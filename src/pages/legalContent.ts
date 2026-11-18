@@ -1,151 +1,239 @@
 import { brand } from '@/config/brand';
+import type { ShopSettings } from '@/features/settings/settings.types';
+import { formatPrice } from '@/utils/formatPrice';
 
 export interface LegalDoc {
   title: string;
   sections: Array<{ heading: string; body: string[] }>;
 }
 
-/**
- * Textes modèles : à faire relire et compléter par un juriste au regard du droit gabonais
- * (protection des données, commerce électronique, mentions obligatoires) avant la mise en ligne.
- */
-export const legalDocs: Record<string, LegalDoc> = {
-  cgv: {
-    title: 'Conditions générales de vente',
-    sections: [
-      {
-        heading: 'Objet',
-        body: [
-          `Les présentes conditions régissent les ventes conclues sur le site ${brand.name} entre la boutique et toute personne effectuant un achat, avec ou sans compte client.`,
-        ],
-      },
-      {
-        heading: 'Prix',
-        body: [
-          'Les prix sont indiqués en francs CFA (XAF). Le prix applicable est celui affiché au moment de la confirmation de la commande ; il est conservé dans la commande et ne change pas ensuite.',
-          'Si un prix change alors qu’un produit est dans votre panier, l’ancien et le nouveau prix vous sont présentés et vous devez confirmer le nouveau montant avant de commander.',
-        ],
-      },
-      {
-        heading: 'Commande',
-        body: [
-          'La commande est confirmée après acceptation des présentes conditions. Un numéro de commande et un code de suivi vous sont communiqués. Le récapitulatif de commande n’est pas une facture.',
-        ],
-      },
-      {
-        heading: 'Paiement',
-        body: [
-          'Les moyens acceptés sont les espèces à la livraison, Airtel Money et Moov Money. Les paiements Mobile Money sont réalisés en dehors du site puis vérifiés manuellement. La préparation commence après vérification des fonds.',
-          'Une commande Mobile Money dont le paiement n’est pas vérifié dans un délai de 24 heures est annulée. Un paiement reçu après annulation fait l’objet d’un remboursement manuel.',
-        ],
-      },
-      {
-        heading: 'Livraison',
-        body: [
-          'Les frais de livraison sont fixes par quartier et affichés avant la confirmation. Les délais sont indicatifs. La livraison est assurée par des livreurs partenaires.',
-        ],
-      },
-      {
-        heading: 'Annulation, retours et remboursements',
-        body: [
-          'Avant le début de la préparation, vous pouvez annuler votre commande depuis votre suivi. Ensuite, une demande d’annulation est examinée par la boutique.',
-          'Les demandes de retour sont possibles dans le délai indiqué sur la page Retours. Le remboursement intervient après réception et inspection du produit, par le moyen de paiement initial lorsque c’est possible.',
-        ],
-      },
-      {
-        heading: 'Fidélité',
-        body: [
-          'Les points sont crédités après livraison et paiement effectifs, à raison d’un point par tranche de 1 000 FCFA dépensés sur les produits. Un point vaut 50 FCFA ; l’utilisation est possible à partir de 100 points. Les points n’expirent pas.',
-        ],
-      },
-    ],
-  },
-  confidentialite: {
-    title: 'Politique de confidentialité',
-    sections: [
-      {
-        heading: 'Données collectées',
-        body: [
-          'Nous collectons les données nécessaires au traitement de vos commandes : nom, téléphone, adresse e-mail, quartier et repère de livraison. Avec un compte : vos adresses, favoris, historique et points de fidélité.',
-        ],
-      },
-      {
-        heading: 'Finalités',
-        body: [
-          'Ces données servent à préparer et livrer vos commandes, vous informer de leur avancement, gérer le service client, le programme de fidélité et prévenir la fraude.',
-        ],
-      },
-      {
-        heading: 'Assistant d’achat',
-        body: [
-          'L’assistant n’accède qu’aux informations publiques du catalogue. Ne lui communiquez jamais de mot de passe ni de code secret. Les conversations sont conservées pour une durée courte puis supprimées.',
-        ],
-      },
-      {
-        heading: 'Partage',
-        body: [
-          'Le livreur attribué reçoit uniquement les informations nécessaires à la livraison. Vos données ne sont pas vendues.',
-        ],
-      },
-      {
-        heading: 'Vos droits',
-        body: [
-          'Vous pouvez demander l’accès, la rectification ou la suppression de vos données depuis votre compte ou via la page Contact. Certaines données de commande sont conservées pendant la durée exigée par la loi.',
-          'Durées de conservation : comptes clients inactifs 3 ans ; documents comptables 10 ans, archivés à part et hors de votre compte ; paniers abandonnés 30 jours ; historique de navigation 13 mois ; journaux de connexion 12 mois ; service client et prospection 3 ans.',
-          'La suppression de votre compte efface ou anonymise vos données personnelles, sauf les documents que la loi impose de conserver (factures et avoirs).',
-        ],
-      },
-      {
-        heading: 'Cookies et stockage local',
-        body: [
-          'Le site utilise le stockage de votre navigateur pour conserver votre panier, votre session et les produits récemment consultés. Aucun traceur publicitaire n’est utilisé à ce stade.',
-        ],
-      },
-    ],
-  },
-  mentions: {
-    title: 'Mentions légales',
-    sections: [
-      {
-        heading: 'Éditeur',
-        body: [
-          `${brand.legalName}. Siège : ${brand.city}, ${brand.country}. RCCM, NIF et responsable de la publication : à compléter.`,
-        ],
-      },
-      { heading: 'Hébergement', body: ['Nom et coordonnées de l’hébergeur : à compléter.'] },
-      {
-        heading: 'Propriété intellectuelle',
-        body: ['Les contenus du site sont protégés. Les marques citées appartiennent à leurs titulaires respectifs.'],
-      },
-    ],
-  },
-  retours: {
-    title: 'Retours et remboursements',
-    sections: [
-      {
-        heading: 'Délai',
-        body: [
-          'Vous pouvez demander un retour dans les 7 jours suivant la livraison, depuis votre compte, votre suivi de commande ou la page Contact.',
-        ],
-      },
-      {
-        heading: 'Justificatifs',
-        body: [
-          'Une description, et si nécessaire des photos, sont demandées uniquement pour les produits endommagés, défectueux ou non conformes.',
-        ],
-      },
-      {
-        heading: 'Traitement',
-        body: [
-          'La boutique accepte ou refuse la demande et vous en informe. Après réception, le produit est inspecté. Les frais de retour sont décidés au cas par cas.',
-        ],
-      },
-      {
-        heading: 'Remboursement',
-        body: [
-          'Le remboursement correspond au montant payé pour les articles concernés. Il est effectué manuellement, par le moyen de paiement initial lorsque c’est possible, après réception et vérification. Les points gagnés sur ces articles sont retirés.',
-        ],
-      },
-    ],
-  },
+/** Paramètres de la boutique repris dans les textes : un seul endroit à modifier, le site reste cohérent. */
+export type LegalSettings = Pick<ShopSettings, 'returnWindowDays' | 'mobileMoneyExpiryHours' | 'loyalty'> &
+  Partial<Pick<ShopSettings, 'legal' | 'support'>>;
+
+/** Valeurs par défaut de l'API (RETURN_WINDOW_DAYS, données de départ), en attendant les paramètres réels. */
+export const DEFAULT_LEGAL_SETTINGS: LegalSettings = {
+  returnWindowDays: 14,
+  mobileMoneyExpiryHours: 24,
+  loyalty: { pointValue: 50, minRedeem: 100, earnPer: 1000 },
 };
+
+/** Valeur obligatoire pas encore fournie : signalée clairement plutôt qu'inventée. */
+const TO_FILL = '[à renseigner dans les Paramètres avant la mise en ligne]';
+const filled = (value: string | undefined) => (value && value.trim() ? value.trim() : TO_FILL);
+
+/**
+ * Textes légaux établis au regard du droit gabonais : loi n° 001/2011 du 25 septembre 2011 relative à la protection
+ * des données à caractère personnel (contrôle : CNPDCP), droit OHADA (RCCM, conservation comptable), TVA gabonaise.
+ * Faute de texte gabonais précis connu (retours, garanties), le modèle français sert de référence, sans citer
+ * d'article non vérifié. À faire valider par un professionnel du droit avant la mise en ligne.
+ */
+export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS): Record<string, LegalDoc> {
+  const company = filled(settings.legal?.companyName || brand.legalName);
+  const contactEmail = filled(settings.support?.email);
+  const contactPhone = filled(settings.support?.phone);
+  const address = filled(settings.support?.address || `${brand.city}, ${brand.country}`);
+  const { earnPer, pointValue, minRedeem } = settings.loyalty;
+  const days = settings.returnWindowDays;
+
+  return {
+    cgv: {
+      title: 'Conditions générales de vente',
+      sections: [
+        {
+          heading: 'Objet et champ d’application',
+          body: [
+            `Les présentes conditions régissent les ventes conclues sur le site ${brand.name} entre ${company} (« la boutique ») et toute personne qui achète, avec ou sans compte client. Elles sont acceptées à chaque commande ; la version applicable est celle en vigueur au jour de la commande.`,
+            `Les annonces de la place de marché sont publiées par des vendeurs indépendants : la vente est alors conclue entre l’acheteur et le vendeur, sous les conditions de ce dernier. ${brand.name} met en relation, vérifie les annonces et assure la messagerie, mais n’est pas le vendeur.`,
+          ],
+        },
+        {
+          heading: 'Produits',
+          body: [
+            'Les caractéristiques essentielles des produits figurent sur leur fiche. Les photos sont aussi fidèles que possible mais n’ont pas de valeur contractuelle. Les produits sont proposés dans la limite des stocks disponibles.',
+          ],
+        },
+        {
+          heading: 'Prix',
+          body: [
+            'Les prix sont indiqués en francs CFA (XAF), toutes taxes comprises : la taxe sur la valeur ajoutée applicable au Gabon (18 % au taux normal) est incluse. Les frais de livraison s’ajoutent et sont affichés avant la confirmation.',
+            'Le prix applicable est celui affiché au moment de la confirmation de la commande ; il est conservé dans la commande. Si un prix change alors qu’un produit est dans votre panier, le nouveau montant vous est présenté avant la commande.',
+          ],
+        },
+        {
+          heading: 'Commande',
+          body: [
+            'La commande est conclue après le récapitulatif, l’acceptation des présentes conditions et la confirmation. Un numéro de commande et un code de suivi vous sont communiqués, ainsi qu’un e-mail de confirmation. Le récapitulatif n’est pas une facture : la facture est émise au paiement.',
+            'La boutique peut demander une vérification avant de préparer une commande inhabituelle (montant, quantités, commandes répétées). Elle peut annuler une commande en cas de fraude avérée ou de produit indisponible ; toute somme versée est alors remboursée.',
+          ],
+        },
+        {
+          heading: 'Paiement',
+          body: [
+            'Moyens acceptés : espèces à la livraison, Airtel Money et Moov Money. Les paiements Mobile Money sont effectués hors du site, sur le numéro indiqué, avec le numéro de commande en référence ; vous déclarez ensuite la référence de la transaction et la boutique vérifie la réception des fonds avant la préparation.',
+            `Une commande Mobile Money dont le paiement n’est pas reçu dans un délai de ${settings.mobileMoneyExpiryHours} heures est annulée. Un paiement reçu après annulation est remboursé. Seul le montant exact de la commande est accepté.`,
+          ],
+        },
+        {
+          heading: 'Livraison',
+          body: [
+            'La livraison est assurée dans les quartiers proposés, par des livreurs partenaires, à l’adresse et au repère indiqués. Les frais sont fixés par quartier ; les délais sont indicatifs. En cas d’absence, une nouvelle tentative ou l’annulation vous est proposée.',
+            'Les risques sont transférés à la remise du colis. Vérifiez le colis en présence du livreur et signalez tout dommage depuis votre compte ou la page Contact dans les meilleurs délais.',
+          ],
+        },
+        {
+          heading: 'Annulation, retours et remboursements',
+          body: [
+            'Avant le début de la préparation, vous pouvez annuler votre commande depuis votre compte. Ensuite, une demande d’annulation est examinée par la boutique, qui vous informe de sa décision et de son motif.',
+            `Un retour peut être demandé dans les ${days} jours suivant la livraison, selon les modalités de la page Retours et remboursements. Le remboursement intervient après réception et inspection, par le moyen de paiement initial lorsque c’est possible.`,
+          ],
+        },
+        {
+          heading: 'Garanties',
+          body: [
+            'Les produits bénéficient de la garantie légale contre les vices cachés et de la garantie de conformité au contrat, dans les conditions prévues par la loi. Un produit défectueux ou non conforme est réparé, remplacé ou remboursé, retour à la charge de la boutique.',
+          ],
+        },
+        {
+          heading: 'Programme de fidélité',
+          body: [
+            `Les points sont crédités après livraison et paiement effectifs, à raison d’un point par tranche de ${formatPrice(earnPer)} dépensés sur les produits. Un point vaut ${formatPrice(pointValue)} ; ils s’utilisent à partir de ${minRedeem} points. Les points gagnés sur des articles remboursés sont retirés. Les points n’expirent pas.`,
+          ],
+        },
+        {
+          heading: 'Service client et litiges',
+          body: [
+            `Pour toute question ou réclamation : ${contactEmail}, ${contactPhone}, ou la page Contact. Une solution amiable est recherchée en priorité.`,
+            'Les présentes conditions sont soumises au droit gabonais. À défaut d’accord amiable, le litige est porté devant les juridictions compétentes de Libreville, sous réserve des règles protectrices dont bénéficie le consommateur.',
+          ],
+        },
+      ],
+    },
+    confidentialite: {
+      title: 'Politique de confidentialité',
+      sections: [
+        {
+          heading: 'Responsable du traitement',
+          body: [
+            `${company}, ${address}. Contact pour vos données : ${contactEmail}. Les traitements respectent la loi n° 001/2011 du 25 septembre 2011 relative à la protection des données à caractère personnel ; ils sont déclarés auprès de la Commission Nationale pour la Protection des Données à Caractère Personnel (CNPDCP).`,
+          ],
+        },
+        {
+          heading: 'Données collectées',
+          body: [
+            'Commande : nom, téléphone, adresse e-mail, quartier, repère et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes, points de fidélité, préférences de notification. Assistance : vos messages et les photos jointes. Place de marché : annonces, demandes et messages échangés.',
+            'Le mot de passe n’est jamais conservé en clair. Aucune donnée de carte bancaire n’est collectée : les paiements Mobile Money se font hors du site.',
+          ],
+        },
+        {
+          heading: 'Finalités et bases légales',
+          body: [
+            'Exécution du contrat : préparer, livrer et facturer vos commandes, gérer retours et remboursements, le compte et la fidélité. Obligation légale : conservation des factures. Intérêt légitime : sécurité du site et prévention de la fraude (vérification de commandes inhabituelles). Consentement : mesure d’audience, notifications sur l’appareil, offres promotionnelles.',
+          ],
+        },
+        {
+          heading: 'Destinataires et sous-traitants',
+          body: [
+            'Vos données sont traitées par l’équipe habilitée de la boutique, chacun selon son rôle. Le livreur reçoit uniquement ce qui est nécessaire à la livraison. Vos données ne sont jamais vendues.',
+            'Prestataires techniques, liés par contrat : hébergement du site (Vercel) et de l’API (Render), base de données (Neon), envoi des e-mails (Resend), images (Cloudinary), suivi des erreurs (Sentry), et pour la place de marché, vérification des annonces et assistant de messagerie par intelligence artificielle (Google Gemini ou Anthropic). Ces prestataires peuvent héberger les données hors du Gabon, notamment aux États-Unis ou dans l’Union européenne ; la boutique encadre ces transferts par des engagements contractuels de protection.',
+          ],
+        },
+        {
+          heading: 'Assistants automatisés',
+          body: [
+            'L’assistant d’achat n’accède qu’aux informations publiques du catalogue. Sur la place de marché, les annonces et les messages peuvent être analysés par un service d’intelligence artificielle pour vérifier leur conformité et proposer des réponses ; une décision défavorable sur une annonce peut être revue par l’équipe. Ne communiquez jamais de mot de passe ni de code reçu.',
+          ],
+        },
+        {
+          heading: 'Durées de conservation',
+          body: [
+            'Comptes clients inactifs : 3 ans, puis anonymisation. Factures et pièces comptables : 10 ans (droit comptable OHADA), archivées hors de votre compte. Paniers : 30 jours. Mesure d’audience : 13 mois. Journaux de connexion : 12 mois. Assistance et prospection : 3 ans après le dernier contact.',
+          ],
+        },
+        {
+          heading: 'Vos droits',
+          body: [
+            'Vous disposez d’un droit d’accès, de rectification, d’opposition et de suppression de vos données, ainsi que d’un droit d’obtenir une copie de vos données. Ces demandes se font depuis votre compte (Profil et préférences) ou via la page Contact ; une réponse vous est apportée dans un délai d’un mois.',
+            'La suppression du compte efface ou anonymise vos données, sauf celles que la loi impose de conserver (factures). Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la CNPDCP.',
+          ],
+        },
+        {
+          heading: 'Sécurité',
+          body: [
+            'Connexions chiffrées (HTTPS), mots de passe protégés par un hachage robuste, accès de l’équipe en deux étapes et journalisés, sauvegardes de la base. En cas de violation de données présentant un risque, vous en serez informé.',
+          ],
+        },
+        {
+          heading: 'Cookies et stockage local',
+          body: [
+            'Des cookies techniques, indispensables, conservent votre session et protègent les formulaires. Le stockage de votre navigateur garde votre panier et les produits récemment consultés.',
+            'La mesure d’audience n’est activée qu’avec votre accord, donné ou retiré à tout moment depuis « Gérer les cookies » en bas de page ; votre choix est redemandé après 6 mois. Aucun traceur publicitaire n’est utilisé.',
+          ],
+        },
+      ],
+    },
+    mentions: {
+      title: 'Mentions légales',
+      sections: [
+        {
+          heading: 'Éditeur du site',
+          body: [
+            `${company}. Siège social : ${address}.`,
+            `Immatriculation au Registre du Commerce et du Crédit Mobilier (RCCM) : ${filled(settings.legal?.rccm)}. Numéro d’identification fiscale (NIF) : ${filled(settings.legal?.nif)}.`,
+            `Contact : ${contactEmail}, ${contactPhone}. Directeur de la publication : le représentant légal de la société.`,
+          ],
+        },
+        {
+          heading: 'Hébergement',
+          body: [
+            'Site : Vercel Inc. (vercel.com). API et traitements : Render Services, Inc. (render.com). Base de données : Neon, Inc. (neon.tech). Images : Cloudinary Ltd. (cloudinary.com).',
+          ],
+        },
+        {
+          heading: 'Propriété intellectuelle',
+          body: [
+            `La structure du site, ses textes, logos et visuels sont la propriété de ${company} ou de ses partenaires. Toute reproduction sans autorisation est interdite. Les marques citées appartiennent à leurs titulaires ; les annonces de la place de marché engagent leurs auteurs.`,
+          ],
+        },
+        {
+          heading: 'Données personnelles',
+          body: [
+            'Le traitement de vos données est décrit dans la Politique de confidentialité, conformément à la loi n° 001/2011 relative à la protection des données à caractère personnel.',
+          ],
+        },
+      ],
+    },
+    retours: {
+      title: 'Retours et remboursements',
+      sections: [
+        {
+          heading: 'Délai',
+          body: [
+            `Vous pouvez demander un retour dans les ${days} jours suivant la livraison, depuis votre compte ou la page Contact. Un retour refusé peut être réexaminé sur demande motivée.`,
+          ],
+        },
+        {
+          heading: 'Conditions',
+          body: [
+            'Le produit doit être complet, dans son emballage d’origine lorsque c’est possible, et ne pas avoir été utilisé au-delà de ce qui est nécessaire pour l’essayer. Pour un produit endommagé, défectueux ou non conforme, une description et au moins une photo sont demandées.',
+          ],
+        },
+        {
+          heading: 'Traitement',
+          body: [
+            'La boutique accepte ou refuse la demande et vous informe de sa décision et de son motif. Après réception, le produit est inspecté. Les frais de retour sont à la charge de la boutique pour un produit défectueux, endommagé ou non conforme ; dans les autres cas, ils sont précisés lors de l’acceptation.',
+          ],
+        },
+        {
+          heading: 'Remboursement',
+          body: [
+            'Le remboursement correspond au montant payé pour les articles retournés, remises comprises au prorata. Il est effectué après réception et vérification, par le moyen de paiement initial lorsque c’est possible ; un autre moyen nécessite votre accord. Les points gagnés sur ces articles sont retirés.',
+          ],
+        },
+      ],
+    },
+  };
+}
+
+/** Textes avec les valeurs par défaut : base de l'éditeur des pages légales du back-office. */
+export const legalDocs = buildLegalDocs();
