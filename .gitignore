@@ -1,0 +1,12 @@
+node_modules
+dist
+*.local
+.env
+.DS_Store
+coverage
+
+# Tests de parcours (Playwright)
+e2e/.logs
+e2e/.results
+e2e/.report
+e2e/.state

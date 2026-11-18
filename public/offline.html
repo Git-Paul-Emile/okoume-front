@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2F6C55" />
+    <title>Hors ligne : Okoumé</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: #f7f2e8;
+        color: #25352f;
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+        padding: 24px;
+        text-align: center;
+      }
+      main {
+        max-width: 420px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 20px 0 8px;
+      }
+      p {
+        color: #4e5f58;
+        line-height: 1.5;
+      }
+      button {
+        margin-top: 20px;
+        height: 44px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 10px;
+        background: #2f6c55;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/favicon.svg" alt="" width="64" height="64" />
+      <h1>Vous êtes hors ligne</h1>
+      <p>
+        Cette page n’a pas encore été consultée sur cet appareil. Votre panier est conservé : vous pourrez finaliser
+        votre commande dès le retour de la connexion.
+      </p>
+      <button type="button" onclick="location.reload()">Réessayer</button>
+    </main>
+  </body>
+</html>

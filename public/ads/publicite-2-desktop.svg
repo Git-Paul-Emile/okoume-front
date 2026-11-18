@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400">
+  <rect width="1200" height="400" fill="#2F6C55"/>
+  <circle cx="1010" cy="200" r="230" fill="#25352F"/>
+  <circle cx="1080" cy="120" r="110" fill="#A64D73"/>
+  <g transform="translate(840 110) scale(1.15)">
+  <path d="M0 70L70 0h90v90L90 160Z" fill="#F7F2E8"/>
+  <circle cx="128" cy="32" r="13" fill="#25352F"/>
+  <rect x="44" y="76" width="60" height="12" rx="6" transform="rotate(-45 74 82)" fill="#E5ECE7"/>
+</g>
+  <text x="72" y="150" text-anchor="start" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="54" font-weight="800" fill="#FFFFFF">Faites connaître</text>
+  <text x="72" y="212" text-anchor="start" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="54" font-weight="800" fill="#FFFFFF">votre marque</text>
+  <text x="72" y="258" text-anchor="start" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="400" fill="#E5ECE7">Présentez vos produits et services aux visiteurs de la boutique.</text>
+  <rect x="72" y="290" width="290" height="56" rx="10" fill="#F7F2E8"/><text x="217.0" y="325.56" text-anchor="middle" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="21" font-weight="700" fill="#25352F">Devenir annonceur</text>
+</svg>

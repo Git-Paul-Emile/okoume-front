@@ -1,0 +1,23 @@
+{
+  "name": "Okoumé, boutique en ligne",
+  "short_name": "Okoumé",
+  "description": "Boutique en ligne au Gabon : paiement à la livraison ou par Airtel Money et Moov Money.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F7F2E8",
+  "theme_color": "#2F6C55",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Mes commandes", "url": "/compte/commandes" },
+    { "name": "Suivre une commande", "url": "/suivi" },
+    { "name": "Promotions", "url": "/promotions" }
+  ]
+}
