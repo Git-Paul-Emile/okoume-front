@@ -222,15 +222,13 @@ export function actionItems(
   waitHours = 24,
 ): ActionItem[] {
   const stock = stockAlerts(products);
-  // Commandes en espèces non préparées depuis trop longtemps : alerte, la décision reste humaine (6.4)
-  const waiting = orders.filter(
-    (o) => o.status === 'confirmed' && o.paymentMethod === 'cash' && now - time(o.createdAt) > waitHours * 3_600_000,
-  );
+  // Commandes non préparées depuis trop longtemps, quel que soit le moyen (tout se paie à la livraison) (6.4)
+  const waiting = orders.filter((o) => o.status === 'confirmed' && now - time(o.createdAt) > waitHours * 3_600_000);
   const items: ActionItem[] = [
     {
       id: 'payments',
-      label: 'Paiements Mobile Money à vérifier',
-      count: orders.filter((o) => o.paymentStatus === 'awaiting_verification' && o.status !== 'cancelled').length,
+      label: 'Encaissements à confirmer (commandes livrées)',
+      count: orders.filter((o) => o.status === 'delivered' && o.paymentStatus === 'awaiting_payment').length,
       level: 'critical',
       to: '/admin/paiements',
     },
@@ -285,7 +283,7 @@ export function actionItems(
     },
     {
       id: 'waiting',
-      label: `Commandes en espèces en attente depuis plus de ${waitHours} h`,
+      label: `Commandes à préparer en attente depuis plus de ${waitHours} h`,
       count: waiting.length,
       level: 'warning',
       to: '/admin/commandes',

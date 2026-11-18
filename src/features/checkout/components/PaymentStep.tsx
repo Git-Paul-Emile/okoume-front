@@ -5,6 +5,7 @@ import type { PaymentMethod } from '@/features/orders/orders.types';
 import { cn } from '@/utils/text';
 import { PaymentLogo } from './PaymentLogo';
 
+/** Tous les paiements se font à la livraison, au livreur : en espèces ou par Mobile Money. */
 const methods: Array<{ id: PaymentMethod; label: string; text: string }> = [
   {
     id: 'cash',
@@ -13,24 +14,22 @@ const methods: Array<{ id: PaymentMethod; label: string; text: string }> = [
   },
   {
     id: 'airtel',
-    label: 'Airtel Money',
-    text: 'Après la commande, envoyez le montant au numéro indiqué. La préparation démarre après vérification.',
+    label: 'Airtel Money à la livraison',
+    text: 'Vous payez à la réception, depuis votre téléphone, en présence du livreur.',
   },
   {
     id: 'moov',
-    label: 'Moov Money',
-    text: 'Après la commande, envoyez le montant au numéro indiqué. La préparation démarre après vérification.',
+    label: 'Moov Money à la livraison',
+    text: 'Vous payez à la réception, depuis votre téléphone, en présence du livreur.',
   },
 ];
 
 export function PaymentStep({
   value,
-  expiryHours,
   onBack,
   onNext,
 }: {
   value: PaymentMethod | null;
-  expiryHours: number;
   onBack: () => void;
   onNext: (m: PaymentMethod) => void;
 }) {
@@ -77,12 +76,9 @@ export function PaymentStep({
           );
         })}
       </div>
-      {(selected === 'airtel' || selected === 'moov') && (
-        <p className="rounded-md bg-ivory p-3 text-sm text-ink-soft">
-          Le paiement Mobile Money est vérifié manuellement par notre équipe. Sans paiement vérifié sous {expiryHours}{' '}
-          h, la commande est annulée.
-        </p>
-      )}
+      <p className="rounded-md bg-ivory p-3 text-sm text-ink-soft">
+        Aucun paiement avant la livraison : vous réglez le livreur à la réception de votre commande.
+      </p>
       {error && (
         <p className="text-sm font-medium text-danger" role="alert">
           {error}

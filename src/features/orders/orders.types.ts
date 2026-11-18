@@ -110,8 +110,6 @@ export interface Order {
   pointsUsed: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
-  /** Paiement Mobile Money déclaré par le client (référence de la transaction), en attente de vérification */
-  paymentDeclaration?: { reference: string; at: string } | null;
   status: OrderStatus;
   /** Étapes de la commande (6.3) : nouvel état, état précédent, date, auteur et motif éventuel. */
   history: Array<{ status: OrderStatus; at: string; note?: string; from?: OrderStatus; by?: string }>;

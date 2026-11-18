@@ -10,10 +10,9 @@ import { formatDateTime } from '@/utils/formatDate';
 import { orderStatusLabel, paymentMethodLabel, paymentStatusLabel } from '../orders.constants';
 import type { Order, ReturnRequest } from '../orders.types';
 import { CancelOrderDialog } from './CancelOrderDialog';
-import { OrderMessageDialog, PaymentChangeDialog, PaymentDeadline } from './OrderRequests';
+import { OrderMessageDialog, PaymentChangeDialog } from './OrderRequests';
 import { OrderItems, OrderTotalsTable } from './OrderSummary';
 import { OrderTimeline } from './OrderTimeline';
-import { PaymentDeclaration } from './PaymentDeclaration';
 import { ReturnRequestDialog } from './ReturnRequestDialog';
 
 const returnStep: Partial<Record<ReturnRequest['status'], string>> = {
@@ -35,16 +34,7 @@ function returnMessage(r: ReturnRequest) {
 }
 
 /** Détail d'une commande : utilisé par le suivi invité et l'espace client. */
-/** trackingCode : commande suivie sans compte ; seule la déclaration de paiement y est possible. */
-export function OrderDetailPanel({
-  order: initial,
-  inAccount = false,
-  trackingCode,
-}: {
-  order: Order;
-  inAccount?: boolean;
-  trackingCode?: string;
-}) {
+export function OrderDetailPanel({ order: initial, inAccount = false }: { order: Order; inAccount?: boolean }) {
   const [order, setOrder] = useState(initial);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
@@ -65,7 +55,6 @@ export function OrderDetailPanel({
   const canCancel =
     canAct && !['delivered', 'cancelled', 'shipping'].includes(order.status) && !order.cancellationRequest;
   const active = !['delivered', 'cancelled', 'claim'].includes(order.status);
-  const mobileMoney = order.paymentMethod !== 'cash';
   const canChangePayment =
     canAct && active && order.paymentStatus === 'awaiting_payment' && order.paymentChangeRequest?.status !== 'pending';
   const canDispute = canAct && order.status === 'delivered' && !order.deliveryDispute;
@@ -108,19 +97,6 @@ export function OrderDetailPanel({
             {returnMessage(order.returnRequest)}
           </p>
         )}
-        {active && mobileMoney && order.paymentStatus === 'awaiting_payment' && (
-          <PaymentDeadline order={order} hours={settings?.mobileMoneyExpiryHours ?? 24} />
-        )}
-        {active &&
-          mobileMoney &&
-          (inAccount || trackingCode) &&
-          (order.paymentStatus === 'awaiting_payment' || order.paymentStatus === 'awaiting_verification') && (
-            <PaymentDeclaration
-              order={order}
-              {...(trackingCode && !inAccount ? { trackingCode } : {})}
-              onDeclared={setOrder}
-            />
-          )}
         {change && (
           <p className="mt-6 flex items-center gap-2 rounded-md bg-ivory p-3 text-sm text-ink-soft">
             <Clock className="size-4 shrink-0" />

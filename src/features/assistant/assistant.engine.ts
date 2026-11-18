@@ -31,6 +31,17 @@ export interface AssistantReply {
 
 const has = (q: string, words: string[]) => words.some((w) => q.includes(w));
 
+/** Réponse de présentation : ce que l'assistant sait faire, avec des questions qu'il comprend. */
+const CAPABILITIES = [
+  'Je peux vous aider à :',
+  '• trouver un produit selon votre budget (« téléphone moins de 300 000 », « parfum pour femme ») ;',
+  '• connaître les frais et délais de livraison (« livraison à Owendo ») ;',
+  '• comprendre le paiement Airtel Money, Moov Money ou en espèces ;',
+  '• suivre une commande, faire un retour, utiliser vos points de fidélité ;',
+  '• vous mettre en relation avec notre équipe.',
+  'Que cherchez-vous ?',
+].join('\n');
+
 function parseBudget(q: string): number | null {
   const m = q.match(/(\d[\d\s.]*)\s*(k|mille|000|fcfa|f|cfa|francs?)?/);
   if (!m) return null;
@@ -55,8 +66,9 @@ function matchCategory(q: string, categories: Category[]) {
     'mode-homme': ['chemise', 'basket', 'chaussure homme'],
     mobilier: ['canape', 'meuble', 'fauteuil', 'chevet'],
   };
-  for (const [id, words] of Object.entries(synonyms))
-    if (has(q, words)) return categories.find((c) => c.id === id) ?? null;
+  // Les clés sont des slugs : les identifiants des catégories de l'API sont des UUID
+  for (const [slug, words] of Object.entries(synonyms))
+    if (has(q, words)) return categories.find((c) => c.slug === slug) ?? null;
   return categories.find((c) => q.includes(normalizeText(c.name))) ?? null;
 }
 
@@ -66,7 +78,7 @@ export function answer(message: string, data: AssistantData): AssistantReply {
 
   if (!q) return { text: 'Posez-moi une question sur un produit, la livraison ou le paiement.' };
 
-  if (has(q, ['humain', 'conseiller', 'quelqu un', 'parler a', 'whatsapp', 'appeler'])) {
+  if (has(q, ['humain', 'conseiller', 'quelquun', 'parler a', 'whatsapp', 'appeler'])) {
     return {
       text: `Je vous mets en relation avec notre équipe. ${settings ? settings.support.hours + '.' : ''}`,
       links: [
@@ -78,17 +90,41 @@ export function answer(message: string, data: AssistantData): AssistantReply {
     };
   }
 
+  // Présentation : ce que l'assistant sait faire, avec des exemples prêts à reprendre
+  if (
+    has(q, [
+      'que peux tu',
+      'que pouvez vous',
+      'quest ce que tu peux',
+      'quest ce que vous pouvez',
+      'tu peux faire quoi',
+      'tu fais quoi',
+      'a quoi tu sers',
+      'a quoi sers tu',
+      'qui es tu',
+      'tu es qui',
+      'comment ca marche',
+      'comment tu marches',
+      'aide moi',
+      'besoin daide',
+    ]) ||
+    q === 'aide' ||
+    q === 'help'
+  ) {
+    return { text: CAPABILITIES, links: [{ label: 'Voir le catalogue', to: '/catalogue' }] };
+  }
+
   if (has(q, ['bonjour', 'bonsoir', 'salut', 'hello', 'mbolo'])) {
-    return {
-      text: 'Bonjour ! Je peux vous aider à trouver un produit selon votre budget, vous expliquer la livraison ou le paiement Mobile Money. Que cherchez-vous ?',
-    };
+    return { text: `Bonjour ! ${CAPABILITIES}` };
+  }
+
+  if (has(q, ['merci', 'parfait', 'super', 'top', 'genial'])) {
+    return { text: 'Avec plaisir ! Une autre question sur un produit, la livraison ou le paiement ?' };
   }
 
   if (has(q, ['airtel', 'moov', 'mobile money', 'payer', 'paiement', 'espece', 'cash'])) {
-    const hours = settings?.mobileMoneyExpiryHours ?? 24;
     return {
-      text: `Trois moyens de paiement : espèces à la livraison, Airtel Money ou Moov Money. Pour le Mobile Money, les instructions (numéro, bénéficiaire, montant) s’affichent après la commande ; indiquez votre numéro de commande en référence. La préparation commence après vérification du paiement, à effectuer sous ${hours} h.`,
-      links: [{ label: 'Guide du paiement Mobile Money', to: '/conseils/payer-par-mobile-money' }],
+      text: 'Tout se paie à la livraison, au livreur : en espèces, par Airtel Money ou par Moov Money. Rien à payer avant. Pour le Mobile Money, vous envoyez le montant depuis votre téléphone au moment de la réception, avec votre numéro de commande en référence.',
     };
   }
 
@@ -108,7 +144,6 @@ export function answer(message: string, data: AssistantData): AssistantReply {
       text: fees.length
         ? `Les frais de livraison sont fixes par quartier, de ${formatPrice(Math.min(...fees))} à ${formatPrice(Math.max(...fees))}. Indiquez-moi votre quartier pour le tarif exact.`
         : 'Les frais de livraison dépendent de votre quartier.',
-      links: [{ label: 'Zones et tarifs', to: '/livraison' }],
     };
   }
 
@@ -121,7 +156,7 @@ export function answer(message: string, data: AssistantData): AssistantReply {
 
   if (has(q, ['retour', 'rembourse', 'annul', 'echange'])) {
     return {
-      text: `Avant la préparation, vous pouvez annuler depuis votre suivi ou votre compte. Pour un retour, faites la demande sous ${settings?.returnWindowDays ?? 7} jours ; le remboursement intervient après réception et vérification du produit.`,
+      text: `Avant la préparation, vous pouvez annuler depuis votre suivi ou votre compte. Pour un retour, faites la demande sous ${settings?.returnWindowDays ?? 14} jours ; le remboursement intervient après réception et vérification du produit.`,
       links: [{ label: 'Conditions de retour', to: '/legal/retours' }],
     };
   }

@@ -22,7 +22,6 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
   const [rules, setRules] = useState({
     maxDiscount: String(Math.round(settings.maxDiscountRate * 100)),
     returnDays: String(settings.returnWindowDays),
-    expiryHours: String(settings.mobileMoneyExpiryHours),
     earnPer: String(settings.loyalty.earnPer),
     pointValue: String(settings.loyalty.pointValue),
     minRedeem: String(settings.loyalty.minRedeem),
@@ -70,7 +69,6 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
       social: Object.fromEntries(Object.entries(social).map(([k, v]) => [k, v.trim()])),
       maxDiscountRate: n.maxDiscount / 100,
       returnWindowDays: n.returnDays,
-      mobileMoneyExpiryHours: n.expiryHours,
       loyalty: { earnPer: n.earnPer, pointValue: n.pointValue, minRedeem: n.minRedeem },
       reopenWindowDays: n.reopenDays,
       maxAddresses: Math.min(20, Math.max(1, n.maxAddresses)),
@@ -209,13 +207,6 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
               disabled
             />
             <TextField
-              label="Délai de paiement Mobile Money (heures)"
-              inputMode="numeric"
-              value={rules.expiryHours}
-              onChange={setRule('expiryHours')}
-              hint="Au-delà, la commande peut être annulée."
-            />
-            <TextField
               label="Délai de réouverture (jours)"
               inputMode="numeric"
               value={rules.reopenDays}
@@ -224,7 +215,7 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
               hint="Pour rouvrir une demande d’assistance ou un retour refusé."
             />
             <TextField
-              label="Alerte espèces non préparées (heures)"
+              label="Alerte commandes non préparées (heures)"
               inputMode="numeric"
               value={rules.cashAlertHours}
               onChange={setRule('cashAlertHours')}

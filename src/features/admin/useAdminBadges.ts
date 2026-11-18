@@ -16,7 +16,8 @@ export function useAdminBadges(): Partial<Record<BadgeKey, number>> {
   return useMemo(
     () => ({
       orders: orders.filter((o) => o.status === 'confirmed').length,
-      payments: orders.filter((o) => o.paymentStatus === 'awaiting_verification' && o.status !== 'cancelled').length,
+      // Commandes livrées dont l'encaissement (espèces ou Mobile Money) reste à confirmer
+      payments: orders.filter((o) => o.status === 'delivered' && o.paymentStatus === 'awaiting_payment').length,
       returns: orders.filter(
         (o) => o.cancellationRequest?.status === 'pending' || o.returnRequest?.status === 'pending',
       ).length,

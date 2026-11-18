@@ -8,13 +8,12 @@ export interface LegalDoc {
 }
 
 /** Paramètres de la boutique repris dans les textes : un seul endroit à modifier, le site reste cohérent. */
-export type LegalSettings = Pick<ShopSettings, 'returnWindowDays' | 'mobileMoneyExpiryHours' | 'loyalty'> &
+export type LegalSettings = Pick<ShopSettings, 'returnWindowDays' | 'loyalty'> &
   Partial<Pick<ShopSettings, 'legal' | 'support'>>;
 
 /** Valeurs par défaut de l'API (RETURN_WINDOW_DAYS, données de départ), en attendant les paramètres réels. */
 export const DEFAULT_LEGAL_SETTINGS: LegalSettings = {
   returnWindowDays: 14,
-  mobileMoneyExpiryHours: 24,
   loyalty: { pointValue: 50, minRedeem: 100, earnPer: 1000 },
 };
 
@@ -70,8 +69,8 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Paiement',
           body: [
-            'Moyens acceptés : espèces à la livraison, Airtel Money et Moov Money. Les paiements Mobile Money sont effectués hors du site, sur le numéro indiqué, avec le numéro de commande en référence ; vous déclarez ensuite la référence de la transaction et la boutique vérifie la réception des fonds avant la préparation.',
-            `Une commande Mobile Money dont le paiement n’est pas reçu dans un délai de ${settings.mobileMoneyExpiryHours} heures est annulée. Un paiement reçu après annulation est remboursé. Seul le montant exact de la commande est accepté.`,
+            'Tous les paiements se font à la livraison, au livreur : en espèces, par Airtel Money ou par Moov Money. Aucun paiement n’est demandé avant la livraison. Pour le Mobile Money, vous envoyez le montant depuis votre téléphone au moment de la réception, au numéro de la boutique, avec le numéro de commande en référence.',
+            'Seul le montant exact de la commande est accepté. La facture est émise une fois le paiement enregistré par la boutique.',
           ],
         },
         {

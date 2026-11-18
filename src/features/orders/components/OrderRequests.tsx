@@ -1,46 +1,13 @@
-import { AlarmClock } from 'lucide-react';
 import { useState } from 'react';
 import { getErrorMessage } from '@/api/ApiError';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { TextAreaField } from '@/components/ui/TextField';
-import { useCountdown } from '@/hooks/useCountdown';
 import { toast } from '@/stores/toastStore';
-import { formatDateTime } from '@/utils/formatDate';
 import { cn } from '@/utils/text';
 import { paymentMethodLabel } from '../orders.constants';
 import { useDisputeDelivery, useReopenReturn, useRequestPaymentChange } from '../orders.queries';
 import type { Order, PaymentMethod } from '../orders.types';
-
-/** Délai pour payer une commande Mobile Money (8.7) ; au-delà, la commande peut être annulée. */
-export function PaymentDeadline({ order, hours }: { order: Order; hours: number }) {
-  const deadline = new Date(new Date(order.createdAt).getTime() + hours * 3_600_000).toISOString();
-  const left = useCountdown(deadline);
-  return (
-    <p
-      className={cn(
-        'mt-6 flex items-start gap-2 rounded-md p-3 text-sm',
-        left.expired ? 'bg-danger/10 text-danger' : 'bg-[#fbf1dc] text-warning',
-      )}
-    >
-      <AlarmClock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-      {left.expired ? (
-        <span>
-          Délai de paiement dépassé depuis le {formatDateTime(deadline)}. Sans paiement reçu, la commande sera annulée
-          et vous en serez informé. Un paiement arrivé après l’annulation vous sera remboursé.
-        </span>
-      ) : (
-        <span>
-          Payez par {paymentMethodLabel[order.paymentMethod]} avant le {formatDateTime(deadline)}, soit encore{' '}
-          <strong>
-            {left.days * 24 + left.hours} h {String(left.minutes).padStart(2, '0')} min
-          </strong>
-          . Passé ce délai, la commande sera annulée.
-        </span>
-      )}
-    </p>
-  );
-}
 
 const METHODS: PaymentMethod[] = ['cash', 'airtel', 'moov'];
 

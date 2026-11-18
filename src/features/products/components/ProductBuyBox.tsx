@@ -1,7 +1,6 @@
 import { motion } from 'motion/react';
 import { Bot, ShoppingBag, Truck } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { Link } from 'react-router';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
@@ -137,9 +136,6 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
               {fees.length
                 ? `De ${formatPrice(Math.min(...fees))} à ${formatPrice(Math.max(...fees))} selon le quartier, délai indicatif 24 à 72 h. `
                 : ''}
-              <Link to="/livraison" className="font-semibold text-forest underline-offset-2 hover:underline">
-                Voir les zones
-              </Link>
             </p>
           </div>
         </li>

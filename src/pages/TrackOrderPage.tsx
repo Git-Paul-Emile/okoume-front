@@ -80,7 +80,7 @@ export default function TrackOrderPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mt-8"
             >
-              <OrderDetailPanel order={track.data} trackingCode={code.trim().toUpperCase()} />
+              <OrderDetailPanel order={track.data} />
             </motion.div>
           )}
         </AnimatePresence>

@@ -62,12 +62,6 @@ export function useRequestPaymentChange() {
   return useOrderMutation<{ to: PaymentMethod }>((order, v) => ordersApi.requestPaymentChange(order, v.to));
 }
 
-export function useDeclarePayment() {
-  return useOrderMutation<{ reference: string; trackingCode?: string }>((order, v) =>
-    ordersApi.declarePayment(order, v.reference, v.trackingCode),
-  );
-}
-
 export function useDisputeDelivery() {
   return useOrderMutation<{ message: string }>((order, v) => ordersApi.disputeDelivery(order, v.message));
 }

@@ -70,8 +70,7 @@ export function RecordPaymentDialog({
   const [v, setV] = useState({
     amount: String(remainingAmount(order) || order.totals.total),
     at: localNow(),
-    // Référence déclarée par le client : à vérifier, pas à recopier sans contrôle
-    reference: order.paymentDeclaration?.reference ?? '',
+    reference: '',
   });
   const [error, setError] = useState('');
   const submit = () => {
@@ -88,7 +87,7 @@ export function RecordPaymentDialog({
     <Modal
       open
       onClose={onClose}
-      title={cash ? 'Confirmer l’encaissement' : 'Enregistrer le paiement reçu'}
+      title="Confirmer l’encaissement"
       description={`Total ${formatPrice(order.totals.total)} · déjà reçu ${formatPrice(paidAmount(order))}. Saisissez le total exact : un paiement partiel est refusé.`}
     >
       <div className="space-y-4">

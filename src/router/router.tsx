@@ -17,10 +17,7 @@ const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const PromotionsPage = lazy(() => import('@/pages/PromotionsPage'));
-const BlogPage = lazy(() => import('@/pages/BlogPage'));
-const ArticlePage = lazy(() => import('@/pages/ArticlePage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
-const DeliveryInfoPage = lazy(() => import('@/pages/DeliveryInfoPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const InvoicePage = lazy(() => import('@/pages/InvoicePage'));
@@ -194,10 +191,7 @@ export const routes: RouteObject[] = [
       { path: 'inscription', element: <RegisterPage /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
       { path: 'promotions', element: <PromotionsPage /> },
-      { path: 'conseils', element: <BlogPage /> },
-      { path: 'conseils/:slug', element: <ArticlePage /> },
       { path: 'contact', element: <ContactPage /> },
-      { path: 'livraison', element: <DeliveryInfoPage /> },
       { path: 'legal/:page', element: <LegalPage /> },
       {
         path: 'compte',

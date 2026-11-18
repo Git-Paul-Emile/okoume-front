@@ -14,7 +14,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { formatDateTime } from '@/utils/formatDate';
 import { answer, type AssistantReply } from '../assistant.engine';
-import { assistantApi } from '../assistant.api';
+import { ApiError } from '@/api/ApiError';
+import { askAssistant, assistantApi } from '../assistant.api';
 import { budgetExhausted, nextPeriodStart, takeMessageSlot } from '../assistantQuota';
 
 interface Message extends AssistantReply {
@@ -77,24 +78,43 @@ export function AssistantWidget() {
     const retryAt = takeMessageSlot(isMember);
     setLimitedUntil(retryAt);
     if (retryAt) return;
-    void assistantApi
-      .record()
-      .then(() => qc.invalidateQueries({ queryKey: ['assistant', 'usage'] }))
-      .catch(() => undefined);
     setInput('');
+    // Les derniers échanges donnent le fil de la conversation au modèle (le message d'accueil est exclu)
+    const history = messages
+      .slice(1)
+      .slice(-8)
+      .map((m) => ({
+        from: m.from === 'user' ? ('client' as const) : ('assistant' as const),
+        text: m.text.slice(0, 2_000),
+      }));
     setMessages((m) => [...m, { id: ++msgId, from: 'user', text: value }]);
     setTyping(true);
-    window.setTimeout(() => {
-      const reply = answer(value, {
+    void reply(value, history).then((r) => {
+      setMessages((m) => [...m, { id: ++msgId, from: 'bot', ...r }]);
+      setTyping(false);
+      void qc.invalidateQueries({ queryKey: ['assistant', 'usage'] });
+    });
+  };
+
+  /** L'assistant d'IA de l'API d'abord ; s'il est injoignable, les règles locales, sur les mêmes données publiques. */
+  const reply = async (value: string, history: Array<{ from: 'client' | 'assistant'; text: string }>) => {
+    try {
+      const r = await askAssistant({ message: value, history, ...(slug ? { productSlug: slug } : {}) });
+      const bySlug = new Map((products.data ?? []).map((p) => [p.slug, p]));
+      const found = r.productSlugs.flatMap((s) => bySlug.get(s) ?? []);
+      return { text: r.reply, ...(found.length ? { products: found } : {}) } satisfies AssistantReply;
+    } catch (error) {
+      // Plafond mensuel atteint : le message de l'API l'explique au client
+      if (error instanceof ApiError && error.status === 429) return { text: error.message } satisfies AssistantReply;
+      await assistantApi.record().catch(() => undefined);
+      return answer(value, {
         products: products.data ?? [],
         categories: categories.data?.all ?? [],
         zones: zones.data ?? [],
         settings: settings.data ?? null,
         contextProduct,
       });
-      setMessages((m) => [...m, { id: ++msgId, from: 'bot', ...reply }]);
-      setTyping(false);
-    }, 550);
+    }
   };
 
   return (

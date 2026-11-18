@@ -24,14 +24,15 @@ function CopyValue({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Instructions après la commande : tous les paiements se font à la livraison, au livreur. */
 export function PaymentInstructions({ order, settings }: { order: Order; settings: ShopSettings | undefined }) {
   if (order.paymentMethod === 'cash')
     return (
       <div className="rounded-lg bg-forest-50 p-5">
         <h2 className="text-base">Paiement en espèces à la livraison</h2>
         <p className="mt-1.5 text-sm text-ink-soft">
-          Préparez {formatPrice(order.totals.total)}, si possible en monnaie exacte. Le paiement est enregistré lorsque
-          le livreur nous confirme l’encaissement.
+          Préparez {formatPrice(order.totals.total)}, si possible en monnaie exacte. Rien à payer avant : vous réglez le
+          livreur à la réception.
         </p>
       </div>
     );
@@ -40,20 +41,19 @@ export function PaymentInstructions({ order, settings }: { order: Order; setting
   return (
     <div className="rounded-lg border border-mure/30 bg-mure-50 p-5">
       <h2 className="flex items-center gap-2 text-base">
-        <PaymentLogo method={order.paymentMethod} className="size-8" /> Payez maintenant par{' '}
-        {account?.label ?? 'Mobile Money'}
+        <PaymentLogo method={order.paymentMethod} className="size-8" /> Paiement par {account?.label ?? 'Mobile Money'}{' '}
+        à la livraison
       </h2>
-      {account && <p className="mt-1.5 text-sm text-ink-soft">{account.instructions}</p>}
+      <p className="mt-1.5 text-sm text-ink-soft">
+        Rien à payer maintenant. À la réception, envoyez le montant depuis votre téléphone, en présence du livreur, avec
+        votre numéro de commande en référence.
+      </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {account && <CopyValue label="Numéro bénéficiaire" value={account.number} />}
         {account && <CopyValue label="Nom du bénéficiaire" value={account.beneficiary} />}
         <CopyValue label="Montant exact" value={String(order.totals.total)} />
         <CopyValue label="Référence (n° de commande)" value={order.number} />
       </div>
-      <p className="mt-3 text-sm text-ink-soft">
-        Aucune preuve n’est à téléverser : notre équipe vérifie la réception des fonds. Sans paiement vérifié sous{' '}
-        {settings?.mobileMoneyExpiryHours ?? 24} h, la commande est annulée automatiquement.
-      </p>
     </div>
   );
 }

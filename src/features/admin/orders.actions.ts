@@ -21,10 +21,6 @@ export const nextStatusAction: Partial<Record<OrderStatus, string>> = {
   shipping: 'Marquer livrée',
 };
 
-/** Une commande Mobile Money non vérifiée ne peut pas entrer en préparation (6.4). */
-export const paymentBlocksPreparation = (order: AdminOrder) =>
-  order.status === 'confirmed' && order.paymentMethod !== 'cash' && order.paymentStatus !== 'paid';
-
 export const canReopen = (who: Parameters<typeof can>[0]) => can(who, 'commandes:valider');
 
 /**
@@ -48,11 +44,9 @@ export function advancePatch(order: AdminOrder, now = new Date().toISOString(), 
     throw new Error(
       'Nouveaux frais de livraison en attente de l’accord du client : la livraison ne peut pas continuer.',
     );
-  if (paymentBlocksPreparation(order))
-    throw new Error('Vérifiez d’abord le paiement Mobile Money : la commande ne peut pas être préparée avant.');
   return {
     status: next,
-    // L'encaissement des espèces est confirmé séparément par une personne autorisée (8.5)
+    // Tout se paie à la livraison : l'encaissement est confirmé séparément par une personne autorisée (8.5)
     history: [...order.history, { status: next, at: now, ...(note ? { note } : {}) }],
   };
 }
@@ -107,19 +101,6 @@ export const canWriteOff = (who: Parameters<typeof can>[0]) => isOwner(who);
 
 /** Seul l'administrateur principal accepte ou refuse un retour (28.6). */
 export const canDecideReturn = (who: Parameters<typeof can>[0]) => can(who, 'retours:valider');
-
-/**
- * Commandes Mobile Money sans paiement après le délai (8.7) : à annuler, ce qui libère leur réservation (7.2).
- * Les commandes en espèces ne sont jamais concernées ; un paiement déclaré reste à vérifier.
- */
-export const expiredPayments = (orders: AdminOrder[], hours: number, now: number) =>
-  orders.filter(
-    (o) =>
-      o.paymentMethod !== 'cash' &&
-      o.paymentStatus === 'awaiting_payment' &&
-      o.status === 'confirmed' &&
-      now - new Date(o.createdAt).getTime() > hours * 3_600_000,
-  );
 
 export const DELIVERY_FAILURE_REASONS = [
   'Client absent ou injoignable',

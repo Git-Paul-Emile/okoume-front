@@ -1,11 +1,9 @@
 import { motion } from 'motion/react';
 import { Printer } from 'lucide-react';
-import { useState } from 'react';
 import { useLocation, useParams } from 'react-router';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { PaymentInstructions } from '@/features/checkout/components/PaymentInstructions';
 import { OrderItems, OrderTotalsTable } from '@/features/orders/components/OrderSummary';
-import { PaymentDeclaration } from '@/features/orders/components/PaymentDeclaration';
 import type { Order } from '@/features/orders/orders.types';
 import { useSettings } from '@/features/settings/settings.queries';
 import { formatDateTime } from '@/utils/formatDate';
@@ -37,10 +35,7 @@ function AnimatedCheck() {
 
 export default function OrderConfirmationPage() {
   const { number } = useParams();
-  const placed = (useLocation().state as { order?: Order } | null)?.order;
-  // Mise à jour locale après la déclaration du paiement : la réponse du suivi ne contient pas les coordonnées
-  const [declared, setDeclared] = useState<Pick<Order, 'paymentStatus' | 'paymentDeclaration'> | null>(null);
-  const order = placed && declared ? { ...placed, ...declared } : placed;
+  const order = (useLocation().state as { order?: Order } | null)?.order;
   const { data: settings } = useSettings();
 
   // Le code de suivi n'est affiché qu'une fois, juste après la commande (jamais récupéré par simple numéro).
@@ -59,18 +54,14 @@ export default function OrderConfirmationPage() {
       </div>
     );
 
-  const steps =
+  // Tous les paiements se font à la livraison : mêmes étapes, seul le moyen de paiement change
+  const steps = [
+    'Nous préparons votre commande.',
+    'Un livreur est attribué : vous recevez ses informations par e-mail.',
     order.paymentMethod === 'cash'
-      ? [
-          'Nous préparons votre commande.',
-          'Un livreur est attribué : vous recevez ses informations par e-mail.',
-          'Vous payez en espèces à la réception.',
-        ]
-      : [
-          'Envoyez le paiement Mobile Money avec votre numéro de commande en référence.',
-          'Nous vérifions la réception des fonds, puis préparons la commande.',
-          'Un livreur est attribué : vous recevez ses informations par e-mail.',
-        ];
+      ? 'Vous payez en espèces à la réception.'
+      : 'Vous payez par Mobile Money à la réception, en présence du livreur.',
+  ];
 
   return (
     <div className="container-page py-8 lg:py-12">
@@ -101,17 +92,6 @@ export default function OrderConfirmationPage() {
         </div>
 
         <PaymentInstructions order={order} settings={settings} />
-        {order.paymentMethod !== 'cash' && (
-          <div className="card px-6 pb-6">
-            <PaymentDeclaration
-              order={order}
-              trackingCode={order.trackingCode}
-              onDeclared={(o) =>
-                setDeclared({ paymentStatus: o.paymentStatus, paymentDeclaration: o.paymentDeclaration ?? null })
-              }
-            />
-          </div>
-        )}
 
         <div className="card p-6">
           <h2 className="text-lg">Prochaines étapes</h2>

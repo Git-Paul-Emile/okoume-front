@@ -75,7 +75,6 @@ const orderDto = z.object({
   pointsUsed: z.number(),
   paymentMethod,
   paymentStatus,
-  paymentDeclaration: z.object({ reference: z.string(), at: z.string() }).nullable(),
   status,
   history,
   cancellationRequest: z
@@ -116,7 +115,6 @@ const trackingDto = z.object({
   totals,
   paymentMethod,
   paymentStatus,
-  paymentDeclaration: z.object({ reference: z.string(), at: z.string() }).nullable(),
   createdAt: z.string(),
   zoneName: z.string(),
 });
@@ -156,7 +154,6 @@ export function toOrder(raw: unknown, ownerId: Id | null): Order {
     pointsUsed: o.pointsUsed,
     paymentMethod: o.paymentMethod,
     paymentStatus: o.paymentStatus,
-    paymentDeclaration: o.paymentDeclaration,
     status: o.status,
     history: o.history,
     cancellationRequest: o.cancellationRequest,
@@ -192,7 +189,6 @@ export function toTrackedOrder(raw: unknown): Order {
     pointsUsed: 0,
     paymentMethod: o.paymentMethod,
     paymentStatus: o.paymentStatus,
-    paymentDeclaration: o.paymentDeclaration,
     status: o.status,
     history: o.history,
     cancellationRequest: null,
@@ -377,14 +373,6 @@ export const ordersBackend = {
 
   disputeDelivery: async (order: Order, reason: string) =>
     refreshed(order, await backend.post(`/orders/${order.id}/delivery-disputes`, { reason })),
-
-  /** Paiement Mobile Money envoyé : la commande passe « à vérifier » avec la référence de la transaction. */
-  declarePayment: async (order: Order, reference: string) =>
-    refreshed(order, await backend.post(`/orders/${order.id}/payment-declarations`, { reference })),
-
-  /** Même déclaration sans compte, prouvée par le numéro et le code de suivi. */
-  declarePaymentByTracking: async (number: string, code: string, reference: string) =>
-    toTrackedOrder(await backend.post('/order-tracking/payment-declarations', { number, code, reference })),
 
   /** Changement immédiat du moyen de paiement, tant que rien n'est encaissé (8.6). */
   changePaymentMethod: async (order: Order, paymentMethod: PaymentMethod) =>

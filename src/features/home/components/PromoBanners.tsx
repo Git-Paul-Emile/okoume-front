@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { ButtonLink } from '@/components/ui/Button';
+import { useCategories } from '@/features/categories/categories.queries';
 import { useProducts } from '@/features/products/products.queries';
 import { usePublicPromoCodes } from '@/features/promotions/promotions.queries';
 import { AdBanner } from './AdBanner';
@@ -13,9 +14,12 @@ import { AdBanner } from './AdBanner';
 export function PromoBanners({ children }: { children?: ReactNode }) {
   const { data: products } = useProducts();
   const { data: codes } = usePublicPromoCodes();
-  const sofa = products?.find((p) => p.categoryId === 'mobilier');
+  const { data: categories } = useCategories();
+  // Catégories repérées par leur nom court : leurs identifiants viennent de la base
+  const idOf = (slug: string) => categories?.bySlug.get(slug)?.id;
+  const sofa = products?.find((p) => p.categoryId === idOf('mobilier'));
   const bag = products?.find((p) => p.slug.includes('sac-en-cuir'));
-  const blender = products?.find((p) => p.categoryId === 'cuisine' && p.featured);
+  const blender = products?.find((p) => p.categoryId === idOf('cuisine') && p.featured);
   const code = codes?.find((c) => c.freeDelivery) ?? codes?.[0];
 
   return (

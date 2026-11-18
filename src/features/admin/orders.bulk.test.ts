@@ -23,14 +23,15 @@ describe('actions groupées sur les commandes', () => {
   it('fait avancer ce qui peut l’être et explique le reste', () => {
     const list = [
       order({ number: 'C-01' }),
-      order({ number: 'C-02', paymentMethod: 'airtel', paymentStatus: 'awaiting_verification' }),
+      // Mobile Money non payé : se prépare comme les espèces, tout se paie à la livraison
+      order({ number: 'C-02', paymentMethod: 'airtel' }),
       order({ number: 'C-03', status: 'ready' }),
       order({ number: 'C-04', status: 'delivered' }),
     ];
     const plan = bulkAdvancePlan(list, 'Nadia', NOW);
-    expect(plan.ready.map((r) => r.order.number)).toEqual(['C-01']);
+    expect(plan.ready.map((r) => r.order.number)).toEqual(['C-01', 'C-02']);
     expect(plan.ready[0].patch.history?.at(-1)).toMatchObject({ status: 'preparing', from: 'confirmed', by: 'Nadia' });
-    expect(plan.skipped.map((s) => s.number)).toEqual(['C-02', 'C-03', 'C-04']);
+    expect(plan.skipped.map((s) => s.number)).toEqual(['C-03', 'C-04']);
   });
 
   it('n’altère jamais l’historique existant', () => {

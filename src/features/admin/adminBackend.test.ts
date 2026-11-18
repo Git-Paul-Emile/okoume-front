@@ -74,7 +74,6 @@ const staffOrder = {
   pointsUsed: 0,
   paymentMethod: 'cash',
   paymentStatus: 'awaiting_payment',
-  paymentDeclaration: null,
   status: 'courier_assigned',
   history: [
     { status: 'confirmed', at: 'a', actor: 'customer' },

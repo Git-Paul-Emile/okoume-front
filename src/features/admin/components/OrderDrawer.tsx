@@ -20,7 +20,6 @@ import {
   feeChangeBlocks,
   type inspectionPatch,
   nextStatusAction,
-  paymentBlocksPreparation,
   RETURN_STEPS,
 } from '../orders.actions';
 import { AssignCourierDialog } from './AssignCourierDialog';
@@ -91,12 +90,11 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
   const feeBlocked = feeChangeBlocks(order);
   // Commande signalée par l'API (19.3) : la préparation attend la vérification d'un membre autorisé
   const reviewPending = order.status === 'confirmed' && order.review?.status === 'pending';
-  const blocked = paymentBlocksPreparation(order) || feeBlocked || reviewPending;
+  const blocked = feeBlocked || reviewPending;
   const cancellable = !['delivered', 'cancelled', 'claim'].includes(order.status);
-  const cashToCollect =
-    order.paymentMethod === 'cash' &&
-    order.paymentStatus === 'awaiting_payment' &&
-    ['courier_assigned', 'shipping', 'delivered'].includes(order.status);
+  // Tous les paiements se font à la livraison (espèces ou Mobile Money) : l'encaissement est confirmé ensuite
+  const toCollect =
+    order.paymentStatus === 'awaiting_payment' && ['courier_assigned', 'shipping', 'delivered'].includes(order.status);
   // Facture et points sont traités par le serveur quand la commande devient payée
   const recordPayment = (input: PaymentInput) =>
     act(
@@ -132,9 +130,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               <p className="w-full text-xs text-warning">
                 {reviewPending
                   ? 'Commande à vérifier avant de commencer la préparation.'
-                  : feeBlocked
-                    ? 'Nouveaux frais de livraison en attente de l’accord du client.'
-                    : 'Paiement Mobile Money à vérifier avant de commencer la préparation.'}
+                  : 'Nouveaux frais de livraison en attente de l’accord du client.'}
               </p>
             )}
             {next && (
@@ -200,26 +196,6 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               {order.review.note && ` : ${order.review.note}`} (signaux : {order.review.reasons.join(', ')})
             </p>
           )}
-          {/* Une commande Mobile Money naît « en attente de paiement » : l'équipe enregistre le paiement dès sa réception */}
-          {order.paymentMethod !== 'cash' &&
-            (order.paymentStatus === 'awaiting_payment' || order.paymentStatus === 'awaiting_verification') && (
-              <Notice title="Paiement Mobile Money à vérifier">
-                Contrôlez la réception de {formatPrice(order.totals.total)} sur le compte{' '}
-                {paymentMethodLabel[order.paymentMethod]} avec la référence {order.number}, puis enregistrez le montant
-                réellement reçu.
-                {order.paymentDeclaration ? (
-                  <p className="mt-2">
-                    Déclaré par le client le {formatDateTime(order.paymentDeclaration.at)}, référence{' '}
-                    <strong className="font-mono">{order.paymentDeclaration.reference}</strong>.
-                  </p>
-                ) : (
-                  <p className="mt-2">Le client n’a pas encore déclaré son paiement.</p>
-                )}
-                <Button size="sm" className="mt-3" onClick={() => setDialog('payment')}>
-                  Enregistrer le paiement reçu
-                </Button>
-              </Notice>
-            )}
           {order.paymentStatus === 'partially_paid' && (
             <Notice title="Paiement partiel">
               Reçu {formatPrice(paidAmount(order))} sur {formatPrice(order.totals.total)} : il reste{' '}
@@ -229,10 +205,12 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               </Button>
             </Notice>
           )}
-          {cashToCollect && (
+          {toCollect && (
             <Notice title="Encaissement à confirmer">
-              Le paiement en espèces n’est enregistré qu’après confirmation de l’encaissement (
-              {formatPrice(order.totals.total)}).
+              Paiement{' '}
+              {order.paymentMethod === 'cash' ? 'en espèces' : 'par ' + paymentMethodLabel[order.paymentMethod]} à la
+              livraison : confirmez l’encaissement de {formatPrice(order.totals.total)}
+              {order.paymentMethod !== 'cash' && ', avec la référence de la transaction reçue par SMS'}.
               <Button size="sm" className="mt-3" onClick={() => setDialog('payment')}>
                 Confirmer l’encaissement
               </Button>

@@ -9,7 +9,7 @@ test('un client rattache une commande passée sans compte puis change son adress
   // Commande sans compte, avec l'adresse qui servira au compte
   await addToCart(page);
   await fillDelivery(page, { name: 'Nadia Obiang', phone: customer.phone, email: customer.email });
-  const number = await payAndConfirm(page, /livraison/i);
+  const number = await payAndConfirm(page, /Espèces/);
   const code = (await page.getByText('Code de suivi').locator('xpath=following-sibling::p[1]').textContent())?.trim();
 
   await register(page, customer);

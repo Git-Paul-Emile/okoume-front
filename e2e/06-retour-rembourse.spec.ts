@@ -22,7 +22,7 @@ test('un retour accepté, reçu, inspecté et remboursé retire les points gagn�
     phone: customer.phone,
     email: customer.email,
   });
-  const number = await payAndConfirm(page, /livraison/i);
+  const number = await payAndConfirm(page, /Espèces/);
   const before = Number(await (await loyaltyBalance(page)).textContent());
 
   // Livraison puis encaissement des espèces : les points sont crédités une fois la commande payée

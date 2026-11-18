@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductCard, ProductCardSkeleton } from '@/features/products/components/ProductCard';
+import { useCategories } from '@/features/categories/categories.queries';
 import { useProducts } from '@/features/products/products.queries';
 import { productInStock } from '@/features/products/products.utils';
 import { useRatingStats } from '@/features/reviews/reviews.queries';
@@ -13,14 +14,16 @@ const CATEGORY = 'traditionnel';
 export function TraditionalWearSection() {
   const { data: products, isLoading } = useProducts();
   const { data: ratings } = useRatingStats();
+  const { data: categories } = useCategories();
   // Quatre tenues homme puis quatre tenues femme (deux rangées), disponibles et récentes d'abord
-  const pick = (categoryId: string) =>
+  // Catégories repérées par leur nom court : leurs identifiants viennent de la base
+  const pick = (slug: string) =>
     (products ?? [])
-      .filter((p) => p.categoryId === categoryId)
+      .filter((p) => p.categoryId === categories?.bySlug.get(slug)?.id)
       .sort((a, b) => Number(productInStock(b)) - Number(productInStock(a)) || b.createdAt.localeCompare(a.createdAt))
       .slice(0, 4);
   const items = [...pick('tradi-homme'), ...pick('tradi-femme')];
-  if (!isLoading && !items.length) return null;
+  if (!isLoading && categories && !items.length) return null;
 
   return (
     <section aria-labelledby="tradi-title">

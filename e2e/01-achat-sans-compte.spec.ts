@@ -4,7 +4,7 @@ import { addToCart, fillDelivery, payAndConfirm, PRODUCT_NAME } from './support/
 test('un visiteur commande sans compte, paie à la livraison puis suit sa commande', async ({ page }) => {
   await addToCart(page);
   await fillDelivery(page, { name: 'Aïcha Mba', phone: '077 12 34 56', email: 'aicha.mba@exemple.test' });
-  const number = await payAndConfirm(page, /livraison/i);
+  const number = await payAndConfirm(page, /Espèces/);
 
   // Livraison Glass 1 500 FCFA ajoutée au prix de la raquette (31 000 FCFA)
   await expect(page.getByText('Livraison (Glass)')).toBeVisible();

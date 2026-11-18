@@ -5,7 +5,6 @@ import {
   canReopen,
   canRestock,
   canWriteOff,
-  expiredPayments,
   inspectionPatch,
   nextStatus,
 } from './orders.actions';
@@ -38,10 +37,9 @@ describe('avancement des commandes', () => {
     expect(patch.history?.at(-1)).toEqual({ status: 'delivered', at: NOW });
   });
 
-  it('bloque la préparation tant que le paiement Mobile Money n’est pas vérifié', () => {
-    const o = order({ status: 'confirmed', paymentMethod: 'moov', paymentStatus: 'awaiting_verification' });
-    expect(() => advancePatch(o, NOW)).toThrow(/paiement/);
-    expect(advancePatch({ ...o, paymentStatus: 'paid' }, NOW).status).toBe('preparing');
+  it('prépare une commande Mobile Money sans attendre de paiement : tout se paie à la livraison', () => {
+    const o = order({ status: 'confirmed', paymentMethod: 'moov', paymentStatus: 'awaiting_payment' });
+    expect(advancePatch(o, NOW).status).toBe('preparing');
     expect(advancePatch({ ...o, paymentMethod: 'cash', paymentStatus: 'awaiting_payment' }, NOW).status).toBe(
       'preparing',
     );
@@ -85,19 +83,5 @@ describe('retours', () => {
     expect(canDecideReturn('orders_manager')).toBe(false);
     expect(canReopen('orders_manager')).toBe(true);
     expect(canReopen('stock_manager')).toBe(false);
-  });
-});
-
-describe('paiements expirés', () => {
-  it('seulement le Mobile Money sans paiement déclaré, au-delà du délai', () => {
-    const now = new Date('2026-10-28T12:00:00Z').getTime();
-    const base = { status: 'confirmed', paymentStatus: 'awaiting_payment', createdAt: '2026-10-27T10:00:00Z' } as const;
-    const list = [
-      order({ id: 'a', ...base, paymentMethod: 'airtel' }),
-      order({ id: 'b', ...base, paymentMethod: 'cash' }),
-      order({ id: 'c', ...base, paymentMethod: 'moov', paymentStatus: 'awaiting_verification' }),
-      order({ id: 'd', ...base, paymentMethod: 'moov', createdAt: '2026-10-28T08:00:00Z' }),
-    ];
-    expect(expiredPayments(list, 24, now).map((o) => o.id)).toEqual(['a']);
   });
 });

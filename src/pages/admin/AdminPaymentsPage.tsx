@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import type { PaymentStatus } from '@/features/orders/orders.types';
-import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { adminOrdersBackend } from '@/features/admin/adminOrders.backend';
-import { useAdminMutation, useAdminOrders, useAdminSettings } from '@/features/admin/admin.queries';
-import { expiredPayments } from '@/features/admin/orders.actions';
-import { can } from '@/features/admin/permissions';
-import { useAdminAuthStore } from '@/stores/adminAuthStore';
+import { useAdminOrders } from '@/features/admin/admin.queries';
 import type { AdminOrder } from '@/features/admin/admin.types';
 import { AdminTable, type Column } from '@/features/admin/components/AdminTable';
 import { OrderDrawer } from '@/features/admin/components/OrderDrawer';
@@ -19,12 +13,15 @@ import { useSelection } from '@/features/admin/useSelection';
 import { formatDateTime } from '@/utils/formatDate';
 import { formatPrice } from '@/utils/formatPrice';
 
-type Filter = 'awaiting_verification' | 'partially_paid' | 'refund_due' | 'awaiting_payment' | 'paid' | 'refunded';
+/** Tous les paiements se font à la livraison : « À encaisser » regroupe les commandes livrées non encore réglées. */
+type Filter =
+  'to_collect' | 'awaiting_verification' | 'partially_paid' | 'refund_due' | 'awaiting_payment' | 'paid' | 'refunded';
 const LABELS: Record<Filter, string> = {
+  to_collect: 'À encaisser',
   awaiting_verification: 'À vérifier',
   partially_paid: 'Partiels',
   refund_due: 'À rembourser',
-  awaiting_payment: 'En attente',
+  awaiting_payment: 'Avant livraison',
   paid: 'Payés',
   refunded: 'Remboursés',
 };
@@ -56,23 +53,7 @@ const sum = (list: AdminOrder[]) => list.reduce((s, o) => s + o.totals.total, 0)
 
 export default function AdminPaymentsPage() {
   const { data: orders, isLoading } = useAdminOrders();
-  const { data: settings } = useAdminSettings();
-  const admin = useAdminAuthStore((s) => s.admin);
-  const [now] = useState(() => Date.now());
-  const [confirmExpired, setConfirmExpired] = useState(false);
-  const [filter, setFilter] = useState<Filter>('awaiting_verification');
-  const cancelExpired = useAdminMutation(
-    async (list: AdminOrder[]) => {
-      // Annulation par transition ; la réservation est libérée par le serveur
-      for (const o of list)
-        await adminOrdersBackend.transition(
-          o,
-          { action: 'cancel', reason: 'paiement Mobile Money non reçu dans le délai' },
-          [],
-        );
-    },
-    (list) => `${list.length} commande${list.length > 1 ? 's annulées' : ' annulée'} : paiement non reçu dans le délai`,
-  );
+  const [filter, setFilter] = useState<Filter>('to_collect');
   const [query, setQuery] = useState('');
   const { selected, open, close } = useSelection(orders);
 
@@ -81,38 +62,23 @@ export default function AdminPaymentsPage() {
   const by = (s: PaymentStatus) => orders.filter((o) => o.paymentStatus === s);
   // Une commande annulée sans paiement n'attend plus rien
   const pending = by('awaiting_payment').filter((o) => o.status !== 'cancelled');
-  const list = filter === 'awaiting_payment' ? pending : by(filter);
+  const toCollect = pending.filter((o) => o.status === 'delivered');
+  const beforeDelivery = pending.filter((o) => o.status !== 'delivered');
+  const listOf = (f: Filter) => (f === 'to_collect' ? toCollect : f === 'awaiting_payment' ? beforeDelivery : by(f));
+  const list = listOf(filter);
   const rows = list.filter((o) => matches(query, o.number, o.customer.recipient, o.customer.phone));
-  const hours = settings?.mobileMoneyExpiryHours ?? 24;
-  const expired = expiredPayments(orders, hours, now);
 
   return (
     <>
       <PageIntro>
-        Les paiements Airtel Money et Moov Money sont vérifiés à la main : comparez le montant et la référence reçus
-        avant de confirmer.
+        Tous les paiements se font à la livraison, en espèces ou par Mobile Money. Une fois la commande livrée,
+        confirmez l’encaissement (avec la référence de la transaction pour Airtel Money et Moov Money).
       </PageIntro>
-      {expired.length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-[#fbf1dc] p-4 text-sm">
-          <p className="text-warning">
-            <strong>
-              {expired.length} commande{expired.length > 1 ? 's' : ''} Mobile Money
-            </strong>{' '}
-            sans paiement depuis plus de {hours} h : {expired.map((o) => o.number).join(', ')}. Le client est informé de
-            l’annulation et le stock réservé est libéré.
-          </p>
-          {can(admin, 'paiements:annuler') && (
-            <Button size="sm" variant="danger" onClick={() => setConfirmExpired(true)}>
-              Annuler les commandes expirées
-            </Button>
-          )}
-        </div>
-      )}
       <StatRow
         items={[
-          { label: 'À vérifier', value: formatPrice(sum(by('awaiting_verification'))) },
+          { label: 'À encaisser (livrées)', value: formatPrice(sum(toCollect)) },
           { label: 'À rembourser', value: formatPrice(sum(by('refund_due'))) },
-          { label: 'Espèces à encaisser', value: formatPrice(sum(pending.filter((o) => o.paymentMethod === 'cash'))) },
+          { label: 'À encaisser à la livraison', value: formatPrice(sum(beforeDelivery)) },
           { label: 'Encaissé au total', value: formatPrice(sum(by('paid'))) },
         ]}
       />
@@ -121,11 +87,10 @@ export default function AdminPaymentsPage() {
           label="Statut du paiement"
           value={filter}
           onChange={setFilter}
-          options={(Object.keys(LABELS) as Filter[]).map((f) => ({
-            value: f,
-            label: LABELS[f],
-            count: f === 'awaiting_payment' ? pending.length : by(f).length,
-          }))}
+          options={(Object.keys(LABELS) as Filter[])
+            // Ancien statut, conservé pour les commandes passées avant le paiement à la livraison
+            .filter((f) => f !== 'awaiting_verification' || by(f).length > 0)
+            .map((f) => ({ value: f, label: LABELS[f], count: listOf(f).length }))}
         />
         <SearchInput value={query} onChange={setQuery} placeholder="Numéro, client, téléphone" />
       </Toolbar>
@@ -139,16 +104,6 @@ export default function AdminPaymentsPage() {
         empty="Rien dans cette catégorie."
       />
       <OrderDrawer order={selected} onClose={close} />
-      <ConfirmDialog
-        open={confirmExpired}
-        title="Annuler les commandes expirées"
-        description={`${expired.length} commande${expired.length > 1 ? 's' : ''} sans paiement reçu après ${hours} h. Si un paiement arrive ensuite, il sera remboursé après vérification.`}
-        confirmLabel="Annuler les commandes"
-        tone="danger"
-        loading={cancelExpired.isPending}
-        onConfirm={() => cancelExpired.mutate(expired, { onSuccess: () => setConfirmExpired(false) })}
-        onClose={() => setConfirmExpired(false)}
-      />
     </>
   );
 }

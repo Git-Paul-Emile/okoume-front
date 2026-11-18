@@ -49,7 +49,6 @@ const orderDto = {
   pointsUsed: 0,
   paymentMethod: 'cash',
   paymentStatus: 'awaiting_payment',
-  paymentDeclaration: null,
   status: 'delivered',
   history: [{ status: 'confirmed', at: '2026-11-03T08:00:00.000Z' }],
   cancellationRequest: null,
@@ -94,7 +93,6 @@ describe('commandes de l’API dans le format du front', () => {
       totals: t,
       paymentMethod,
       paymentStatus,
-      paymentDeclaration: null,
       createdAt,
       zoneName: 'Glass',
     });

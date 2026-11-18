@@ -32,11 +32,6 @@ export const ordersApi = {
       evidenceUrls,
     }),
   requestPaymentChange: (order: Order, to: PaymentMethod) => ordersBackend.changePaymentMethod(order, to),
-  /** Paiement Mobile Money déclaré : depuis le compte, ou sans compte avec le code de suivi. */
-  declarePayment: (order: Order, reference: string, trackingCode?: string) =>
-    trackingCode
-      ? ordersBackend.declarePaymentByTracking(order.number, trackingCode, reference)
-      : ordersBackend.declarePayment(order, reference),
   /** Réponse du client aux nouveaux frais de livraison proposés par la boutique (9.5). */
   decideFeeChange: (order: Order, accept: boolean) => ordersBackend.decideFeeChange(order, accept),
   /** Contestation : ouvre une réclamation prioritaire sans modifier le statut « Livrée ». */

@@ -98,7 +98,6 @@ export default function CheckoutPage() {
     <PaymentStep
       key="p"
       value={payment}
-      expiryHours={settings?.mobileMoneyExpiryHours ?? 24}
       onBack={() => setStep(0)}
       onNext={(m) => {
         setPayment(m);

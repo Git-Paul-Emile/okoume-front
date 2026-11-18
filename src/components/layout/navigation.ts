@@ -3,8 +3,6 @@ export const mainLinks = [
   { to: '/catalogue', label: 'Catalogue' },
   { to: '/catalogue?tri=newest', label: 'Nouveautés' },
   { to: '/annonces', label: 'Annonces' },
-  { to: '/conseils', label: 'Conseils' },
-  { to: '/livraison', label: 'Livraison' },
   { to: '/contact', label: 'Contact' },
 ];
 
@@ -12,7 +10,6 @@ export const footerLinks = {
   'Service client': [
     { to: '/contact', label: 'Nous contacter' },
     { to: '/suivi', label: 'Suivre une commande' },
-    { to: '/livraison', label: 'Livraison et zones' },
     { to: '/legal/retours', label: 'Retours et remboursements' },
     { to: '/compte/assistance', label: 'Mes demandes d’assistance' },
   ],
@@ -20,7 +17,6 @@ export const footerLinks = {
     { to: '/catalogue', label: 'Tout le catalogue' },
     { to: '/promotions', label: 'Promotions' },
     { to: '/catalogue?tri=newest', label: 'Nouveautés' },
-    { to: '/conseils', label: 'Conseils et guides' },
   ],
   'Mon compte': [
     { to: '/compte/commandes', label: 'Mes commandes' },

@@ -13,7 +13,7 @@ test('un client inscrit commande, est livré puis demande un retour', async ({ p
     phone: customer.phone,
     email: customer.email,
   });
-  const number = await payAndConfirm(page, /livraison/i);
+  const number = await payAndConfirm(page, /Espèces/);
 
   // La commande apparaît dans l'espace client
   await page.goto('/compte/commandes');

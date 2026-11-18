@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
+import { installFrenchMessages } from '@/lib/zodMessages';
+
+// Mêmes messages de validation que dans l'application
+installFrenchMessages();
 
 // Les pages sont chargées à la demande et Vitest les transforme au premier import : sur une machine
 // chargée, cela dépasse la seconde d'attente par défaut des requêtes findBy et waitFor

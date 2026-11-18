@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
+import { useCategories } from '@/features/categories/categories.queries';
 import type { CatalogFilters, SortKey } from './products.types';
 
 const SORTS: SortKey[] = ['relevance', 'price_asc', 'price_desc', 'newest', 'rating', 'discount'];
@@ -8,6 +9,7 @@ const ATTR_PREFIX = 'attr_';
 /** Les filtres du catalogue vivent dans l'URL : partageables et conservés au retour arrière. */
 export function useCatalogFilters() {
   const [params, setParams] = useSearchParams();
+  const { data: categories } = useCategories();
 
   const filters = useMemo<CatalogFilters>(() => {
     const attributes: Record<string, string[]> = {};
@@ -18,7 +20,8 @@ export function useCatalogFilters() {
     const num = (k: string) => (params.get(k) ? Number(params.get(k)) : null);
     return {
       q: params.get('q') ?? '',
-      category: params.get('categorie'),
+      // ?categorie= accepte l'identifiant ou le nom court (« ?categorie=traditionnel ») : on garde l'identifiant
+      category: categoryParam(params.get('categorie'), categories?.bySlug),
       minPrice: num('min'),
       maxPrice: num('max'),
       inStock: params.get('dispo') === '1',
@@ -27,7 +30,7 @@ export function useCatalogFilters() {
       sort: sort && SORTS.includes(sort) ? sort : 'relevance',
       page: Math.max(1, Number(params.get('page') ?? 1)),
     };
-  }, [params]);
+  }, [params, categories]);
 
   const update = useCallback(
     (patch: Partial<CatalogFilters>) => {
@@ -50,4 +53,10 @@ export function useCatalogFilters() {
   const reset = useCallback(() => setParams(filters.q ? { q: filters.q } : {}), [filters.q, setParams]);
 
   return { filters, update, reset };
+}
+
+/** Identifiant de la catégorie demandée ; un nom court connu est traduit en identifiant. */
+export function categoryParam(value: string | null, bySlug: ReadonlyMap<string, { id: string }> | undefined) {
+  if (!value) return null;
+  return bySlug?.get(value)?.id ?? value;
 }

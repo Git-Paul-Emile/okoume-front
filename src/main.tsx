@@ -7,6 +7,10 @@ import { registerServiceWorker } from './lib/pwa';
 import { recordVisit } from './features/analytics/analytics.api';
 import { env } from './config/env';
 import { startErrorReporting } from './lib/errorReporting';
+import { installFrenchMessages } from './lib/zodMessages';
+
+// Messages de validation clairs, en français, sur tous les formulaires
+installFrenchMessages();
 
 void startErrorReporting(env.sentryDsn, __APP_RELEASE__ || undefined);
 

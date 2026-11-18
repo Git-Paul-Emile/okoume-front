@@ -12,7 +12,7 @@ test('une commande de quantité inhabituelle attend une vérification avant la p
   await page.getByRole('button', { name: 'Ajouter au panier' }).first().click();
   await expect(page.getByRole('button', { name: /Ouvrir le panier, 5 articles/ })).toBeVisible();
   await fillDelivery(page, { name: 'Marc Ella', phone: '062 11 22 33', email: 'marc.ella@exemple.test' });
-  const number = await payAndConfirm(page, /livraison/i);
+  const number = await payAndConfirm(page, /Espèces/);
   // Le client n'est pas averti : la commande est enregistrée normalement
   await expect(page.getByText(/vérifier|suspect/i)).toHaveCount(0);
 

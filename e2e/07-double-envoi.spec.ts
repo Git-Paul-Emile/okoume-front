@@ -4,7 +4,7 @@ import { expect, test } from './support/test';
 test('un double clic puis un renvoi de la même commande ne créent qu’une commande', async ({ page }) => {
   await addToCart(page);
   await fillDelivery(page, { name: 'Léa Moussavou', phone: '077 55 66 77', email: 'lea.moussavou@exemple.test' });
-  const radio = page.getByRole('radio', { name: /livraison/i });
+  const radio = page.getByRole('radio', { name: /Espèces/ });
   await radio.focus();
   await radio.press('Enter');
   await page.getByRole('button', { name: 'Vérifier ma commande' }).click();

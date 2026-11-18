@@ -11,6 +11,8 @@ export function useCategories() {
       all: categories,
       tree: buildTree(categories),
       byId: new Map(categories.map((c) => [c.id, c])),
+      // Nom court stable (« traditionnel ») : liens écrits dans le code et anciennes adresses du catalogue
+      bySlug: new Map(categories.map((c) => [c.slug, c])),
     }),
   });
 }
