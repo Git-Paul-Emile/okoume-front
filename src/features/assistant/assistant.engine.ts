@@ -31,13 +31,64 @@ export interface AssistantReply {
 
 const has = (q: string, words: string[]) => words.some((w) => q.includes(w));
 
+/** Questions sur l'assistant lui-même : ce qu'il fait, à quoi il sert, ses fonctions (texte normalisé). */
+const ABOUT_ME =
+  /\b(que|quoi|quest ce que|comment)\b.*\b(peux|pouvez|peut|sais|savez|fais|faites|sers|servez|aider|aides)\b|\b(tes|vos|ses|les) (fonctions?|fonctionnalites|capacites|roles?|services)\b|\ba quoi (tu |vous )?(sers|servez|sert)\b|\bqui (es|etes) (tu|vous)\b|\b(tu|vous) (es|etes) qui\b|\bton role\b|\bvotre role\b/;
+
+/** Vocabulaire de la boutique : sans aucun de ces mots, la question sort du cadre de l'assistant. */
+const SHOP_WORDS = [
+  'produit',
+  'article',
+  'achat',
+  'acheter',
+  'commande',
+  'commander',
+  'prix',
+  'cout',
+  'cher',
+  'promo',
+  'reduction',
+  'solde',
+  'stock',
+  'dispo',
+  'boutique',
+  'okoume',
+  'panier',
+  'compte',
+  'livr',
+  'pay',
+  'facture',
+  'garantie',
+  'retour',
+  'rembours',
+  'marque',
+  'categorie',
+  'catalogue',
+  'taille',
+  'couleur',
+  'vendeur',
+  'cadeau',
+  'budget',
+  'fcfa',
+  'franc',
+  'mot de passe',
+  'connexion',
+  'inscri',
+  'contact',
+];
+
+const OFF_TOPIC =
+  'Je ne suis pas destiné à cela : je suis l’assistant d’achat d’Okoumé et je réponds uniquement aux questions sur la boutique (produits, prix, livraison, paiement, commandes, retours, fidélité). Que puis-je faire pour votre achat ?';
+
 /** Réponse de présentation : ce que l'assistant sait faire, avec des questions qu'il comprend. */
 const CAPABILITIES = [
-  'Je peux vous aider à :',
+  'Je suis l’assistant d’achat d’Okoumé : je réponds à vos questions sur la boutique et vous aide à choisir. Je peux vous aider à :',
   '• trouver un produit selon votre budget (« téléphone moins de 300 000 », « parfum pour femme ») ;',
   '• connaître les frais et délais de livraison (« livraison à Owendo ») ;',
   '• comprendre le paiement Airtel Money, Moov Money ou en espèces ;',
-  '• suivre une commande, faire un retour, utiliser vos points de fidélité ;',
+  '• suivre une commande, l’annuler ou faire un retour ;',
+  '• utiliser vos points de fidélité et les codes promo ;',
+  '• comprendre votre compte et la commande sans compte ;',
   '• vous mettre en relation avec notre équipe.',
   'Que cherchez-vous ?',
 ].join('\n');
@@ -188,6 +239,10 @@ export function answer(message: string, data: AssistantData): AssistantReply {
   // Recommandation selon besoin et budget
   const budget = parseBudget(q);
   const category = matchCategory(q, categories);
+  // « Que peux-tu faire pour moi ? », « À quoi sers-tu ? » : présentation, sauf si un produit est visé
+  if (!category && ABOUT_ME.test(q)) {
+    return { text: CAPABILITIES, links: [{ label: 'Voir le catalogue', to: '/catalogue' }] };
+  }
   const searchTerms = q
     .replace(/\d[\d\s.]*\s*(k|mille|fcfa|f|cfa|francs?)?/g, ' ')
     .replace(/\b(moins|de|max|maximum|budget|pour|un|une|je|cherche|veux|voudrais|avec|a|le|la|les)\b/g, ' ')
@@ -227,6 +282,8 @@ export function answer(message: string, data: AssistantData): AssistantReply {
       products: cheapest ? [cheapest] : undefined,
     };
   }
+
+  if (!has(q, SHOP_WORDS)) return { text: OFF_TOPIC };
 
   return {
     text: 'Je n’ai pas de réponse fiable à cette question. Reformulez-la (par exemple « téléphone moins de 300 000 » ou « livraison à Owendo ») ou contactez notre équipe.',

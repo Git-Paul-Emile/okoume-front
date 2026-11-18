@@ -17,6 +17,10 @@ const phone = (id: string, price: number) =>
     name: `Téléphone ${id}`,
     categoryId: smartphones.id,
     images: [],
+    brand: null,
+    shortDescription: '',
+    description: [],
+    tags: [],
     specs: [],
     promotion: null,
     variants: [{ id: `${id}-v`, label: 'Standard', price, stock: 5, reserved: 0, attributes: {} }],
@@ -30,14 +34,20 @@ const data: AssistantData = {
 };
 
 describe('assistant d’achat', () => {
-  it.each(['qu’est ce que tu peux faire pour moi?', 'Que peux-tu faire ?', 'aide', 'Qui es-tu ?'])(
-    'se présente quand on lui demande ce qu’il sait faire : « %s »',
-    (question) => {
-      const reply = answer(question, data);
-      expect(reply.text).toContain('Je peux vous aider');
-      expect(reply.text).not.toContain('pas de réponse fiable');
-    },
-  );
+  it.each([
+    'qu’est ce que tu peux faire pour moi?',
+    'que peux faire pour moi?',
+    'Que peux-tu faire ?',
+    'À quoi sers-tu ?',
+    'Quelles sont tes fonctions ?',
+    'comment tu peux m’aider',
+    'aide',
+    'Qui es-tu ?',
+  ])('se présente quand on lui demande ce qu’il sait faire : « %s »', (question) => {
+    const reply = answer(question, data);
+    expect(reply.text).toContain('Je peux vous aider');
+    expect(reply.text).not.toContain('pas de réponse fiable');
+  });
 
   it('trouve la catégorie d’un mot courant malgré les identifiants UUID de l’API', () => {
     const reply = answer('téléphone moins de 300 000', data);
@@ -48,6 +58,13 @@ describe('assistant d’achat', () => {
   it('met en relation avec l’équipe quand on demande à parler à quelqu’un', () => {
     expect(answer('je voudrais parler à quelqu’un', data).links?.some((l) => l.to === '/contact')).toBe(true);
   });
+
+  it.each(['Qui a gagné le match hier ?', 'Écris-moi un poème', 'Quelle est la capitale du Japon ?'])(
+    'répond courtoisement qu’il n’est pas destiné aux questions hors sujet : « %s »',
+    (question) => {
+      expect(answer(question, data).text).toMatch(/Je ne suis pas destiné à cela/);
+    },
+  );
 
   it('répond aux remerciements', () => {
     expect(answer('merci beaucoup', data).text).toMatch(/Avec plaisir/);
