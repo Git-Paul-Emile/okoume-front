@@ -42,7 +42,7 @@ export function HomePage() {
 
       <Reveal>
         <PromoBanners>
-          <AdBanner placement="home-promo" />
+          <AdBanner placement="home-promo" className="lg:mb-3" />
         </PromoBanners>
       </Reveal>
 
