@@ -15,21 +15,24 @@ function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
   const cropWideMatte = variant === 'wide' && !ad.imageMobile && ad.image.endsWith('banniere-tech-premium.jpg');
   const imageClass =
     variant === 'side'
-      ? 'size-full rounded-xl object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.01]'
+      ? 'size-full rounded-2xl object-contain transition-transform duration-500 group-hover:scale-[1.01]'
       : cropWideMatte
         ? 'size-full object-cover scale-[1.1] transition-transform duration-500'
         : 'size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]';
   const content = (
     <>
-      <picture
+      <div
         className={cn(
-          'block size-full',
-          variant === 'side' && 'overflow-hidden rounded-xl p-2.5 sm:p-3',
+          variant === 'side'
+            ? 'absolute inset-y-0 inset-x-2.5 overflow-hidden rounded-2xl sm:inset-x-3'
+            : 'block size-full',
         )}
       >
-        {ad.imageMobile && <source media="(max-width: 639px)" srcSet={ad.imageMobile} />}
-        <img src={ad.image} alt={ad.alt} className={imageClass} />
-      </picture>
+        <picture className="block size-full">
+          {ad.imageMobile && <source media="(max-width: 639px)" srcSet={ad.imageMobile} />}
+          <img src={ad.image} alt={ad.alt} className={imageClass} />
+        </picture>
+      </div>
       {/* Une publicité tierce doit être identifiable comme telle */}
       {ad.advertiser && (
         <span className="absolute top-2 right-2 rounded-sm bg-ink/70 px-1.5 py-0.5 text-[11px] font-semibold text-white">
@@ -86,8 +89,8 @@ export function AdBanner({
           ? 'aspect-[4/3] shrink-0 sm:aspect-[7/2]'
           : 'aspect-[7/2] shrink-0'
       : current?.imageMobile
-        ? 'aspect-[4/3] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1'
-        : 'aspect-[6/7] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1',
+        ? 'aspect-[4/3] sm:aspect-[6/7] lg:flex-none'
+        : 'aspect-[6/7] lg:flex-none',
     className,
   );
   if (isLoading) return <div className={cn(frame, 'skeleton')} />;

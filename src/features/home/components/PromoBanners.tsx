@@ -25,9 +25,8 @@ export function PromoBanners({ children }: { children?: ReactNode }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
       {/* Colonne de gauche : encart « Livraison offerte » (moitié haute) puis espace publicitaire (moitié basse) */}
-      {/* L'image latérale conserve son retrait interne : un petit gap externe donne le même
-          espacement visible que celui des autres blocs de la page. */}
-      <div className="flex min-h-0 flex-col gap-1">
+      {/* Retrait horizontal pour l'image, avec un espacement vertical resserré. */}
+      <div className="flex min-h-0 flex-col gap-2">
         <motion.div
           whileHover={{ y: -3 }}
           className="relative min-h-56 flex-1 basis-0 overflow-hidden rounded-lg bg-mure text-white"
