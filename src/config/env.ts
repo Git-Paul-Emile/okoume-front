@@ -16,10 +16,13 @@ if (!parsed.success) {
   throw new Error('Configuration invalide : vérifiez le fichier .env (voir .env.example).');
 }
 
-const backendOrigin = parsed.data.VITE_BACKEND_URL.replace(/\/$/, '');
+const useSameOriginApi =
+  typeof window !== 'undefined' &&
+  (__VERCEL_API_PROXY__ || window.location.hostname.endsWith('.vercel.app'));
+const backendOrigin = useSameOriginApi ? window.location.origin : parsed.data.VITE_BACKEND_URL.replace(/\/$/, '');
 
 export const env = {
-  /** Origine de l'API (santé, service worker) */
+  /** Origine de l'API (même origine via Vercel en production, service direct en local) */
   backendOrigin,
   /** Adresse de l'API Okoumé, versionnée */
   backendUrl: `${backendOrigin}/api/v1`,

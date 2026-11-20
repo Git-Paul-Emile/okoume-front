@@ -18,7 +18,10 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     // Version déployée, pour relier une erreur remontée à sa mise en ligne (fournie par Vercel au build)
-    define: { __APP_RELEASE__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? '') },
+    define: {
+      __APP_RELEASE__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? ''),
+      __VERCEL_API_PROXY__: JSON.stringify(process.env.VERCEL === '1'),
+    },
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },

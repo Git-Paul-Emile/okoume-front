@@ -11,3 +11,5 @@ interface ImportMeta {
 
 /** Commit déployé (VERCEL_GIT_COMMIT_SHA au build), vide en local */
 declare const __APP_RELEASE__: string;
+/** API proxifiée sous l'origine du site sur Vercel pour partager les cookies de session. */
+declare const __VERCEL_API_PROXY__: boolean;
