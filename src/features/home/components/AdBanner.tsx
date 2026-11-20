@@ -59,6 +59,7 @@ export function AdBanner({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
+  const current = count ? slides[index % count] : null;
 
   useEffect(() => {
     if (count < 2 || paused) return;
@@ -69,13 +70,16 @@ export function AdBanner({
   const frame = cn(
     'relative overflow-hidden rounded-lg bg-ink',
     variant === 'wide'
-      ? 'aspect-[4/3] shrink-0 sm:aspect-[3/1]'
-      : 'aspect-[4/3] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1',
+      ? current?.imageMobile
+        ? 'aspect-[4/3] shrink-0 sm:aspect-[3/1]'
+        : 'aspect-[3/1] shrink-0'
+      : current?.imageMobile
+        ? 'aspect-[4/3] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1'
+        : 'aspect-[6/7] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1',
     className,
   );
   if (isLoading) return <div className={cn(frame, 'skeleton')} />;
-  if (!count) return null;
-  const current = slides[index % count];
+  if (!count || !current) return null;
 
   return (
     <div
