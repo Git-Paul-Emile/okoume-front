@@ -83,8 +83,8 @@ export function AdBanner({
       ? cropWideMatte
         ? 'aspect-[5/1] shrink-0'
         : current?.imageMobile
-          ? 'aspect-[4/3] shrink-0 sm:aspect-[3/1]'
-          : 'aspect-[3/1] shrink-0'
+          ? 'aspect-[4/3] shrink-0 sm:aspect-[7/2]'
+          : 'aspect-[7/2] shrink-0'
       : current?.imageMobile
         ? 'aspect-[4/3] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1'
         : 'aspect-[6/7] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1',
