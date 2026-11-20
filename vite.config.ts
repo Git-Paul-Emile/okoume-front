@@ -11,7 +11,11 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
-      contentSecurityPolicy({ backendUrl: env.VITE_BACKEND_URL, sentryDsn: env.VITE_SENTRY_DSN }),
+      contentSecurityPolicy({
+        backendUrl: env.VITE_BACKEND_URL,
+        sentryDsn: env.VITE_SENTRY_DSN,
+        enableVercelToolbar: process.env.VERCEL === '1',
+      }),
     ],
     // Version déployée, pour relier une erreur remontée à sa mise en ligne (fournie par Vercel au build)
     define: { __APP_RELEASE__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? '') },
