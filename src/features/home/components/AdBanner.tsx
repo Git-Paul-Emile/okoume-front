@@ -15,13 +15,18 @@ function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
   const cropWideMatte = variant === 'wide' && !ad.imageMobile && ad.image.endsWith('banniere-tech-premium.jpg');
   const imageClass =
     variant === 'side'
-      ? 'size-full rounded-lg object-contain transition-transform duration-500 group-hover:scale-[1.01]'
+      ? 'size-full rounded-xl object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.01]'
       : cropWideMatte
         ? 'size-full object-cover scale-[1.1] transition-transform duration-500'
         : 'size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]';
   const content = (
     <>
-      <picture className={cn('block size-full', variant === 'side' && 'p-2.5 sm:p-3')}>
+      <picture
+        className={cn(
+          'block size-full',
+          variant === 'side' && 'overflow-hidden rounded-xl p-2.5 sm:p-3',
+        )}
+      >
         {ad.imageMobile && <source media="(max-width: 639px)" srcSet={ad.imageMobile} />}
         <img src={ad.image} alt={ad.alt} className={imageClass} />
       </picture>
