@@ -1,9 +1,10 @@
+import { Plus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { TextAreaField, TextField } from '@/components/ui/TextField';
-import type { Ad, Banner } from '@/features/home/home.types';
+import { SelectField, TextAreaField, TextField } from '@/components/ui/TextField';
+import type { Ad, AdInput, Banner } from '@/features/home/home.types';
 import { adminApi } from '@/features/admin/admin.api';
 import { useAdminAds, useAdminBanners, useAdminMutation } from '@/features/admin/admin.queries';
 import { AdminTable, type Column } from '@/features/admin/components/AdminTable';
@@ -32,7 +33,7 @@ export default function AdminContentPage() {
   const { data: ads, isLoading } = useAdminAds();
   const { data: banners = [] } = useAdminBanners();
   const [tab, setTab] = useState<Tab>('ads');
-  const [ad, setAd] = useState<Ad | null>(null);
+  const [ad, setAd] = useState<Ad | 'new' | null>(null);
   const [banner, setBanner] = useState<Banner | null>(null);
   const toggle = useAdminMutation(
     (a: Ad) => adminApi.updateAd(a.id, { active: !a.active }),
@@ -120,6 +121,11 @@ export default function AdminContentPage() {
             { value: 'banners', label: 'Carrousel d’accueil', count: banners.length },
           ]}
         />
+        {tab === 'ads' && (
+          <Button className="sm:ml-auto" icon={<Plus className="size-4" />} onClick={() => setAd('new')}>
+            Nouvelle campagne
+          </Button>
+        )}
       </Toolbar>
       {tab === 'ads' ? (
         <AdminTable
@@ -138,7 +144,7 @@ export default function AdminContentPage() {
           onRowClick={setBanner}
         />
       )}
-      {ad && <AdDialog ad={ad} onClose={() => setAd(null)} />}
+      {ad && <AdDialog ad={ad === 'new' ? null : ad} onClose={() => setAd(null)} />}
       {banner && <BannerDialog banner={banner} onClose={() => setBanner(null)} />}
     </>
   );
@@ -146,22 +152,23 @@ export default function AdminContentPage() {
 
 const toDate = (iso: string | null) => (iso ? iso.slice(0, 10) : '');
 
-function AdDialog({ ad, onClose }: { ad: Ad; onClose: () => void }) {
-  const [v, setV] = useState({
-    advertiser: ad.advertiser ?? '',
-    alt: ad.alt,
-    href: ad.href,
-    image: ad.image as string | null,
-    imageMobile: ad.imageMobile,
-    contract: ad.contract ?? null,
-    startsAt: toDate(ad.startsAt),
-    endsAt: toDate(ad.endsAt),
-    priority: String(ad.priority),
-  });
+function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
+  const [v, setV] = useState(() => ({
+    placement: ad?.placement ?? 'home-promo',
+    advertiser: ad?.advertiser ?? '',
+    alt: ad?.alt ?? '',
+    href: ad?.href ?? '/catalogue',
+    image: ad?.image ?? null,
+    imageMobile: ad?.imageMobile ?? null,
+    startsAt: toDate(ad?.startsAt ?? null),
+    endsAt: toDate(ad?.endsAt ?? null),
+    priority: String(ad?.priority ?? 10),
+    active: ad?.active ?? true,
+  }));
   const [error, setError] = useState('');
   const set = (patch: Partial<typeof v>) => setV((x) => ({ ...x, ...patch }));
   const save = useAdminMutation(
-    (patch: Partial<Ad>) => adminApi.updateAd(ad.id, patch),
+    (input: AdInput) => (ad ? adminApi.updateAd(ad.id, input) : adminApi.createAd(input)),
     'Espace publicitaire enregistré',
   );
 
@@ -170,31 +177,39 @@ function AdDialog({ ad, onClose }: { ad: Ad; onClose: () => void }) {
     if (v.alt.trim().length < 5) return setError('Décrivez le visuel : ce texte est lu par les lecteurs d’écran.');
     if (v.startsAt && v.endsAt && v.endsAt < v.startsAt) return setError('La fin doit être après le début.');
     if (!v.image) return setError('Ajoutez le visuel ordinateur.');
-    save.mutate(
-      {
-        advertiser: v.advertiser.trim() || null,
-        alt: v.alt.trim(),
-        href: v.href.trim(),
-        image: v.image,
-        imageMobile: v.imageMobile,
-        contract: v.contract,
-        startsAt: v.startsAt ? new Date(`${v.startsAt}T00:00:00`).toISOString() : null,
-        endsAt: v.endsAt ? new Date(`${v.endsAt}T23:59:00`).toISOString() : null,
-        priority: Number(v.priority) || 0,
-      },
-      { onSuccess: onClose },
-    );
+    const input: AdInput = {
+      placement: v.placement,
+      advertiser: v.advertiser.trim() || null,
+      alt: v.alt.trim(),
+      href: v.href.trim(),
+      image: v.image,
+      imageMobile: v.imageMobile,
+      startsAt: v.startsAt ? new Date(`${v.startsAt}T00:00:00`).toISOString() : null,
+      endsAt: v.endsAt ? new Date(`${v.endsAt}T23:59:00`).toISOString() : null,
+      priority: Number(v.priority) || 0,
+      active: v.active,
+    };
+    save.mutate(input, { onSuccess: onClose });
   };
 
   return (
     <Modal
       open
       onClose={onClose}
-      title="Espace publicitaire"
-      description={placementLabel[ad.placement]}
+      title={ad ? 'Modifier la campagne publicitaire' : 'Nouvelle campagne publicitaire'}
+      description="Choisissez un emplacement, un visuel et la période de diffusion."
       className="max-w-xl"
     >
       <form onSubmit={submit} noValidate className="max-h-[75vh] space-y-4 overflow-y-auto pr-1">
+        <SelectField
+          label="Emplacement"
+          value={v.placement}
+          disabled={!!ad}
+          onChange={(e) => set({ placement: e.target.value })}
+        >
+          <option value="home-promo">Accueil, grande bannière (1200 × 400)</option>
+          <option value="home-promo-side">Accueil, colonne (600 × 700)</option>
+        </SelectField>
         <TextField
           label="Annonceur"
           optional
@@ -208,11 +223,11 @@ function AdDialog({ ad, onClose }: { ad: Ad; onClose: () => void }) {
           label="Visuel ordinateur"
           value={v.image}
           onChange={(image) => set({ image })}
-          aspect={ad.placement === 'home-promo-side' ? 'aspect-[6/7] max-w-[240px]' : 'aspect-[3/1]'}
+          aspect={v.placement === 'home-promo-side' ? 'aspect-[6/7] max-w-[240px]' : 'aspect-[3/1]'}
           fit="cover"
           maxSize={1600}
           uploader={staffImageUploader('banners')}
-          hint={`${placementLabel[ad.placement] ?? ''}. JPG, PNG ou WebP, 5 Mo au maximum.`}
+          hint={`${placementLabel[v.placement] ?? ''}. JPG, PNG ou WebP, 5 Mo au maximum.`}
         />
         <ImageUpload
           label="Visuel mobile (facultatif)"
@@ -235,6 +250,7 @@ function AdDialog({ ad, onClose }: { ad: Ad; onClose: () => void }) {
             onChange={(e) => set({ priority: e.target.value })}
           />
         </div>
+        <Switch checked={v.active} onChange={() => set({ active: !v.active })} label="Afficher cette campagne" />
         {error && (
           <p className="text-sm font-medium text-danger" role="alert">
             {error}

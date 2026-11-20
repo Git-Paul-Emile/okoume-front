@@ -4,7 +4,7 @@ import { backend } from '@/api/backend';
 import type { Id } from '@/api/types';
 import type { Article } from '@/features/articles/articles.types';
 import type { LegalPageRecord } from '@/features/legal/legal.api';
-import type { Ad, Banner, ExclusiveOffer } from './home.types';
+import type { Ad, AdInput, Banner, ExclusiveOffer } from './home.types';
 
 /**
  * Contenus sur l'API (api/src/features/content) : bannières, espaces publicitaires, offres exclusives, articles et
@@ -155,6 +155,7 @@ export const contentBackend = {
     ),
 
   staffAds: async (signal?: AbortSignal) => list(await backend.get('/staff/content/ads', undefined, signal), toAd),
+  createAd: async (ad: AdInput) => toAd(await backend.post('/staff/content/ads', ad)),
   /** Le contrat de l'annonceur n'est pas conservé par l'API : il reste dans les documents de la boutique. */
   updateAd: async (id: Id, patch: Partial<Ad>) =>
     toAd(

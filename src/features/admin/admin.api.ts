@@ -8,7 +8,7 @@ import type { Id } from '@/api/types';
 import type { Article } from '@/features/articles/articles.types';
 import type { Category } from '@/features/categories/categories.types';
 import type { DeliveryZone, ZoneRequest } from '@/features/delivery/delivery.types';
-import type { Ad, Banner } from '@/features/home/home.types';
+import type { Ad, AdInput, Banner } from '@/features/home/home.types';
 import type { PromoCode } from '@/features/promotions/promotions.types';
 import type { LegalPageRecord } from '@/features/legal/legal.api';
 import type { Review } from '@/features/reviews/reviews.types';
@@ -119,6 +119,7 @@ export const adminApi = {
   tickets: (signal?: AbortSignal): Promise<Ticket[]> => supportBackend.staffList(signal),
 
   ads: (signal?: AbortSignal): Promise<Ad[]> => contentBackend.staffAds(signal),
+  createAd: (ad: AdInput): Promise<Ad> => contentBackend.createAd(ad),
   updateAd: (id: Id, patch: Partial<Ad>): Promise<Ad> => contentBackend.updateAd(id, patch),
   banners: (signal?: AbortSignal): Promise<Banner[]> => contentBackend.staffBanners(signal),
   updateBanner: (id: Id, patch: Partial<Banner>): Promise<Banner> => contentBackend.updateBanner(id, patch),

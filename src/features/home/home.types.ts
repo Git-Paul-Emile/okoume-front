@@ -34,6 +34,9 @@ export interface Ad {
   contract?: { name: string; size: number; type: string; url: string } | null;
 }
 
+/** Champs d'une campagne publicitaire transmis à l'API. */
+export type AdInput = Omit<Ad, 'id' | 'contract'>;
+
 /** Encart « Offre exclusive » de l'accueil, administrable (titre, produit mis en avant, lien). */
 export interface ExclusiveOffer {
   id: Id;

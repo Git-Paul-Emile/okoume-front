@@ -59,7 +59,7 @@ Les numéros Mobile Money, WhatsApp et les coordonnées de la boutique sont fict
 
 ## Espaces publicitaires
 
-L'accueil comporte deux espaces publicitaires ouverts à **toute entreprise** (pas seulement aux produits de la boutique), chacun en diaporama de 3 visuels :
+L'accueil comporte deux emplacements publicitaires ouverts à **toute entreprise** (pas seulement aux produits de la boutique). Chaque emplacement peut contenir plusieurs campagnes et affiche jusqu'à 3 visuels :
 
 | Emplacement       | Où                                             | Format conseillé |
 | ----------------- | ---------------------------------------------- | ---------------- |
@@ -68,11 +68,11 @@ L'accueil comporte deux espaces publicitaires ouverts à **toute entreprise** (p
 
 Sur mobile, les deux espaces utilisent le visuel `imageMobile` (800 × 600 px).
 
-Ils se gèrent dans le back-office (Contenus) ; les visuels de départ viennent de l'API (`api/prisma/seeders/data/ads.json`) :
+Les emplacements sont fixes dans la mise en page, mais leurs campagnes sont gérées dans le back-office (Contenus). L'équipe peut créer et modifier une campagne, choisir l'emplacement, envoyer les visuels chez l'hébergeur, renseigner l'annonceur, son lien et la période, régler la priorité et activer ou désactiver la diffusion. Les campagnes désactivées sont conservées pour l'historique. Les visuels initiaux viennent du seed de l'API (`api/prisma/seeders/data/ads.json`) :
 
 - Les entrées sans annonceur (`"advertiser": null`) sont les visuels « espace disponible » de la boutique ; ils renvoient vers le formulaire de contact, sujet « Publicité et partenariat ».
-- Pour une campagne : dans Contenus, ajoutez les visuels (envoyés chez l'hébergeur d'images), l'annonceur, le texte du visuel, le site de l'annonceur, les dates, la priorité, puis activez-la.
-- Chaque espace affiche 3 diapositives : d'abord les campagnes en cours, par priorité, puis les visuels « espace disponible » pour compléter. Une campagne porte la mention « Publicité · nom de l'annonceur » ; les liens externes s'ouvrent dans un nouvel onglet avec `rel="sponsored"`.
+- Une campagne planifiée n'apparaît qu'à sa date de début et cesse d'être diffusée à sa date de fin. Les campagnes en cours passent avant les visuels de la boutique, selon leur priorité.
+- Une campagne porte la mention « Publicité · nom de l'annonceur » ; les liens externes s'ouvrent dans un nouvel onglet avec `rel="sponsored"`.
 
 ## Architecture
 
