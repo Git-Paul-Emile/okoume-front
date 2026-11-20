@@ -57,7 +57,9 @@ async function staleWhileRevalidate(request, cacheName) {
       }
       return response;
     })
-    .catch(() => cached);
+    // fetch peut échouer (hors ligne ou bloqué par un filtre réseau). respondWith exige
+    // malgré tout une Response : cached peut être absent lors du premier chargement.
+    .catch(() => cached ?? Response.error());
   return cached || network;
 }
 
