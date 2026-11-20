@@ -10,17 +10,20 @@ import { pickAds } from '../home.utils';
 type Variant = 'wide' | 'side';
 
 /** Visuel d'une diapositive : lien interne ou externe (annonceur), avec la mention « Publicité » si tiers. */
-function AdSlide({ ad }: { ad: Ad }) {
+function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
   const external = /^https?:\/\//.test(ad.href);
+  const cropWideMatte = variant === 'wide' && !ad.imageMobile && ad.image.endsWith('banniere-tech-premium.jpg');
+  const imageClass =
+    variant === 'side'
+      ? 'size-full rounded-md object-contain p-2.5 transition-transform duration-500 group-hover:scale-[1.01] sm:p-3'
+      : cropWideMatte
+        ? 'size-full object-cover scale-[1.1] transition-transform duration-500'
+        : 'size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]';
   const content = (
     <>
       <picture className="block size-full">
         {ad.imageMobile && <source media="(max-width: 639px)" srcSet={ad.imageMobile} />}
-        <img
-          src={ad.image}
-          alt={ad.alt}
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-        />
+        <img src={ad.image} alt={ad.alt} className={imageClass} />
       </picture>
       {/* Une publicité tierce doit être identifiable comme telle */}
       {ad.advertiser && (
@@ -60,6 +63,8 @@ export function AdBanner({
   const [paused, setPaused] = useState(false);
   const count = slides.length;
   const current = count ? slides[index % count] : null;
+  const cropWideMatte =
+    variant === 'wide' && !!current && !current.imageMobile && current.image.endsWith('banniere-tech-premium.jpg');
 
   useEffect(() => {
     if (count < 2 || paused) return;
@@ -68,11 +73,13 @@ export function AdBanner({
   }, [count, paused]);
 
   const frame = cn(
-    'relative overflow-hidden rounded-lg bg-ink',
+    'relative overflow-hidden rounded-lg bg-transparent',
     variant === 'wide'
-      ? current?.imageMobile
-        ? 'aspect-[4/3] shrink-0 sm:aspect-[3/1]'
-        : 'aspect-[3/1] shrink-0'
+      ? cropWideMatte
+        ? 'aspect-[5/1] shrink-0'
+        : current?.imageMobile
+          ? 'aspect-[4/3] shrink-0 sm:aspect-[3/1]'
+          : 'aspect-[3/1] shrink-0'
       : current?.imageMobile
         ? 'aspect-[4/3] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1'
         : 'aspect-[6/7] sm:aspect-[6/7] lg:aspect-auto lg:min-h-0 lg:flex-1',
@@ -99,7 +106,7 @@ export function AdBanner({
           animate={{ opacity: 1, x: 0, transition: { duration: 0.5, ease } }}
           exit={{ opacity: 0, x: -30, transition: { duration: 0.3 } }}
         >
-          <AdSlide ad={current} />
+          <AdSlide ad={current} variant={variant} />
         </motion.div>
       </AnimatePresence>
       {count > 1 && (
