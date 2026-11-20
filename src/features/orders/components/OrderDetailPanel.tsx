@@ -85,6 +85,32 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
         </div>
         <OrderTimeline order={order} />
 
+        {!!order.trackedOrders?.length && order.trackedOrders.length > 1 && (
+          <section className="mt-5 rounded-md bg-ivory p-4">
+            <h3 className="font-semibold">Suivi des boutiques</h3>
+            <ul className="mt-2 divide-y divide-sage text-sm">
+              {order.trackedOrders.map((stop) => (
+                <li key={stop.number} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                  <span>
+                    <span className="block font-medium">{stop.shopName}</span>
+                    <span className="text-xs text-ink-muted">
+                      {stop.fulfilledBy === 'okoume'
+                        ? stop.collectionConfirmedAt
+                          ? `Collecte confirmée le ${formatDateTime(stop.collectionConfirmedAt)}`
+                          : 'Collecte par le livreur OKOUMÉ'
+                        : 'Livraison indépendante par la boutique'}
+                    </span>
+                  </span>
+                  <span className="text-right">
+                    <span className="block">{orderStatusLabel[stop.status]}</span>
+                    <span className="text-xs text-ink-muted">{formatPrice(stop.total)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {order.cancellationRequest && order.cancellationRequest.status === 'pending' && (
           <p className="mt-6 flex items-center gap-2 rounded-md bg-[#fbf1dc] p-3 text-sm text-warning">
             <Clock className="size-4" /> Demande d’annulation en cours d’examen ({order.cancellationRequest.reason}). La

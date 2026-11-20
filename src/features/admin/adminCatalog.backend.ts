@@ -130,6 +130,14 @@ const staffProductDto = z.object({
   tags: z.array(z.string()),
   promotion: promotionDto.nullable(),
   variants: z.array(staffVariantDto),
+  seller: z.object({ slug: z.string(), name: z.string() }).nullable().default(null),
+  condition: z.enum(['new', 'like_new', 'good', 'used']).nullable().default(null),
+  moderation: z
+    .enum(['in_review', 'changes_requested', 'pending_moderation', 'approved', 'rejected'])
+    .nullable()
+    .default(null),
+  moderationIssues: z.array(z.string()).default([]),
+  moderationNote: z.string().nullable().default(null),
   createdAt: z.string(),
 });
 
@@ -171,6 +179,11 @@ export function toAdminProduct(raw: unknown, categories: readonly Category[]): A
     tags: p.tags,
     promotion: p.promotion,
     relatedIds: [],
+    seller: p.seller,
+    condition: p.condition,
+    moderation: p.moderation,
+    moderationIssues: p.moderationIssues,
+    moderationNote: p.moderationNote,
     createdAt: p.createdAt,
     variants: p.variants.map(({ cost, ...v }) => (cost === null ? v : { ...v, cost })),
   };
@@ -294,6 +307,13 @@ export const adminCatalogBackend = {
     const categories = await categoriesOf(signal);
     return getAll('/staff/products', {}, (raw) => toAdminProduct(raw, categories), signal);
   },
+
+  /** Décision de l'équipe sur un produit de vendeur (32.3) : toujours motivée, un refus est définitif. */
+  moderateProduct: async (id: Id, decision: 'approve' | 'request_changes' | 'reject', note: string, issues: string[]) =>
+    toAdminProduct(
+      await backend.put(`/staff/products/${id}/moderation`, { decision, note, issues }),
+      await categoriesOf(),
+    ),
 
   createProduct: async (product: AdminProduct) =>
     toAdminProduct(await backend.post('/staff/products', createProductBody(product)), await categoriesOf()),

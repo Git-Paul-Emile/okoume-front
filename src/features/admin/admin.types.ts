@@ -103,8 +103,15 @@ export interface AdminVariant extends Variant {
   weightGrams?: number | null;
   dimensions?: { length: number; width: number; height: number } | null;
 }
+/** Vérification d'un produit de vendeur avant publication (cahier des charges 32.3). */
+export type ProductModeration = 'in_review' | 'changes_requested' | 'pending_moderation' | 'approved' | 'rejected';
+
 export interface AdminProduct extends Omit<Product, 'variants'> {
   variants: AdminVariant[];
+  /** Produit de vendeur : état de sa vérification, points relevés et note de l'équipe ; null pour Okoumé */
+  moderation?: ProductModeration | null;
+  moderationIssues?: string[];
+  moderationNote?: string | null;
   /** Données nécessaires à la fiscalité (4.2) : à valider avec un expert-comptable. */
   tax?: { vatRate: number; hsCode: string };
 }

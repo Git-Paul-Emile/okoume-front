@@ -27,6 +27,7 @@ export function useCatalogFilters() {
       inStock: params.get('dispo') === '1',
       onSale: params.get('promo') === '1',
       attributes,
+      shop: params.get('boutique') || null,
       sort: sort && SORTS.includes(sort) ? sort : 'relevance',
       page: Math.max(1, Number(params.get('page') ?? 1)),
     };
@@ -43,6 +44,7 @@ export function useCatalogFilters() {
       if (next.inStock) p.set('dispo', '1');
       if (next.onSale) p.set('promo', '1');
       for (const [k, v] of Object.entries(next.attributes)) if (v.length) p.set(ATTR_PREFIX + k, v.join(','));
+      if (next.shop) p.set('boutique', next.shop);
       if (next.sort !== 'relevance') p.set('tri', next.sort);
       if (next.page > 1) p.set('page', String(next.page));
       setParams(p, { preventScrollReset: true });

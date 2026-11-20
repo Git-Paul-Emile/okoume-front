@@ -40,6 +40,8 @@ const productDto = z.object({
   featured: z.boolean(),
   isNew: z.boolean(),
   tags: z.array(z.string()),
+  seller: z.object({ slug: z.string(), name: z.string() }).nullable().default(null),
+  condition: z.enum(['new', 'like_new', 'good', 'used']).nullable().default(null),
   createdAt: z.string(),
 });
 
@@ -88,6 +90,8 @@ export function toProduct(raw: unknown): Product {
     relatedIds: [],
     tags: p.tags,
     status: 'published',
+    seller: p.seller,
+    condition: p.condition,
     createdAt: p.createdAt,
   };
 }

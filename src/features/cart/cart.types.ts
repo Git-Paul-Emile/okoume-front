@@ -34,4 +34,15 @@ export interface CartTotals {
   itemCount: number;
   codeError: string | null;
   pointsError: string | null;
+  /** Une commande par boutique du panier (32.4), calculée par l'API : qui vend, qui livre, frais */
+  shipments?: Shipment[];
+}
+
+export interface Shipment {
+  /** null : boutique Okoumé */
+  shop: { id: string; name: string | null } | null;
+  fulfilledBy: 'okoume' | 'seller';
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
 }

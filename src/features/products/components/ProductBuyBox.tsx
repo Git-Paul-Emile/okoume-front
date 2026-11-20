@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
-import { Bot, ShoppingBag, Truck } from 'lucide-react';
+import { Bot, ShoppingBag, Store, Truck } from 'lucide-react';
+import { Link } from 'react-router';
 import { useRef, useState } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +16,7 @@ import { formatPrice } from '@/utils/formatPrice';
 import { cn } from '@/utils/text';
 import { whatsappShareLink } from '@/utils/whatsapp';
 import type { Product, Variant } from '../products.types';
+import { conditionLabel } from '../products.utils';
 import {
   applyPromotion,
   availabilityLabel,
@@ -66,6 +68,26 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
         <span>Réf. {variant.sku}</span>
         {product.brand && <span>Marque : {product.brand}</span>}
       </div>
+
+      {/* Qui vend (32.1) : la boutique Okoumé ou la boutique d'un vendeur inscrit */}
+      <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <Store className="size-4 text-forest" aria-hidden />
+        {product.seller ? (
+          <>
+            Vendu par{' '}
+            <Link to={`/boutiques/${product.seller.slug}`} className="font-semibold text-forest hover:underline">
+              {product.seller.name}
+            </Link>
+          </>
+        ) : (
+          <span>
+            Vendu par <span className="font-semibold">Okoumé</span>
+          </span>
+        )}
+        {product.condition && product.condition !== 'new' && (
+          <Badge tone="neutral">{conditionLabel(product.condition)}</Badge>
+        )}
+      </p>
 
       <p className="mt-4 text-ink-soft">{product.shortDescription}</p>
 

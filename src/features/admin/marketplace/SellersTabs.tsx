@@ -271,16 +271,3 @@ export function ShopPaymentsTab() {
     />
   );
 }
-
-export function BoostsTab() {
-  return (
-    <DecisionList
-      kind="boosts"
-      fetch={adminMarketplaceBackend.boosts}
-      decide={adminMarketplaceBackend.decideBoost}
-      describe={(b) =>
-        `${b.shop.name} : « ${b.listing.title} », ${b.plan.name} (${b.plan.durationDays} jours)${b.endsAt ? `, jusqu’au ${formatDate(b.endsAt)}` : ''}`
-      }
-    />
-  );
-}

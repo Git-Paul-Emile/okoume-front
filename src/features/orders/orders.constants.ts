@@ -58,5 +58,5 @@ export const canCancelDirectly = (status: OrderStatus) => status === 'confirmed'
  * Numéro de commande tel que l'API le génère (CMD-2026-7KQ4XM, 6 caractères lisibles) ; les commandes de
  * départ gardent leurs 5 chiffres (CMD-2026-00147). Même règle que l'API (support.schemas.ts).
  */
-export const ORDER_NUMBER_PATTERN = /^CMD-\d{4}-[A-Z0-9]{5,6}$/i;
+export const ORDER_NUMBER_PATTERN = /^(?:CMD|PAN)-\d{4}-[A-Z0-9]{5,6}$/i;
 export const ORDER_NUMBER_EXAMPLE = 'CMD-2026-7KQ4XM';

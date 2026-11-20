@@ -20,31 +20,7 @@ const call = () => ({
   body: JSON.parse(String(fetchMock.mock.calls[0]![1].body ?? 'null')) as unknown,
 });
 
-const report = {
-  id: 'r1',
-  listing: { id: 'l1', slug: 'velo-vtt', title: 'Vélo VTT', shopName: 'Cycles Awa' },
-  reason: 'scam',
-  comment: '',
-  status: 'upheld',
-  decidedAt: 'x',
-  createdAt: 'y',
-};
-
-describe('modération de la place de marché', () => {
-  it('liste par défaut les annonces qui attendent une décision humaine', async () => {
-    fetchMock.mockResolvedValue(json({ items: [], total: 0, page: 1, limit: 20, hasNext: false }));
-    await adminMarketplaceBackend.listings('pending_moderation', 1);
-    expect(String(fetchMock.mock.calls[0]![0])).toBe(
-      'http://api.test/api/v1/staff/listings?limit=20&page=1&status=pending_moderation',
-    );
-  });
-
-  it('envoie une décision motivée sur une annonce et un classement de signalement', async () => {
-    fetchMock.mockResolvedValue(json(report));
-    await adminMarketplaceBackend.decideReport('r1', 'upheld');
-    expect(call()).toEqual({ route: 'PATCH /staff/listing-reports/r1', body: { status: 'upheld' } });
-  });
-
+describe('administration des boutiques de vendeurs', () => {
   it('refuse un paiement avec son motif, valide sans motif', async () => {
     fetchMock.mockResolvedValue(
       json({

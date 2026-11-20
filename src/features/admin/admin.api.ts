@@ -76,6 +76,8 @@ export const adminApi = {
   products: (signal?: AbortSignal) => adminCatalogBackend.products(signal),
   createProduct: (product: AdminProduct) => adminCatalogBackend.createProduct(product),
   /** priceReason : motif historisé par l'API pour chaque prix modifié */
+  moderateProduct: (id: Id, decision: 'approve' | 'request_changes' | 'reject', note: string, issues: string[]) =>
+    adminCatalogBackend.moderateProduct(id, decision, note, issues),
   updateProduct: (id: Id, patch: Partial<AdminProduct>, priceReason?: string) =>
     adminCatalogBackend.updateProduct(id, patch, priceReason),
 

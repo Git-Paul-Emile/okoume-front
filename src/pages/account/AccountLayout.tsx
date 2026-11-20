@@ -1,17 +1,5 @@
 import { motion } from 'motion/react';
-import {
-  Heart,
-  LayoutDashboard,
-  LifeBuoy,
-  LogOut,
-  MapPin,
-  MessageCircle,
-  Package,
-  Coins,
-  ShoppingBag,
-  Store,
-  User,
-} from 'lucide-react';
+import { Heart, LayoutDashboard, LifeBuoy, LogOut, MapPin, Package, Coins, Store, User } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { useCurrentUser, useLogout } from '@/features/auth/auth.queries';
@@ -21,8 +9,6 @@ import { cn } from '@/utils/text';
 const links = [
   { to: '/compte', label: 'Tableau de bord', icon: LayoutDashboard, end: true },
   { to: '/compte/commandes', label: 'Mes commandes', icon: Package },
-  { to: '/compte/demandes', label: 'Demandes aux vendeurs', icon: ShoppingBag },
-  { to: '/compte/messages', label: 'Messages', icon: MessageCircle },
   { to: '/vendeur', label: 'Espace vendeur', icon: Store },
   { to: '/compte/favoris', label: 'Mes favoris', icon: Heart },
   { to: '/compte/fidelite', label: 'Fidélité et parrainage', icon: Coins },

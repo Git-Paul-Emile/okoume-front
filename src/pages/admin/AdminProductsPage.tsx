@@ -18,10 +18,11 @@ import { matches } from '@/features/admin/admin.utils';
 import { useSelection } from '@/features/admin/useSelection';
 import { isPromotionActive } from '@/features/products/products.utils';
 import { missingCost } from '@/features/admin/product.builder';
+import { SellerProductReviewDialog } from '@/features/admin/components/SellerProductReviewDialog';
 import { toast } from '@/stores/toastStore';
 import { formatPrice } from '@/utils/formatPrice';
 
-type Filter = 'all' | 'published' | 'draft' | 'archived' | 'promo';
+type Filter = 'all' | 'published' | 'draft' | 'archived' | 'promo' | 'sellers' | 'review';
 
 const available = (p: AdminProduct) => p.variants.reduce((s, v) => s + Math.max(0, v.stock - v.reserved), 0);
 
@@ -44,7 +45,14 @@ export default function AdminProductsPage() {
 
   const catName = new Map(categories.map((c) => [c.id, c.name]));
   const inFilter = (p: AdminProduct, f: Filter) =>
-    f === 'all' || (f === 'promo' ? isPromotionActive(p.promotion) : p.status === f);
+    f === 'all' ||
+    (f === 'promo'
+      ? isPromotionActive(p.promotion)
+      : f === 'sellers'
+        ? !!p.seller
+        : f === 'review'
+          ? p.moderation === 'pending_moderation'
+          : p.status === f);
   const rows = products.filter(
     (p) =>
       inFilter(p, filter) &&
@@ -67,6 +75,7 @@ export default function AdminProductsPage() {
             <span className="block max-w-[260px] truncate font-semibold">{p.name}</span>
             <span className="block text-xs text-ink-muted">
               {p.sku} · {p.variants.length} variante{p.variants.length > 1 ? 's' : ''}
+              {p.seller ? ` · Boutique ${p.seller.name}` : ''}
             </span>
           </span>
         </span>
@@ -118,7 +127,7 @@ export default function AdminProductsPage() {
         <Switch
           checked={p.status === 'published'}
           onChange={() =>
-            p.status !== 'published' && missingCost(p)
+            p.status !== 'published' && !p.seller && missingCost(p)
               ? toast.error('Publication impossible', {
                   description: 'Renseignez le coût d’achat de chaque variante avant de publier ce produit.',
                 })
@@ -135,6 +144,8 @@ export default function AdminProductsPage() {
     draft: 'Brouillons',
     archived: 'Retirés',
     promo: 'En promotion',
+    sellers: 'Vendeurs',
+    review: 'À examiner',
     all: 'Tous',
   };
 
@@ -201,7 +212,12 @@ export default function AdminProductsPage() {
         onRowClick={open}
         empty="Aucun produit ne correspond."
       />
-      {selected && <ProductEditDialog key={selected.id} product={selected} onClose={close} />}
+      {selected &&
+        (selected.seller ? (
+          <SellerProductReviewDialog key={selected.id} product={selected} onClose={close} />
+        ) : (
+          <ProductEditDialog key={selected.id} product={selected} onClose={close} />
+        ))}
       {bulk && <BulkPriceDialog products={products} categories={categories} onClose={() => setBulk(false)} />}
       {importing && (
         <ImportCatalogDialog products={products} categories={categories} onClose={() => setImporting(false)} />

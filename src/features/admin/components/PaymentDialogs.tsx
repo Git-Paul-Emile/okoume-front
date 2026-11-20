@@ -6,6 +6,7 @@ import { paymentMethodLabel } from '@/features/orders/orders.constants';
 import type { PaymentMethod } from '@/features/orders/orders.types';
 import { formatPrice } from '@/utils/formatPrice';
 import type { AdminOrder } from '../admin.types';
+import type { CheckoutPaymentSummary } from '../adminOrders.backend';
 import {
   paidAmount,
   paymentError,
@@ -57,18 +58,21 @@ const ErrorText = ({ text }: { text: string }) =>
 /** Enregistrement d'un encaissement (8.4, 8.5) : montant, date, référence et observations. */
 export function RecordPaymentDialog({
   order,
+  checkout,
   loading,
   onClose,
   onConfirm,
 }: {
   order: AdminOrder;
+  checkout: CheckoutPaymentSummary | null;
   loading: boolean;
   onClose: () => void;
   onConfirm: (input: PaymentInput) => void;
 }) {
   const cash = order.paymentMethod === 'cash';
+  const amountDue = (checkout?.total ?? remainingAmount(order)) || order.totals.total;
   const [v, setV] = useState({
-    amount: String(remainingAmount(order) || order.totals.total),
+    amount: String(amountDue),
     at: localNow(),
     reference: '',
   });
@@ -79,7 +83,10 @@ export function RecordPaymentDialog({
       at: receivedAt(v.at, order.createdAt),
       reference: v.reference,
     };
-    const e = paymentError(order, input);
+    const e =
+      input.amount !== amountDue
+        ? `Le montant attendu est ${formatPrice(amountDue)}.`
+        : paymentError(order, input);
     if (e) return setError(e);
     onConfirm(input);
   };
@@ -88,7 +95,11 @@ export function RecordPaymentDialog({
       open
       onClose={onClose}
       title="Confirmer l’encaissement"
-      description={`Total ${formatPrice(order.totals.total)} · déjà reçu ${formatPrice(paidAmount(order))}. Saisissez le total exact : un paiement partiel est refusé.`}
+      description={
+        checkout
+          ? `Encaissement unique pour ${checkout.orders} commandes centralisées (${checkout.shops.join(', ')}). Total : ${formatPrice(amountDue)}.`
+          : `Total ${formatPrice(order.totals.total)} · déjà reçu ${formatPrice(paidAmount(order))}. Saisissez le total exact : un paiement partiel est refusé.`
+      }
     >
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">

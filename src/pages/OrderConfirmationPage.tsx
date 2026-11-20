@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { formatPrice } from '@/utils/formatPrice';
 import { Printer } from 'lucide-react';
 import { useLocation, useParams } from 'react-router';
 import { Button, ButtonLink } from '@/components/ui/Button';
@@ -54,13 +55,25 @@ export default function OrderConfirmationPage() {
       </div>
     );
 
+  const checkoutOrders = order.checkout?.length ? order.checkout : [order];
+  const centralOrders = checkoutOrders.filter((candidate) => candidate.fulfilledBy === 'okoume');
+  const sellerDeliveredOrders = checkoutOrders.filter((candidate) => candidate.fulfilledBy === 'seller');
+  const centralTotal = centralOrders.reduce((sum, candidate) => sum + candidate.totals.total, 0);
+  const hasCentralRoute = centralOrders.length > 0;
+
   // Tous les paiements se font à la livraison : mêmes étapes, seul le moyen de paiement change
   const steps = [
-    'Nous préparons votre commande.',
-    'Un livreur est attribué : vous recevez ses informations par e-mail.',
+    'Chaque boutique prépare les produits de sa sous-commande.',
+    ...(hasCentralRoute
+      ? ['Un livreur Okoumé collecte les commandes centralisées et les remet en une seule livraison.']
+      : ['La boutique organise la remise au client.']),
     order.paymentMethod === 'cash'
-      ? 'Vous payez en espèces à la réception.'
-      : 'Vous payez par Mobile Money à la réception, en présence du livreur.',
+      ? hasCentralRoute
+        ? `Vous réglez une fois ${formatPrice(centralTotal)} au livreur Okoumé, puis les vendeurs indépendants séparément.`
+        : 'Vous réglez à la livraison.'
+      : hasCentralRoute
+        ? `Vous réglez une fois ${formatPrice(centralTotal)} par Mobile Money au livreur Okoumé, puis les vendeurs indépendants séparément.`
+        : 'Vous réglez par Mobile Money à la livraison.',
   ];
 
   return (
@@ -77,8 +90,8 @@ export default function OrderConfirmationPage() {
             </p>
             <div className="mx-auto mt-5 grid max-w-md grid-cols-2 gap-3 text-left">
               <div className="rounded-md bg-ivory p-3">
-                <p className="text-xs text-ink-muted">Numéro de commande</p>
-                <p className="font-mono text-lg font-bold">{order.number}</p>
+                <p className="text-xs text-ink-muted">{order.checkoutNumber ? 'Numéro du panier' : 'Numéro de commande'}</p>
+                <p className="font-mono text-lg font-bold">{order.checkoutNumber ?? order.number}</p>
               </div>
               <div className="rounded-md bg-ivory p-3">
                 <p className="text-xs text-ink-muted">Code de suivi</p>
@@ -91,7 +104,41 @@ export default function OrderConfirmationPage() {
           </motion.div>
         </div>
 
-        <PaymentInstructions order={order} settings={settings} />
+        {/* Le numéro de passage en caisse relie les sous-commandes du même panier. */}
+        {order.checkout && order.checkout.length > 1 && (
+          <div className="card p-6">
+            <h2 className="text-lg">Votre panier regroupe {order.checkout.length} sous-commandes</h2>
+            <p className="mt-1 text-sm text-ink-soft">
+              {hasCentralRoute
+                ? `Les commandes centralisées sont regroupées sur une tournée et un paiement de ${formatPrice(centralTotal)}.`
+                : 'Chaque boutique organise sa propre remise.'}
+              {sellerDeliveredOrders.length > 0 && ' Les boutiques qui livrent elles-mêmes restent indépendantes.'}
+            </p>
+            <ul className="mt-4 divide-y divide-sage text-sm">
+              {order.checkout.map((o) => (
+                <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <span>
+                    <span className="block font-semibold">{o.shop ? `Boutique ${o.shop.name}` : 'OKOUMÉ'}</span>
+                    <span className="text-ink-muted">
+                      {o.fulfilledBy === 'seller' ? 'Livrée par la boutique, paiement séparé' : 'Collecte OKOUMÉ'} · total{' '}
+                      {formatPrice(o.totals.total)}
+                    </span>
+                  </span>
+                  <span className="text-right font-mono">
+                    <span className="block font-bold">Sous-commande {o.number}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <PaymentInstructions
+          order={order}
+          settings={settings}
+          amount={hasCentralRoute ? centralTotal : order.totals.total}
+          reference={hasCentralRoute ? (order.checkoutNumber ?? order.number) : order.number}
+        />
 
         <div className="card p-6">
           <h2 className="text-lg">Prochaines étapes</h2>
@@ -109,7 +156,9 @@ export default function OrderConfirmationPage() {
 
         <div className="card p-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-lg">Récapitulatif de commande</h2>
+            <h2 className="text-lg">
+              {order.checkout && order.checkout.length > 1 ? `Détail de la sous-commande ${order.number}` : 'Récapitulatif de commande'}
+            </h2>
             <p className="text-xs text-ink-muted">
               Passée le {formatDateTime(order.createdAt)} · Ce document n’est pas une facture.
             </p>
@@ -127,7 +176,9 @@ export default function OrderConfirmationPage() {
           <Button variant="outline" icon={<Printer className="size-4" />} onClick={() => window.print()}>
             Imprimer ou enregistrer en PDF
           </Button>
-          <ButtonLink to={`/suivi?numero=${order.number}`}>Suivre ma commande</ButtonLink>
+          <ButtonLink to={`/suivi?numero=${encodeURIComponent(order.checkoutNumber ?? order.number)}`}>
+            Suivre ma commande
+          </ButtonLink>
           <ButtonLink to="/catalogue" variant="ghost">
             Continuer mes achats
           </ButtonLink>

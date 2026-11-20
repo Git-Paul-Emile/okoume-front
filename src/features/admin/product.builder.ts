@@ -132,6 +132,8 @@ export function buildProduct(
     relatedIds: [],
     tags: [slugify(form.name).split('-')[0]].filter(Boolean),
     status: form.publish ? 'published' : 'draft',
+    seller: null,
+    condition: null,
     createdAt: now.toISOString(),
   };
 }

@@ -120,5 +120,26 @@ export interface Order {
   paymentMethodHistory?: Array<{ method: PaymentMethod; until: string }>;
   deliveryDispute?: DeliveryDispute | null;
   deliveryFeeChange?: DeliveryFeeChange | null;
+  /** Boutique qui vend (32.4) ; null pour la boutique Okoumé */
+  shop: { slug: string; name: string } | null;
+  /** Passage en caisse commun aux commandes d'un même panier */
+  checkoutNumber: string | null;
+  /** Qui livre (32.5) : les livreurs Okoumé ou le vendeur */
+  fulfilledBy: 'okoume' | 'seller';
+  /** Confirmation de remise au livreur pour cet arrêt de la tournée centralisée */
+  collectionConfirmedAt: string | null;
+  collectionConfirmedBy: string | null;
+  /** Juste après la commande : toutes les commandes du même panier, celle-ci comprise */
+  checkout?: Order[];
+  /** Sous-commandes agrégées pour le suivi global sans compte */
+  trackedOrders?: Array<{
+    number: string;
+    shopName: string;
+    status: OrderStatus;
+    paymentStatus: PaymentStatus;
+    fulfilledBy: 'okoume' | 'seller';
+    total: number;
+    collectionConfirmedAt: string | null;
+  }>;
   createdAt: string;
 }

@@ -12,12 +12,7 @@ import { useAdminAuthStore } from '@/stores/adminAuthStore';
 import { toast } from '@/stores/toastStore';
 import { formatPrice } from '@/utils/formatPrice';
 import { useAdminMutation } from '../admin.queries';
-import {
-  adminMarketplaceBackend,
-  type MarketplaceSettings,
-  type StaffAccessPlan,
-  type StaffBoostPlan,
-} from '../adminMarketplace.backend';
+import { adminMarketplaceBackend, type MarketplaceSettings, type StaffAccessPlan } from '../adminMarketplace.backend';
 import { can } from '../permissions';
 
 const int = (v: string) => {
@@ -136,106 +131,22 @@ function AccessPlanDialog({ plan, onClose }: { plan: StaffAccessPlan | null; onC
   );
 }
 
-function BoostPlanDialog({ plan, onClose }: { plan: StaffBoostPlan | null; onClose: () => void }) {
-  const [v, setV] = useState({
-    name: plan?.name ?? '',
-    description: plan?.description ?? '',
-    durationDays: String(plan?.durationDays ?? 7),
-    price: String(plan?.price ?? ''),
-    active: plan?.active ?? true,
-    position: String(plan?.position ?? 0),
-  });
-  const [error, setError] = useState('');
-  const save = useAdminMutation(
-    (p: Omit<StaffBoostPlan, 'id'>) => adminMarketplaceBackend.saveBoostPlan(p, plan?.id ?? null),
-    (p) => `Mise en avant ${p.name} enregistrée`,
-  );
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    const durationDays = int(v.durationDays);
-    const price = int(v.price);
-    const position = int(v.position);
-    if (v.name.trim().length < 2) return setError('Nom trop court.');
-    if (!durationDays || !price || position === null)
-      return setError('Durée, prix et ordre : nombres entiers positifs.');
-    save.mutate(
-      { name: v.name.trim(), description: v.description.trim(), durationDays, price, active: v.active, position },
-      { onSuccess: onClose, onError: (err) => setError(getErrorMessage(err)) },
-    );
-  };
-
-  return (
-    <Modal open onClose={onClose} title={plan ? `Modifier ${plan.name}` : 'Nouvelle offre de mise en avant'}>
-      <form onSubmit={submit} noValidate className="space-y-3">
-        <TextField label="Nom" value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} />
-        <TextAreaField
-          label="Description"
-          optional
-          rows={2}
-          value={v.description}
-          onChange={(e) => setV({ ...v, description: e.target.value })}
-        />
-        <div className="grid grid-cols-3 gap-3">
-          <TextField
-            label="Durée (jours)"
-            inputMode="numeric"
-            value={v.durationDays}
-            onChange={(e) => setV({ ...v, durationDays: e.target.value })}
-          />
-          <TextField
-            label="Prix (FCFA)"
-            inputMode="numeric"
-            value={v.price}
-            onChange={(e) => setV({ ...v, price: e.target.value })}
-          />
-          <TextField
-            label="Ordre"
-            inputMode="numeric"
-            value={v.position}
-            onChange={(e) => setV({ ...v, position: e.target.value })}
-          />
-        </div>
-        <Checkbox
-          label="Proposée aux vendeurs"
-          checked={v.active}
-          onChange={(e) => setV({ ...v, active: e.target.checked })}
-        />
-        {error && <p className="text-sm font-medium text-danger">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button type="submit" loading={save.isPending}>
-            Enregistrer
-          </Button>
-        </div>
-      </form>
-    </Modal>
-  );
-}
-
 const SETTINGS_FIELDS: Array<{ key: keyof MarketplaceSettings; label: string; hint: string }> = [
-  { key: 'graceDays', label: 'Délai de grâce (jours)', hint: 'Annonces encore visibles après l’échéance de l’offre.' },
+  { key: 'graceDays', label: 'Délai de grâce (jours)', hint: 'Produits encore visibles après l’échéance de l’offre.' },
   {
     key: 'reminderDays',
     label: 'Rappel avant échéance (jours)',
     hint: 'Le vendeur est prévenu ce nombre de jours avant.',
   },
   {
-    key: 'agreementValidityHours',
-    label: 'Validité d’un prix convenu (heures)',
-    hint: 'Durée pendant laquelle le prix négocié s’applique.',
-  },
-  {
     key: 'aiReviewMonthlyLimit',
     label: 'Vérifications automatiques par mois',
-    hint: 'Au-delà, les annonces vont en modération humaine.',
+    hint: 'Au-delà, les produits vont en vérification humaine.',
   },
   {
-    key: 'aiChatMonthlyLimit',
-    label: 'Réponses automatiques du tchat par mois',
-    hint: 'Au-delà, le vendeur répond lui-même.',
+    key: 'commissionRate',
+    label: 'Commission sur les ventes des vendeurs (%)',
+    hint: 'Retenue sur ce qu’un livreur Okoumé encaisse pour un vendeur, hors frais de livraison.',
   },
 ];
 
@@ -244,8 +155,7 @@ function SettingsForm({ settings, editable }: { settings: MarketplaceSettings; e
     graceDays: String(settings.graceDays),
     reminderDays: String(settings.reminderDays),
     aiReviewMonthlyLimit: String(settings.aiReviewMonthlyLimit),
-    agreementValidityHours: String(settings.agreementValidityHours),
-    aiChatMonthlyLimit: String(settings.aiChatMonthlyLimit),
+    commissionRate: String(settings.commissionRate),
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const save = useAdminMutation(adminMarketplaceBackend.updateSettings, 'Réglages de la place de marché enregistrés');
@@ -291,7 +201,7 @@ function SettingsForm({ settings, editable }: { settings: MarketplaceSettings; e
   );
 }
 
-/** Offres d'accès, offres de mise en avant et réglages de la place de marché. */
+/** Offres d'accès des boutiques et réglages des vendeurs. */
 export function OffersTab() {
   const admin = useAdminAuthStore((s) => s.admin);
   const editable = can(admin, 'vendeurs:modifier');
@@ -299,20 +209,14 @@ export function OffersTab() {
     queryKey: ['admin', 'marketplace', 'access-plans'],
     queryFn: ({ signal }) => adminMarketplaceBackend.accessPlans(signal),
   });
-  const boostPlans = useQuery({
-    queryKey: ['admin', 'marketplace', 'boost-plans'],
-    queryFn: ({ signal }) => adminMarketplaceBackend.boostPlans(signal),
-  });
   const settings = useQuery({
     queryKey: ['admin', 'marketplace', 'settings'],
     queryFn: ({ signal }) => adminMarketplaceBackend.settings(signal),
   });
   const [accessDialog, setAccessDialog] = useState<StaffAccessPlan | 'new' | null>(null);
-  const [boostDialog, setBoostDialog] = useState<StaffBoostPlan | 'new' | null>(null);
 
-  if (plans.isLoading || boostPlans.isLoading || settings.isLoading) return <PageLoader />;
-  if (!plans.data || !boostPlans.data || !settings.data)
-    return <ErrorState error={plans.error ?? boostPlans.error ?? settings.error} />;
+  if (plans.isLoading || settings.isLoading) return <PageLoader />;
+  if (!plans.data || !settings.data) return <ErrorState error={plans.error ?? settings.error} />;
 
   return (
     <div className="space-y-6">
@@ -346,41 +250,10 @@ export function OffersTab() {
         </ul>
       </section>
 
-      <section className="card space-y-3 p-5">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg">Offres de mise en avant</h2>
-          {editable && (
-            <Button size="sm" onClick={() => setBoostDialog('new')}>
-              Nouvelle offre
-            </Button>
-          )}
-        </div>
-        <ul className="divide-y divide-sage text-sm">
-          {boostPlans.data.map((p) => (
-            <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-              <span>
-                <strong>{p.name}</strong> : {p.durationDays} jours, {formatPrice(p.price)}
-              </span>
-              <span className="flex items-center gap-2">
-                {!p.active && <Badge>Retirée</Badge>}
-                {editable && (
-                  <Button size="sm" variant="ghost" onClick={() => setBoostDialog(p)}>
-                    Modifier
-                  </Button>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <SettingsForm settings={settings.data} editable={editable} />
 
       {accessDialog && (
         <AccessPlanDialog plan={accessDialog === 'new' ? null : accessDialog} onClose={() => setAccessDialog(null)} />
-      )}
-      {boostDialog && (
-        <BoostPlanDialog plan={boostDialog === 'new' ? null : boostDialog} onClose={() => setBoostDialog(null)} />
       )}
     </div>
   );

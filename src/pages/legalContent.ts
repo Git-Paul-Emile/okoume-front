@@ -43,7 +43,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
           heading: 'Objet et champ d’application',
           body: [
             `Les présentes conditions régissent les ventes conclues sur le site ${brand.name} entre ${company} (« la boutique ») et toute personne qui achète, avec ou sans compte client. Elles sont acceptées à chaque commande ; la version applicable est celle en vigueur au jour de la commande.`,
-            `Les annonces de la place de marché sont publiées par des vendeurs indépendants : la vente est alors conclue entre l’acheteur et le vendeur, sous les conditions de ce dernier. ${brand.name} met en relation, vérifie les annonces et assure la messagerie, mais n’est pas le vendeur.`,
+            `Des vendeurs indépendants, inscrits sur ${brand.name}, y publient aussi leurs produits. Chaque fiche indique la boutique qui vend. Un panier qui réunit plusieurs boutiques donne une commande par boutique : chacune est préparée par sa boutique, livrée par les livreurs de ${brand.name} ou par le vendeur, et payée à la livraison. Pour les produits d’un vendeur, le vendeur est responsable du produit ; ${brand.name} vérifie les produits avant publication, encaisse pour le vendeur quand ses livreurs livrent, et arbitre les litiges.`,
           ],
         },
         {
@@ -62,21 +62,21 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Commande',
           body: [
-            'La commande est conclue après le récapitulatif, l’acceptation des présentes conditions et la confirmation. Un numéro de commande et un code de suivi vous sont communiqués, ainsi qu’un e-mail de confirmation. Le récapitulatif n’est pas une facture : la facture est émise au paiement.',
+            'La commande est conclue après le récapitulatif, l’acceptation des présentes conditions et la confirmation. Pour un panier multi-boutiques, un numéro global relie les sous-commandes de chaque boutique ; un code de suivi commun et un e-mail récapitulatif vous sont communiqués. Le récapitulatif n’est pas une facture : la facture est émise au paiement.',
             'La boutique peut demander une vérification avant de préparer une commande inhabituelle (montant, quantités, commandes répétées). Elle peut annuler une commande en cas de fraude avérée ou de produit indisponible ; toute somme versée est alors remboursée.',
           ],
         },
         {
           heading: 'Paiement',
           body: [
-            'Tous les paiements se font à la livraison, au livreur : en espèces, par Airtel Money ou par Moov Money. Aucun paiement n’est demandé avant la livraison. Pour le Mobile Money, vous envoyez le montant depuis votre téléphone au moment de la réception, au numéro de la boutique, avec le numéro de commande en référence.',
-            'Seul le montant exact de la commande est accepté. La facture est émise une fois le paiement enregistré par la boutique.',
+            'Tous les paiements se font à la livraison : en espèces, par Airtel Money ou par Moov Money. Aucun paiement n’est demandé avant la livraison. Pour les sous-commandes confiées au livreur OKOUMÉ, le paiement est regroupé et réglé une fois à la réception. Les boutiques qui livrent elles-mêmes encaissent leur sous-commande séparément. Pour le Mobile Money, utilisez la référence de panier ou de commande indiquée au récapitulatif.',
+            'Seul le montant exact dû pour la livraison concernée est accepté. La facture est émise une fois le paiement enregistré par la boutique.',
           ],
         },
         {
           heading: 'Livraison',
           body: [
-            'La livraison est assurée dans les quartiers proposés, par des livreurs partenaires, à l’adresse et au repère indiqués. Les frais sont fixés par quartier ; les délais sont indicatifs. En cas d’absence, une nouvelle tentative ou l’annulation vous est proposée.',
+            'Pour les commandes centralisées, un livreur OKOUMÉ collecte les produits dans les boutiques concernées et les remet en une seule livraison à l’adresse indiquée. Une boutique peut aussi organiser indépendamment la livraison de sa sous-commande. Les frais sont affichés avant la confirmation ; les délais sont indicatifs. En cas d’absence, une nouvelle tentative ou l’annulation vous est proposée.',
             'Les risques sont transférés à la remise du colis. Vérifiez le colis en présence du livreur et signalez tout dommage depuis votre compte ou la page Contact dans les meilleurs délais.',
           ],
         },
@@ -120,7 +120,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Données collectées',
           body: [
-            'Commande : nom, téléphone, adresse e-mail, quartier, repère et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes, points de fidélité, préférences de notification. Assistance : vos messages et les photos jointes. Place de marché : annonces, demandes et messages échangés.',
+            'Commande : nom, téléphone, adresse e-mail, quartier, repère et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes, points de fidélité, préférences de notification. Assistance : vos messages et les photos jointes. Commande auprès d’une boutique de vendeur : les informations nécessaires à la préparation et à la livraison (nom, téléphone, quartier, repère, consignes) sont transmises à ce vendeur.',
             'Le mot de passe n’est jamais conservé en clair. Aucune donnée de carte bancaire n’est collectée : les paiements Mobile Money se font hors du site.',
           ],
         },
@@ -134,13 +134,13 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
           heading: 'Destinataires et sous-traitants',
           body: [
             'Vos données sont traitées par l’équipe habilitée de la boutique, chacun selon son rôle. Le livreur reçoit uniquement ce qui est nécessaire à la livraison. Vos données ne sont jamais vendues.',
-            'Prestataires techniques, liés par contrat : hébergement du site (Vercel) et de l’API (Render), base de données (Neon), envoi des e-mails (Resend), images (Cloudinary), suivi des erreurs (Sentry), et pour la place de marché, vérification des annonces et assistant de messagerie par intelligence artificielle (Google Gemini ou Anthropic). Ces prestataires peuvent héberger les données hors du Gabon, notamment aux États-Unis ou dans l’Union européenne ; la boutique encadre ces transferts par des engagements contractuels de protection.',
+            'Prestataires techniques, liés par contrat : hébergement du site (Vercel) et de l’API (Render), base de données (Neon), envoi des e-mails (Resend), images (Cloudinary), suivi des erreurs (Sentry), et intelligence artificielle pour l’assistant d’achat et la vérification des produits des vendeurs (Google Gemini ou Anthropic). Ces prestataires peuvent héberger les données hors du Gabon, notamment aux États-Unis ou dans l’Union européenne ; la boutique encadre ces transferts par des engagements contractuels de protection.',
           ],
         },
         {
           heading: 'Assistants automatisés',
           body: [
-            'L’assistant d’achat n’accède qu’aux informations publiques du catalogue. Sur la place de marché, les annonces et les messages peuvent être analysés par un service d’intelligence artificielle pour vérifier leur conformité et proposer des réponses ; une décision défavorable sur une annonce peut être revue par l’équipe. Ne communiquez jamais de mot de passe ni de code reçu.',
+            'L’assistant d’achat n’accède qu’aux informations publiques du catalogue. Les produits proposés par les vendeurs peuvent être analysés par un service d’intelligence artificielle pour vérifier leur conformité avant publication ; un refus est toujours décidé par une personne de l’équipe. Ne communiquez jamais de mot de passe ni de code reçu.',
           ],
         },
         {
@@ -191,7 +191,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Propriété intellectuelle',
           body: [
-            `La structure du site, ses textes, logos et visuels sont la propriété de ${company} ou de ses partenaires. Toute reproduction sans autorisation est interdite. Les marques citées appartiennent à leurs titulaires ; les annonces de la place de marché engagent leurs auteurs.`,
+            `La structure du site, ses textes, logos et visuels sont la propriété de ${company} ou de ses partenaires. Toute reproduction sans autorisation est interdite. Les marques citées appartiennent à leurs titulaires ; les fiches des produits des vendeurs engagent leurs auteurs.`,
           ],
         },
         {

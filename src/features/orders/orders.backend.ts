@@ -103,12 +103,21 @@ const orderDto = z.object({
       createdAt: z.string(),
     })
     .nullable(),
+  shop: z.object({ slug: z.string(), name: z.string() }).nullable().default(null),
+  checkoutNumber: z.string().nullable().default(null),
+  fulfilledBy: z.enum(['okoume', 'seller']).default('okoume'),
+  collectionConfirmedAt: z.string().nullable().default(null),
+  collectionConfirmedBy: z.string().nullable().default(null),
   createdAt: z.string(),
 });
+
+/** Réponse du passage de commande : la première commande, et toutes celles du même panier (une par boutique). */
+const placedDto = orderDto.extend({ checkout: z.array(z.unknown()).default([]) });
 
 /** Suivi sans compte : l'API ne renvoie ni les coordonnées du client ni l'identifiant de la commande. */
 const trackingDto = z.object({
   number: z.string(),
+  checkoutNumber: z.string().nullable().default(null),
   status,
   history,
   items: z.array(item),
@@ -117,6 +126,19 @@ const trackingDto = z.object({
   paymentStatus,
   createdAt: z.string(),
   zoneName: z.string(),
+  orders: z
+    .array(
+      z.object({
+        number: z.string(),
+        shopName: z.string(),
+        status,
+        paymentStatus,
+        fulfilledBy: z.enum(['okoume', 'seller']),
+        total: z.number(),
+        collectionConfirmedAt: z.string().nullable(),
+      }),
+    )
+    .default([]),
 });
 
 const quoteDto = z.object({
@@ -134,6 +156,17 @@ const quoteDto = z.object({
     codeError: z.string().nullable(),
     pointsError: z.string().nullable(),
   }),
+  shipments: z
+    .array(
+      z.object({
+        shop: z.object({ id: z.string(), name: z.string().nullable() }).nullable(),
+        fulfilledBy: z.enum(['okoume', 'seller']),
+        subtotal: z.number(),
+        deliveryFee: z.number(),
+        total: z.number(),
+      }),
+    )
+    .default([]),
 });
 
 /**
@@ -158,6 +191,11 @@ export function toOrder(raw: unknown, ownerId: Id | null): Order {
     history: o.history,
     cancellationRequest: o.cancellationRequest,
     returnRequest: null,
+    shop: o.shop,
+    checkoutNumber: o.checkoutNumber,
+    fulfilledBy: o.fulfilledBy,
+    collectionConfirmedAt: o.collectionConfirmedAt,
+    collectionConfirmedBy: o.collectionConfirmedBy,
     deliveryFeeChange: o.deliveryFeeChange && {
       from: o.deliveryFeeChange.fromFee,
       to: o.deliveryFeeChange.toFee,
@@ -193,6 +231,12 @@ export function toTrackedOrder(raw: unknown): Order {
     history: o.history,
     cancellationRequest: null,
     returnRequest: null,
+    shop: null,
+    checkoutNumber: o.checkoutNumber,
+    fulfilledBy: 'okoume',
+    collectionConfirmedAt: null,
+    collectionConfirmedBy: null,
+    trackedOrders: o.orders,
     createdAt: o.createdAt,
   };
 }
@@ -206,7 +250,7 @@ export interface QuoteRequest {
 
 /** Totaux du panier calculés par l'API ; le nombre d'articles reste compté sur l'appareil. */
 export async function quote(request: QuoteRequest, signal?: AbortSignal): Promise<CartTotals> {
-  const { totals: t } = quoteDto.parse(
+  const { totals: t, shipments } = quoteDto.parse(
     await backend.post(
       '/checkout/quotes',
       {
@@ -218,7 +262,7 @@ export async function quote(request: QuoteRequest, signal?: AbortSignal): Promis
       signal,
     ),
   );
-  return { ...t, itemCount: request.lines.reduce((s, l) => s + l.quantity, 0) };
+  return { ...t, shipments, itemCount: request.lines.reduce((s, l) => s + l.quantity, 0) };
 }
 
 export interface PlaceOrderRequest {
@@ -336,7 +380,8 @@ export const ordersBackend = {
       ...(request.promoCode ? { promoCode: request.promoCode } : {}),
       points: request.points,
     });
-    return toOrder(raw, ownerId);
+    const { checkout } = placedDto.parse(raw);
+    return { ...toOrder(raw, ownerId), checkout: checkout.map((o) => toOrder(o, ownerId)) };
   },
 
   /** Commandes du compte sur les 3 dernières années, de la plus récente à la plus ancienne. */

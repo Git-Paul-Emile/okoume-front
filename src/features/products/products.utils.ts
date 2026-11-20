@@ -51,3 +51,8 @@ export const availabilityLabel: Record<Availability, string> = {
   low_stock: 'Stock limité',
   out_of_stock: 'Indisponible',
 };
+
+const CONDITION_LABELS = { new: 'Neuf', like_new: 'Comme neuf', good: 'Bon état', used: 'Usé' } as const;
+
+/** Libellé de l'état d'un produit de vendeur (32.3). */
+export const conditionLabel = (condition: keyof typeof CONDITION_LABELS) => CONDITION_LABELS[condition];

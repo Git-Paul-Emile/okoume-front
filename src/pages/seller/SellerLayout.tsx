@@ -13,9 +13,10 @@ import { cn } from '@/utils/text';
 
 const links = [
   { to: '/vendeur', label: 'Tableau de bord', end: true },
-  { to: '/vendeur/annonces', label: 'Annonces' },
-  { to: '/vendeur/demandes', label: 'Demandes' },
-  { to: '/vendeur/messages', label: 'Messages' },
+  { to: '/vendeur/produits', label: 'Produits' },
+  { to: '/vendeur/commandes', label: 'Commandes' },
+  { to: '/vendeur/livraison', label: 'Livraison' },
+  { to: '/vendeur/reversements', label: 'Reversements' },
   { to: '/vendeur/boutique', label: 'Boutique et offre' },
 ];
 
@@ -34,8 +35,8 @@ function OpenShop() {
       <div className="card mx-auto max-w-2xl p-6 sm:p-8">
         <h1 className="text-2xl">Ouvrir ma boutique</h1>
         <p className="mt-1.5 mb-6 text-ink-soft">
-          Vendez vos articles et services sur Okoumé. Les acheteurs vous contactent par le tchat et vous réglez la vente
-          directement avec eux.
+          Vendez vos produits sur Okoumé. Ils sont publiés avec le nom de votre boutique ; vous recevez et gérez vos
+          commandes, livrées par Okoumé ou par vous-même, et payées par le client à la livraison.
         </p>
         <ShopForm
           initial={{
@@ -105,13 +106,13 @@ export default function SellerLayout() {
   const { access, status, suspensionReason } = shop.data;
   const warning =
     status === 'suspended'
-      ? `Boutique suspendue${suspensionReason ? ` : ${suspensionReason}` : ''}. Vos annonces ne sont plus visibles.`
+      ? `Boutique suspendue${suspensionReason ? ` : ${suspensionReason}` : ''}. Vos produits ne sont plus visibles.`
       : access.state === 'awaiting_payment'
-        ? 'Votre offre attend son paiement : vos annonces ne sont pas encore visibles.'
+        ? 'Votre offre attend son paiement : vos produits ne sont pas encore visibles.'
         : access.state === 'grace'
-          ? `Votre accès est échu. Vos annonces restent visibles jusqu’au ${access.graceEndsAt ? formatDate(access.graceEndsAt) : 'terme du délai de grâce'} : renouvelez votre offre.`
+          ? `Votre accès est échu. Vos produits restent visibles jusqu’au ${access.graceEndsAt ? formatDate(access.graceEndsAt) : 'terme du délai de grâce'} : renouvelez votre offre.`
           : access.state === 'expired'
-            ? 'Votre accès a expiré : vos annonces sont masquées jusqu’au renouvellement.'
+            ? 'Votre accès a expiré : vos produits sont masqués jusqu’au renouvellement.'
             : null;
 
   return (

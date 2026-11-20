@@ -4,12 +4,7 @@ import { apiFieldErrors } from '@/api/backend';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, TextAreaField, TextField } from '@/components/ui/TextField';
 import { gabonPhone } from '@/features/auth/auth.schemas';
-import {
-  HANDOVER_MODES,
-  PAYMENT_METHODS,
-  handoverLabel,
-  paymentLabel,
-} from '@/features/marketplace/marketplace.backend';
+import { HANDOVER_MODES, PAYMENT_METHODS, handoverLabel, paymentLabel } from '@/features/seller/seller.backend';
 import type { ShopFields } from '../seller.backend';
 
 const toggle = <T,>(list: T[], value: T, on: boolean) => (on ? [...list, value] : list.filter((v) => v !== value));

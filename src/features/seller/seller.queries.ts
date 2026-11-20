@@ -1,16 +1,12 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { sellerProductsBackend, type SellerProductModeration } from './sellerProducts.backend';
+import { sellerOrdersBackend } from './sellerOrders.backend';
+import type { OrderStatus } from '@/features/orders/orders.types';
 import type { Id } from '@/api/types';
-import type { ChatSource } from '@/features/marketplace/useChat';
-import { sellerBackend, type ListingFields, type SellerListingStatus } from './seller.backend';
+import { sellerBackend } from './seller.backend';
 
 /** Toutes les données de l'espace vendeur sont sous cette clé : une action les rafraîchit ensemble. */
 const SELLER = 'seller';
-
-export const sellerChat: ChatSource = {
-  scope: 'seller',
-  get: sellerBackend.conversation,
-  send: sellerBackend.send,
-};
 
 export function useSellerShop() {
   return useQuery({
@@ -42,62 +38,6 @@ export function useSellerDashboard() {
   });
 }
 
-export function useSellerListings(status: SellerListingStatus | undefined, page: number) {
-  return useQuery({
-    queryKey: [SELLER, 'listings', status ?? 'all', page],
-    queryFn: ({ signal }) => sellerBackend.listings(status, page, signal),
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function useSellerListing(id: Id | undefined) {
-  return useQuery({
-    queryKey: [SELLER, 'listing', id],
-    queryFn: ({ signal }) => sellerBackend.listing(id!, signal),
-    enabled: !!id,
-  });
-}
-
-export function useListingStats(id: Id | undefined, published: boolean) {
-  return useQuery({
-    queryKey: [SELLER, 'listing-stats', id],
-    queryFn: ({ signal }) => sellerBackend.listingStats(id!, signal),
-    enabled: !!id && published,
-  });
-}
-
-export function useSellerRequests(page: number) {
-  return useQuery({
-    queryKey: [SELLER, 'requests', page],
-    queryFn: ({ signal }) => sellerBackend.requests(page, signal),
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function useSellerConversations(needsSeller: boolean, page: number) {
-  return useQuery({
-    queryKey: ['conversations', 'seller', 'list', needsSeller, page],
-    queryFn: ({ signal }) => sellerBackend.conversations(needsSeller, page, signal),
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function useBoostPlans() {
-  return useQuery({
-    queryKey: ['boost-plans'],
-    queryFn: ({ signal }) => sellerBackend.boostPlans(signal),
-    staleTime: 10 * 60_000,
-  });
-}
-
-export function useBoosts(page: number) {
-  return useQuery({
-    queryKey: [SELLER, 'boosts', page],
-    queryFn: ({ signal }) => sellerBackend.boosts(page, signal),
-    placeholderData: keepPreviousData,
-  });
-}
-
 /** Action du vendeur : toutes les données de l'espace vendeur sont relues ensuite. */
 export function useSellerAction<V, R>(fn: (vars: V) => Promise<R>) {
   const qc = useQueryClient();
@@ -107,7 +47,48 @@ export function useSellerAction<V, R>(fn: (vars: V) => Promise<R>) {
   });
 }
 
-export const useSaveListing = () =>
-  useSellerAction(({ id, fields }: { id: Id | null; fields: ListingFields }) =>
-    id ? sellerBackend.updateListing(id, fields) : sellerBackend.createListing(fields),
-  );
+/** Produits de la boutique (32.3), filtrables par état de vérification. */
+export function useSellerProducts(moderation: SellerProductModeration | undefined, page: number) {
+  return useQuery({
+    queryKey: [SELLER, 'products', moderation ?? 'all', page],
+    queryFn: ({ signal }) => sellerProductsBackend.list(moderation, page, signal),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useSellerProduct(id: Id | undefined) {
+  return useQuery({
+    queryKey: [SELLER, 'product', id],
+    queryFn: ({ signal }) => sellerProductsBackend.get(id!, signal),
+    enabled: !!id,
+  });
+}
+
+/** Commandes reçues par la boutique (32.4), filtrables par état. */
+export function useSellerOrders(status: OrderStatus | undefined, page: number) {
+  return useQuery({
+    queryKey: [SELLER, 'orders', status ?? 'all', page],
+    queryFn: ({ signal }) => sellerOrdersBackend.list(status, page, signal),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useSellerOrder(id: Id | undefined) {
+  return useQuery({
+    queryKey: [SELLER, 'order', id],
+    queryFn: ({ signal }) => sellerOrdersBackend.get(id!, signal),
+    enabled: !!id,
+  });
+}
+
+export function useShopDelivery() {
+  return useQuery({ queryKey: [SELLER, 'delivery'], queryFn: ({ signal }) => sellerOrdersBackend.delivery(signal) });
+}
+
+export function useSellerPayouts(page: number) {
+  return useQuery({
+    queryKey: [SELLER, 'payouts', page],
+    queryFn: ({ signal }) => sellerOrdersBackend.payouts(page, signal),
+    placeholderData: keepPreviousData,
+  });
+}

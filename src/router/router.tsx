@@ -21,19 +21,16 @@ const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const InvoicePage = lazy(() => import('@/pages/InvoicePage'));
-const ListingsPage = lazy(() => import('@/pages/ListingsPage'));
-const ListingPage = lazy(() => import('@/pages/ListingPage'));
-const AccountRequestsPage = lazy(() => import('@/pages/account/AccountRequestsPage'));
-const AccountConversationsPage = lazy(() => import('@/pages/account/AccountConversationsPage'));
-const AccountConversationPage = lazy(() => import('@/pages/account/AccountConversationPage'));
+const ShopPage = lazy(() => import('@/pages/ShopPage'));
 const SellerLayout = lazy(() => import('@/pages/seller/SellerLayout'));
 const SellerDashboardPage = lazy(() => import('@/pages/seller/SellerDashboardPage'));
 const SellerShopPage = lazy(() => import('@/pages/seller/SellerShopPage'));
-const SellerListingsPage = lazy(() => import('@/pages/seller/SellerListingsPage'));
-const SellerListingEditPage = lazy(() => import('@/pages/seller/SellerListingEditPage'));
-const SellerRequestsPage = lazy(() => import('@/pages/seller/SellerRequestsPage'));
-const SellerConversationsPage = lazy(() => import('@/pages/seller/SellerConversationsPage'));
-const SellerConversationPage = lazy(() => import('@/pages/seller/SellerConversationPage'));
+const SellerProductsPage = lazy(() => import('@/pages/seller/SellerProductsPage'));
+const SellerOrdersPage = lazy(() => import('@/pages/seller/SellerOrdersPage'));
+const SellerOrderPage = lazy(() => import('@/pages/seller/SellerOrderPage'));
+const SellerDeliveryPage = lazy(() => import('@/pages/seller/SellerDeliveryPage'));
+const SellerPayoutsPage = lazy(() => import('@/pages/seller/SellerPayoutsPage'));
+const SellerProductEditPage = lazy(() => import('@/pages/seller/SellerProductEditPage'));
 const AccountLayout = lazy(() => import('@/pages/account/AccountLayout'));
 const AccountOverviewPage = lazy(() => import('@/pages/account/AccountOverviewPage'));
 const AccountOrdersPage = lazy(() => import('@/pages/account/AccountOrdersPage'));
@@ -53,6 +50,7 @@ const AdminEmailsPage = lazy(() => import('@/pages/admin/AdminEmailsPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
 const AdminOrdersPage = lazy(() => import('@/pages/admin/AdminOrdersPage'));
 const AdminPaymentsPage = lazy(() => import('@/pages/admin/AdminPaymentsPage'));
+const AdminPayoutsPage = lazy(() => import('@/pages/admin/AdminPayoutsPage'));
 const AdminReturnsPage = lazy(() => import('@/pages/admin/AdminReturnsPage'));
 const AdminDeliveriesPage = lazy(() => import('@/pages/admin/AdminDeliveriesPage'));
 const AdminProductsPage = lazy(() => import('@/pages/admin/AdminProductsPage'));
@@ -132,6 +130,7 @@ export const routes: RouteObject[] = [
       { path: 'commandes', element: <AdminOrdersPage /> },
       { path: 'place-de-marche', element: <AdminMarketplacePage /> },
       { path: 'paiements', element: <AdminPaymentsPage /> },
+      { path: 'reversements', element: <AdminPayoutsPage /> },
       { path: 'retours', element: <AdminReturnsPage /> },
       { path: 'livraisons', element: <AdminDeliveriesPage /> },
       { path: 'produits', element: <AdminProductsPage /> },
@@ -164,8 +163,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'catalogue', element: <CatalogPage /> },
       { path: 'produit/:slug', element: <ProductPage /> },
-      { path: 'annonces', element: <ListingsPage /> },
-      { path: 'annonces/:slug', element: <ListingPage /> },
+      { path: 'boutiques/:slug', element: <ShopPage /> },
       {
         path: 'vendeur',
         element: (
@@ -176,11 +174,12 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, element: <SellerDashboardPage /> },
           { path: 'boutique', element: <SellerShopPage /> },
-          { path: 'annonces', element: <SellerListingsPage /> },
-          { path: 'annonces/:id', element: <SellerListingEditPage /> },
-          { path: 'demandes', element: <SellerRequestsPage /> },
-          { path: 'messages', element: <SellerConversationsPage /> },
-          { path: 'messages/:id', element: <SellerConversationPage /> },
+          { path: 'produits', element: <SellerProductsPage /> },
+          { path: 'produits/:id', element: <SellerProductEditPage /> },
+          { path: 'commandes', element: <SellerOrdersPage /> },
+          { path: 'commandes/:id', element: <SellerOrderPage /> },
+          { path: 'livraison', element: <SellerDeliveryPage /> },
+          { path: 'reversements', element: <SellerPayoutsPage /> },
         ],
       },
       { path: 'panier', element: <CartPage /> },
@@ -210,9 +209,6 @@ export const routes: RouteObject[] = [
           { path: 'fidelite', element: <AccountLoyaltyPage /> },
           { path: 'assistance', element: <AccountSupportPage /> },
           { path: 'assistance/:number', element: <AccountTicketPage /> },
-          { path: 'demandes', element: <AccountRequestsPage /> },
-          { path: 'messages', element: <AccountConversationsPage /> },
-          { path: 'messages/:id', element: <AccountConversationPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

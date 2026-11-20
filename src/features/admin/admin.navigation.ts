@@ -36,6 +36,7 @@ export const SERVER_SCREENS = [
   '/admin/livraisons',
   '/admin/livreurs',
   '/admin/paiements',
+  '/admin/reversements',
   '/admin/produits',
   '/admin/categories',
   '/admin/stock',
@@ -102,6 +103,7 @@ export const adminNavigation: Array<{ title: string; items: AdminNavItem[] }> = 
     items: [
       { to: '/admin/commandes', label: 'Commandes', icon: ShoppingBag, badge: 'orders', roles: ORDERS },
       { to: '/admin/paiements', label: 'Paiements', icon: CreditCard, badge: 'payments', roles: ORDERS },
+      { to: '/admin/reversements', label: 'Reversements vendeurs', icon: CreditCard, roles: ORDERS },
       { to: '/admin/retours', label: 'Annulations et retours', icon: Undo2, badge: 'returns', roles: ORDERS },
       { to: '/admin/livraisons', label: 'Livraisons', icon: Truck, roles: ORDERS },
       { to: '/admin/livreurs', label: 'Livreurs', icon: Bike, roles: ORDERS },

@@ -77,26 +77,42 @@ const paymentDto = z.object({
   createdAt: z.string(),
 });
 
-const paymentsSummary = z.object({ payments: z.array(paymentDto) });
+const checkoutPaymentDto = z.object({
+  number: z.string().nullable(),
+  total: z.number(),
+  orders: z.number(),
+  shops: z.array(z.string()),
+});
+const paymentsSummary = z.object({ payments: z.array(paymentDto), checkout: checkoutPaymentDto.nullable().optional() });
+export type CheckoutPaymentSummary = z.infer<typeof checkoutPaymentDto>;
+
+export function toPaymentsSummary(raw: unknown) {
+  const summary = paymentsSummary.parse(raw);
+  return {
+    payments: summary.payments.map((p) => ({
+      id: p.id,
+      kind: p.kind,
+      amount: p.amount,
+      method: p.method,
+      at: p.occurredAt,
+      reference: p.reference ?? '',
+      note: p.noReferenceReason ? `Sans référence : ${p.noReferenceReason}` : '',
+      by: p.by,
+      recordedAt: p.createdAt,
+    })),
+    checkout: summary.checkout ?? null,
+  };
+}
 
 /** Encaissements et remboursements d'une commande, dans la forme du back-office. */
 export function toPaymentRecords(raw: unknown): PaymentRecord[] {
-  return paymentsSummary.parse(raw).payments.map((p) => ({
-    id: p.id,
-    kind: p.kind,
-    amount: p.amount,
-    method: p.method,
-    at: p.occurredAt,
-    reference: p.reference ?? '',
-    note: p.noReferenceReason ? `Sans référence : ${p.noReferenceReason}` : '',
-    by: p.by,
-    recordedAt: p.createdAt,
-  }));
+  return toPaymentsSummary(raw).payments;
 }
 
 /** Une transition par requête, avec les champs propres à chaque action (api staff-orders.schemas.ts). */
 export type Transition =
   | { action: 'advance'; note?: string }
+  | { action: 'confirm_collection' }
   | { action: 'assign_courier'; courierId: Id; deliveryCost?: number }
   | { action: 'cancel'; reason: string }
   | { action: 'reopen'; reason: string }
@@ -158,7 +174,7 @@ export const adminOrdersBackend = {
     ),
 
   payments: async (order: AdminOrder, signal?: AbortSignal) =>
-    toPaymentRecords(await backend.get(`/staff/orders/${order.id}/payments`, undefined, signal)),
+    toPaymentsSummary(await backend.get(`/staff/orders/${order.id}/payments`, undefined, signal)),
 
   /** Encaissement vérifié ; l'API émet la facture et crédite les points quand la commande est payée. */
   recordPayment: (order: AdminOrder, entry: PaymentEntry) =>

@@ -49,6 +49,26 @@ export function TotalsList({
       ) : (
         <Row label="Livraison" value="selon le quartier" tone="muted" />
       )}
+      {deliveryKnown && totals.shipments && totals.shipments.length > 1 && (
+        <div className="rounded-md bg-ivory p-3 text-xs text-ink-soft">
+          <p className="font-semibold text-ink">Votre panier donne {totals.shipments.length} commandes</p>
+          <p className="mt-1">
+            Les commandes confiées à OKOUMÉ partagent un livreur et un paiement. Les vendeurs qui livrent eux-mêmes
+            restent séparés.
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {totals.shipments.map((s, i) => (
+              <li key={s.shop?.id ?? 'okoume'} className="flex justify-between gap-3">
+                <span>
+                  {i + 1}. {s.shop ? `Boutique ${s.shop.name ?? ''}` : 'Okoumé'}
+                  {s.fulfilledBy === 'seller' ? ', remise par la boutique' : ', collectée par le livreur OKOUMÉ'}
+                </span>
+                <span className="tabular-nums">livraison {formatPrice(s.deliveryFee)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="flex items-baseline justify-between border-t border-sage pt-3">
         <dt className="text-base font-bold">{deliveryKnown ? 'Total à payer' : 'Total hors livraison'}</dt>
         <motion.dd

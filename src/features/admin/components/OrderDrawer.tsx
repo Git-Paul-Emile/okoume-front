@@ -59,7 +59,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
     queryFn: ({ signal }) => adminOrdersBackend.payments(listed!, signal),
     enabled: !!listed,
   });
-  const order = listed ? { ...listed, payments: payments.data ?? [] } : listed;
+  const order = listed ? { ...listed, payments: payments.data?.payments ?? [] } : listed;
   const admin = useAdminAuthStore((s) => s.admin);
   const { data: zones = [] } = useAdminZones();
   const { data: invoices = [] } = useInvoices();
@@ -95,6 +95,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
   // Tous les paiements se font à la livraison (espèces ou Mobile Money) : l'encaissement est confirmé ensuite
   const toCollect =
     order.paymentStatus === 'awaiting_payment' && ['courier_assigned', 'shipping', 'delivered'].includes(order.status);
+  const checkoutPayment = payments.data?.checkout ?? null;
   // Facture et points sont traités par le serveur quand la commande devient payée
   const recordPayment = (input: PaymentInput) =>
     act(
@@ -147,6 +148,23 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
                 {next}
               </Button>
             )}
+            {order.status === 'courier_assigned' &&
+              order.fulfilledBy === 'okoume' &&
+              !order.shop &&
+              !order.collectionConfirmedAt && (
+                <Button
+                  variant="outline"
+                  loading={update.isPending}
+                  onClick={() =>
+                    transition(
+                      { action: 'confirm_collection' },
+                      `${order.number} : collecte confirmée par la boutique OKOUMÉ`,
+                    )
+                  }
+                >
+                  Confirmer la collecte OKOUMÉ
+                </Button>
+              )}
             {(order.status === 'courier_assigned' || order.status === 'shipping') && (
               <Button variant="outline" onClick={() => setDialog('failure')}>
                 Échec de livraison
@@ -170,6 +188,22 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
             <OrderStatusBadge status={order.status} />
             <PaymentStatusBadge status={order.paymentStatus} />
           </div>
+          {/* Commande d'une boutique de vendeur (32.4) : le vendeur la prépare ; il la livre s'il l'a choisi */}
+          {order.shop && (
+            <p className="rounded-md bg-ivory p-3">
+              Boutique <span className="font-semibold">{order.shop.name}</span> :{' '}
+              {order.fulfilledBy === 'seller'
+                ? 'le vendeur prépare, livre et encaisse lui-même.'
+                : 'le vendeur prépare et confirme la remise. Un livreur Okoumé regroupe les collectes et encaisse une seule fois à la livraison.'}
+            </p>
+          )}
+
+          {checkoutPayment && (
+            <Notice title={`Tournée centralisée ${checkoutPayment.number ?? ''}`}>
+              Un seul livreur collecte les commandes prêtes de {checkoutPayment.shops.join(', ')}, puis les remet au
+              client en une fois. Total à encaisser : {formatPrice(checkoutPayment.total)}.
+            </Notice>
+          )}
 
           {order.review?.status === 'pending' && (
             <Notice title="Commande à vérifier">
@@ -209,7 +243,8 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
             <Notice title="Encaissement à confirmer">
               Paiement{' '}
               {order.paymentMethod === 'cash' ? 'en espèces' : 'par ' + paymentMethodLabel[order.paymentMethod]} à la
-              livraison : confirmez l’encaissement de {formatPrice(order.totals.total)}
+              livraison : confirmez l’encaissement de {formatPrice(checkoutPayment?.total ?? order.totals.total)}
+              {checkoutPayment ? ` pour les ${checkoutPayment.orders} commandes centralisées` : ''}
               {order.paymentMethod !== 'cash' && ', avec la référence de la transaction reçue par SMS'}.
               <Button size="sm" className="mt-3" onClick={() => setDialog('payment')}>
                 Confirmer l’encaissement
@@ -670,6 +705,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
       {dialog === 'payment' && (
         <RecordPaymentDialog
           order={order}
+          checkout={checkoutPayment}
           loading={update.isPending}
           onClose={() => setDialog(null)}
           onConfirm={recordPayment}
