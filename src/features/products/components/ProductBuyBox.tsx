@@ -69,7 +69,7 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
         {product.brand && <span>Marque : {product.brand}</span>}
       </div>
 
-      {/* Qui vend (32.1) : la boutique Okoumé ou la boutique d'un vendeur inscrit */}
+      {/* Qui vend (32.1) : la boutique OKOZA ou la boutique d'un vendeur inscrit */}
       <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
         <Store className="size-4 text-forest" aria-hidden />
         {product.seller ? (
@@ -81,7 +81,7 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
           </>
         ) : (
           <span>
-            Vendu par <span className="font-semibold">Okoumé</span>
+            Vendu par <span className="font-semibold">OKOZA</span>
           </span>
         )}
         {product.condition && product.condition !== 'new' && (

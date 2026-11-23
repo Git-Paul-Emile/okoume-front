@@ -56,7 +56,7 @@ export default function OrderConfirmationPage() {
     );
 
   const checkoutOrders = order.checkout?.length ? order.checkout : [order];
-  const centralOrders = checkoutOrders.filter((candidate) => candidate.fulfilledBy === 'okoume');
+  const centralOrders = checkoutOrders.filter((candidate) => candidate.fulfilledBy === 'okoza');
   const sellerDeliveredOrders = checkoutOrders.filter((candidate) => candidate.fulfilledBy === 'seller');
   const centralTotal = centralOrders.reduce((sum, candidate) => sum + candidate.totals.total, 0);
   const hasCentralRoute = centralOrders.length > 0;
@@ -65,14 +65,14 @@ export default function OrderConfirmationPage() {
   const steps = [
     'Chaque boutique prépare les produits de sa sous-commande.',
     ...(hasCentralRoute
-      ? ['Un livreur Okoumé collecte les commandes centralisées et les remet en une seule livraison.']
+      ? ['Un livreur OKOZA collecte les commandes centralisées et les remet en une seule livraison.']
       : ['La boutique organise la remise au client.']),
     order.paymentMethod === 'cash'
       ? hasCentralRoute
-        ? `Vous réglez une fois ${formatPrice(centralTotal)} au livreur Okoumé, puis les vendeurs indépendants séparément.`
+        ? `Vous réglez une fois ${formatPrice(centralTotal)} au livreur OKOZA, puis les vendeurs indépendants séparément.`
         : 'Vous réglez à la livraison.'
       : hasCentralRoute
-        ? `Vous réglez une fois ${formatPrice(centralTotal)} par Mobile Money au livreur Okoumé, puis les vendeurs indépendants séparément.`
+        ? `Vous réglez une fois ${formatPrice(centralTotal)} par Mobile Money au livreur OKOZA, puis les vendeurs indépendants séparément.`
         : 'Vous réglez par Mobile Money à la livraison.',
   ];
 
@@ -118,9 +118,9 @@ export default function OrderConfirmationPage() {
               {order.checkout.map((o) => (
                 <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                   <span>
-                    <span className="block font-semibold">{o.shop ? `Boutique ${o.shop.name}` : 'OKOUMÉ'}</span>
+                    <span className="block font-semibold">{o.shop ? `Boutique ${o.shop.name}` : 'OKOZA'}</span>
                     <span className="text-ink-muted">
-                      {o.fulfilledBy === 'seller' ? 'Livrée par la boutique, paiement séparé' : 'Collecte OKOUMÉ'} · total{' '}
+                      {o.fulfilledBy === 'seller' ? 'Livrée par la boutique, paiement séparé' : 'Collecte OKOZA'} · total{' '}
                       {formatPrice(o.totals.total)}
                     </span>
                   </span>

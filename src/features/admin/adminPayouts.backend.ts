@@ -4,7 +4,7 @@ import type { Id } from '@/api/types';
 
 /**
  * Reversements aux vendeurs (cahier des charges 1.2, 32.6), lus et enregistrés sur l'API : ce qu'un livreur
- * Okoumé a encaissé pour une boutique, moins la livraison et la commission.
+ * OKOZA a encaissé pour une boutique, moins la livraison et la commission.
  */
 const payoutDto = z.object({
   id: z.string(),

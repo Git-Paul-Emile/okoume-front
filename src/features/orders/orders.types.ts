@@ -58,7 +58,7 @@ export interface ReturnRequest {
 }
 
 /**
- * Réclamation sur une livraison centralisée par Okoumé. Les commandes livrées par le vendeur sont exclues.
+ * Réclamation sur une livraison centralisée par OKOZA. Les commandes livrées par le vendeur sont exclues.
  */
 export interface DeliveryDispute {
   createdAt: string;
@@ -84,12 +84,12 @@ export interface Order {
   cancellationRequest: CancellationRequest | null;
   returnRequest: ReturnRequest | null;
   deliveryDispute?: DeliveryDispute | null;
-  /** Boutique qui vend (32.4) ; null pour la boutique Okoumé */
+  /** Boutique qui vend (32.4) ; null pour la boutique OKOZA */
   shop: { slug: string; name: string } | null;
   /** Passage en caisse commun aux commandes d'un même panier */
   checkoutNumber: string | null;
-  /** Qui livre (32.5) : les livreurs Okoumé ou le vendeur */
-  fulfilledBy: 'okoume' | 'seller';
+  /** Qui livre (32.5) : les livreurs OKOZA ou le vendeur */
+  fulfilledBy: 'okoza' | 'seller';
   /** Confirmation de remise au livreur pour cet arrêt de la tournée centralisée */
   collectionConfirmedAt: string | null;
   collectionConfirmedBy: string | null;
@@ -101,7 +101,7 @@ export interface Order {
     shopName: string;
     status: OrderStatus;
     paymentStatus: PaymentStatus;
-    fulfilledBy: 'okoume' | 'seller';
+    fulfilledBy: 'okoza' | 'seller';
     total: number;
     collectionConfirmedAt: string | null;
   }>;

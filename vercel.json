@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://okoume-back.onrender.com/api/:path*"
+      "destination": "https://okoza-back.onrender.com/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://okoume-back.onrender.com/health"
+      "destination": "https://okoza-back.onrender.com/health"
     },
     {
       "source": "/(.*)",

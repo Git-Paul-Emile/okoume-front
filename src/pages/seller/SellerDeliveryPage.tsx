@@ -10,7 +10,7 @@ import { toast } from '@/stores/toastStore';
 import { formatPrice } from '@/utils/formatPrice';
 
 /**
- * Qui livre les commandes de la boutique (cahier des charges 32.5) : les livreurs Okoumé, aux frais de chaque
+ * Qui livre les commandes de la boutique (cahier des charges 32.5) : les livreurs OKOZA, aux frais de chaque
  * quartier, ou le vendeur lui-même, aux frais qu'il fixe pour les quartiers qu'il dessert.
  */
 export default function SellerDeliveryPage() {
@@ -57,11 +57,11 @@ function DeliveryForm({
       <fieldset className="space-y-3">
         <legend className="sr-only">Qui livre</legend>
         <label className="flex cursor-pointer gap-3 rounded-md border border-sage p-3 has-[:checked]:border-forest">
-          <input type="radio" name="mode" checked={mode === 'okoume'} onChange={() => setMode('okoume')} />
+          <input type="radio" name="mode" checked={mode === 'okoza'} onChange={() => setMode('okoza')} />
           <span>
-            <span className="block font-semibold">Les livreurs Okoumé</span>
+            <span className="block font-semibold">Les livreurs OKOZA</span>
             <span className="text-sm text-ink-soft">
-              Vous préparez la commande, un livreur Okoumé la récupère et encaisse à la livraison. Okoumé garde les
+              Vous préparez la commande, un livreur OKOZA la récupère et encaisse à la livraison. OKOZA garde les
               frais de livraison et vous reverse le reste, commission déduite.
             </span>
           </span>
@@ -81,7 +81,7 @@ function DeliveryForm({
       {mode === 'seller' && (
         <div className="space-y-2">
           <p className="text-sm text-ink-soft">
-            Frais par quartier ; laissez vide un quartier que vous ne livrez pas. Pour repère, le tarif Okoumé est
+            Frais par quartier ; laissez vide un quartier que vous ne livrez pas. Pour repère, le tarif OKOZA est
             indiqué.
           </p>
           <ul className="divide-y divide-sage rounded-md border border-sage">
@@ -90,7 +90,7 @@ function DeliveryForm({
                 <span>
                   <span className="font-semibold">{z.name}</span>{' '}
                   <span className="text-ink-muted">
-                    ({z.city}, tarif Okoumé {formatPrice(z.fee)})
+                    ({z.city}, tarif OKOZA {formatPrice(z.fee)})
                   </span>
                 </span>
                 <input

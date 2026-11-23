@@ -35,9 +35,9 @@ export interface CartTotals {
 }
 
 export interface Shipment {
-  /** null : boutique Okoumé */
+  /** null : boutique OKOZA */
   shop: { id: string; name: string | null } | null;
-  fulfilledBy: 'okoume' | 'seller';
+  fulfilledBy: 'okoza' | 'seller';
   subtotal: number;
   deliveryFee: number;
   total: number;

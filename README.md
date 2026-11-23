@@ -1,11 +1,11 @@
-# Okoumé : boutique en ligne (front client)
+# OKOZA : boutique en ligne (front client)
 
 Les pages publiques `/boutiques` et `/devenir-vendeur` présentent les boutiques partenaires et le parcours vendeur.
 Un vendeur connecté accède à son espace de gestion sur `/vendeur`.
 
 Front-end client de la plateforme e-commerce pour le marché gabonais, conforme au cahier des charges (boutique à vendeur unique, prix en FCFA, paiement en espèces, Airtel Money ou Moov Money).
 
-> **Nom et logo provisoires.** « Okoumé » et la feuille stylisée sont des espaces réservés. Pour les changer : `src/config/brand.ts`, `src/components/ui/Logo.tsx`, `public/favicon.svg`, `public/manifest.webmanifest` et le `<title>` de `index.html`.
+L’identité visuelle utilise le logo OKOZA dans `public/brand/`, avec ses icônes PWA dans `public/` et son nom centralisé dans `src/config/brand.ts`.
 
 ## Stack
 
@@ -27,7 +27,7 @@ npm run dev
 ```
 
 - Site : http://localhost:5173
-- API Okoumé : http://localhost:3000
+- API OKOZA : http://localhost:3000
 
 `npm run dev` lance l'API, son worker et le site ensemble. Toutes les données viennent de l'API : il n'y a plus de
 serveur de démonstration ni de données fictives, et le site refuse de démarrer sans `VITE_BACKEND_URL`.
@@ -155,7 +155,7 @@ Chaque fonctionnalité suit le même schéma : `*.backend.ts` (appels à l'API, 
 - inscription avec le code reçu par e-mail, commande, préparation, livreur, livraison, demande de retour vue par l'équipe ;
 - connexion au back-office en deux étapes, refus d'un mauvais mot de passe, écrans fermés au gestionnaire stock.
 
-Prérequis : PostgreSQL local (identifiants de `api/.env`, droit de créer une base), dépendances de `api/` installées, et Chromium pour Playwright (`npx playwright install chromium`). Chaque lancement recrée la base `okoume_e2e`, charge les données de départ, puis démarre l'API (port 3100), le worker et le front (port 5174) ; la base de développement n'est pas touchée. Les clés Resend, Cloudinary et IA sont neutralisées : les e-mails sont écrits dans `e2e/.logs/worker.log`, où les tests lisent les codes. `npm run e2e:up` démarre le même environnement sans lancer les tests ; `npm run test:e2e` le réutilise s'il tourne déjà. Rapport en cas d'échec : `e2e/.report`.
+Prérequis : PostgreSQL local (identifiants de `api/.env`, droit de créer une base), dépendances de `api/` installées, et Chromium pour Playwright (`npx playwright install chromium`). Chaque lancement recrée la base `okoza_e2e`, charge les données de départ, puis démarre l'API (port 3100), le worker et le front (port 5174) ; la base de développement n'est pas touchée. Les clés Resend, Cloudinary et IA sont neutralisées : les e-mails sont écrits dans `e2e/.logs/worker.log`, où les tests lisent les codes. `npm run e2e:up` démarre le même environnement sans lancer les tests ; `npm run test:e2e` le réutilise s'il tourne déjà. Rapport en cas d'échec : `e2e/.report`.
 
 Aussi couverts : retour accepté, reçu, inspecté et remboursé avec retrait des points ; double clic et renvoi de la commande (une seule commande) ; déclaration du paiement Mobile Money ; commande suspecte vérifiée ; rattachement d'une commande sans compte et changement d'adresse e-mail ; ouverture des 26 écrans de l'équipe et export PDF inscrit au journal.
 
@@ -216,7 +216,7 @@ Limites connues :
 - Sans compte, la page de confirmation n'est plus consultable après un rechargement : la commande se retrouve avec son numéro et son code de suivi.
 - L'API publie un niveau de disponibilité, pas le stock exact : le front reproduit ce niveau, sans réservation.
 - La recherche et les filtres restent faits dans le navigateur sur le catalogue complet (100 produits par page, 20 pages au plus).
-- En production, l'API doit avoir `COOKIE_DOMAIN=.okoume.ga` : sans lui, le cookie CSRF posé par api.okoume.ga n'est pas lisible depuis okoume.ga et toute écriture est refusée (403).
+- En production, l'API doit avoir `COOKIE_DOMAIN=.okoza.ga` : sans lui, le cookie CSRF posé par api.okoza.ga n'est pas lisible depuis okoza.ga et toute écriture est refusée (403).
 
 ## Ce qui reste simplifié
 

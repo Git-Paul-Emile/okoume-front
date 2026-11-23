@@ -24,7 +24,7 @@ export function contentSecurityPolicy(env: {
   enableVercelToolbar?: boolean;
 }): Plugin {
   return {
-    name: 'okoume-csp',
+    name: 'okoza-csp',
     apply: 'build',
     transformIndexHtml: () => [
       {

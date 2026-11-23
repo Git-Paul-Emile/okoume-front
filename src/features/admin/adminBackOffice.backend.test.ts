@@ -24,7 +24,7 @@ const call = () => ({
 
 const member = {
   id: 'm1',
-  email: 'paul@okoume.ga',
+  email: 'paul@okoza.ga',
   firstName: 'Paul',
   lastName: 'Obame',
   role: 'super_admin',

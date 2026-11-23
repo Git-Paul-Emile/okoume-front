@@ -34,8 +34,8 @@ function OpenShop() {
       <div className="card mx-auto max-w-2xl p-6 sm:p-8">
         <h1 className="text-2xl">Ouvrir ma boutique</h1>
         <p className="mt-1.5 mb-6 text-ink-soft">
-          Vendez vos produits sur Okoumé. Ils sont publiés avec le nom de votre boutique ; vous recevez et gérez vos
-          commandes, livrées par Okoumé ou par vous-même, et payées par le client à la livraison.
+          Vendez vos produits sur OKOZA. Ils sont publiés avec le nom de votre boutique ; vous recevez et gérez vos
+          commandes, livrées par OKOZA ou par vous-même, et payées par le client à la livraison.
         </p>
         <ShopForm
           initial={{

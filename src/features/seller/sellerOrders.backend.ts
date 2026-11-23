@@ -22,7 +22,7 @@ export const SELLER_ORDER_STATUSES = [
 ] as const satisfies readonly OrderStatus[];
 
 const deliveryDto = z.object({
-  mode: z.enum(['okoume', 'seller']),
+  mode: z.enum(['okoza', 'seller']),
   fees: z.array(z.object({ zoneId: z.string(), fee: z.number() })),
 });
 
@@ -46,7 +46,7 @@ export const sellerOrdersBackend = {
 export function nextSellerAction(order: Pick<Order, 'status' | 'fulfilledBy' | 'collectionConfirmedAt'>): string | null {
   if (order.status === 'confirmed') return 'Commencer la préparation';
   if (order.status === 'preparing') return 'Commande prête';
-  if (order.fulfilledBy === 'okoume')
+  if (order.fulfilledBy === 'okoza')
     return order.status === 'courier_assigned' && !order.collectionConfirmedAt ? 'Confirmer la remise au livreur' : null;
   if (order.status === 'ready') return 'Partie en livraison';
   if (order.status === 'shipping') return 'Livrée au client';

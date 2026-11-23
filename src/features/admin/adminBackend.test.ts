@@ -26,7 +26,7 @@ const sent = (i = 0) => ({
 
 const member = {
   id: 's1',
-  email: 'ines@okoume.ga',
+  email: 'ines@okoza.ga',
   firstName: 'Inès',
   lastName: 'Moussavou',
   role: 'orders_manager',
@@ -94,7 +94,7 @@ describe('connexion de l’équipe sur l’API', () => {
       id: 's1',
       firstName: 'Inès',
       lastName: 'Moussavou',
-      email: 'ines@okoume.ga',
+      email: 'ines@okoza.ga',
       role: 'super_admin',
     });
   });
@@ -103,9 +103,9 @@ describe('connexion de l’équipe sur l’API', () => {
     fetchMock
       .mockResolvedValueOnce(json({ success: true, data: { challengeId: 'ch1' } }, 202))
       .mockResolvedValueOnce(json({ success: true, data: { member, backupCodesLeft: 9 } }));
-    expect(await staffBackend.startLogin('Ines@Okoume.ga', 'motdepasse-long-1')).toBe('ch1');
+    expect(await staffBackend.startLogin('Ines@Okoza.ga', 'motdepasse-long-1')).toBe('ch1');
     const session = await staffBackend.completeLogin('ch1', { backupCode: 'ABCD-EFGH' });
-    expect(sent(0).body).toEqual({ email: 'ines@okoume.ga', password: 'motdepasse-long-1' });
+    expect(sent(0).body).toEqual({ email: 'ines@okoza.ga', password: 'motdepasse-long-1' });
     expect(sent(1).body).toEqual({ challengeId: 'ch1', backupCode: 'ABCD-EFGH' });
     expect(session.backupCodesLeft).toBe(9);
   });

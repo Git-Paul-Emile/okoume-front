@@ -12,7 +12,7 @@ export function SellerCallout() {
     <section className="grid overflow-hidden rounded-xl border border-forest/15 bg-forest-50 md:grid-cols-[minmax(0,1fr)_250px]">
       <div className="p-6 sm:p-8">
         <p className="text-sm font-semibold text-forest">Vous êtes commerçant ?</p>
-        <h2 className="mt-1 text-2xl sm:text-3xl">{isSeller ? 'Gérez votre boutique OKOUMÉ' : 'Développez votre activité avec OKOUMÉ'}</h2>
+        <h2 className="mt-1 text-2xl sm:text-3xl">{isSeller ? 'Gérez votre boutique OKOZA' : 'Développez votre activité avec OKOZA'}</h2>
         <p className="mt-3 max-w-2xl text-ink-soft">
           {isSeller
             ? 'Retrouvez vos produits, vos commandes et les réglages de votre vitrine dans votre espace vendeur.'
@@ -25,7 +25,7 @@ export function SellerCallout() {
         >
           {isSeller ? 'Espace vendeur' : 'Créer ma boutique'}
         </ButtonLink>
-        {!isSeller && <p className="mt-3 text-xs text-ink-muted">Inscrivez-vous et commencez à vendre sur OKOUMÉ.</p>}
+        {!isSeller && <p className="mt-3 text-xs text-ink-muted">Inscrivez-vous et commencez à vendre sur OKOZA.</p>}
       </div>
       <div className="hidden items-center justify-center bg-forest text-white md:flex" aria-hidden="true">
         <div className="relative grid size-36 place-items-center rounded-3xl border border-white/25 bg-white/10">

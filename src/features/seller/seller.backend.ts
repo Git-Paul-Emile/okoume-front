@@ -176,7 +176,7 @@ export const accessLabel: Record<AccessState, string> = {
 };
 
 export const decisionLabel: Record<ShopPayment['status'], string> = {
-  pending: 'À vérifier par Okoumé',
+  pending: 'À vérifier par OKOZA',
   validated: 'Validé',
   refused: 'Refusé',
 };

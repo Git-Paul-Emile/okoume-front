@@ -18,7 +18,7 @@ const METHOD = { cash: 'Espèces', airtel: 'Airtel Money', moov: 'Moov Money' } 
 
 /**
  * Reversements aux vendeurs (cahier des charges 32.6) : à chaque encaissement d'une commande de vendeur livrée par
- * Okoumé, la part du vendeur est due. L'équipe la reverse et enregistre le moyen et la référence.
+ * OKOZA, la part du vendeur est due. L'équipe la reverse et enregistre le moyen et la référence.
  */
 export default function AdminPayoutsPage() {
   const [filter, setFilter] = useState<Filter>('pending');
@@ -66,7 +66,7 @@ export default function AdminPayoutsPage() {
   return (
     <>
       <PageIntro>
-        Okoumé doit {formatPrice(data.due)} aux vendeurs pour des commandes encaissées par ses livreurs. Les commandes
+        OKOZA doit {formatPrice(data.due)} aux vendeurs pour des commandes encaissées par ses livreurs. Les commandes
         livrées par les vendeurs eux-mêmes sont encaissées par eux et n’apparaissent pas ici.
       </PageIntro>
       <Toolbar>

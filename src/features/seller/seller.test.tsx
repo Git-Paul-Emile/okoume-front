@@ -68,7 +68,7 @@ describe('photos des produits', () => {
           {
             success: true,
             data: {
-              uploadUrl: 'https://api.cloudinary.com/v1_1/okoume/image/upload',
+              uploadUrl: 'https://api.cloudinary.com/v1_1/okoza/image/upload',
               fields: { signature: 'sig' },
               expiresAt: 'z',
             },
@@ -76,9 +76,9 @@ describe('photos des produits', () => {
           201,
         ),
       )
-      .mockResolvedValueOnce(json({ secure_url: 'https://res.cloudinary.com/okoume/image/upload/l.webp' }));
+      .mockResolvedValueOnce(json({ secure_url: 'https://res.cloudinary.com/okoza/image/upload/l.webp' }));
     expect(await productPhotoUploader(new Blob(['x'], { type: 'image/webp' }))).toBe(
-      'https://res.cloudinary.com/okoume/image/upload/l.webp',
+      'https://res.cloudinary.com/okoza/image/upload/l.webp',
     );
     expect(call().route).toBe('POST /seller/products/photo-uploads');
   });

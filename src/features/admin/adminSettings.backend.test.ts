@@ -31,12 +31,12 @@ describe('paramètres sur l’API', () => {
   it('enregistre les informations de boutique', async () => {
     await adminSettingsBackend.update({
       reviewAmount: 750000,
-      social: { facebook: 'https://facebook.com/okoume', tiktok: '' },
+      social: { facebook: 'https://facebook.com/okoza', tiktok: '' },
     });
     expect(patches()).toEqual([
       {
         path: '/staff/settings/shop',
-        body: { social: { facebook: 'https://facebook.com/okoume' }, reviewAmount: 750000 },
+        body: { social: { facebook: 'https://facebook.com/okoza' }, reviewAmount: 750000 },
       },
     ]);
   });

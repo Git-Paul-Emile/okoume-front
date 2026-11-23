@@ -52,7 +52,7 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
     now - new Date(deliveredAt).getTime() < returnWindow * 86_400_000;
   const canCancel =
     canAct && !['delivered', 'cancelled', 'shipping'].includes(order.status) && !order.cancellationRequest;
-  const canDispute = canAct && order.fulfilledBy === 'okoume' && order.status === 'delivered' && !order.deliveryDispute;
+  const canDispute = canAct && order.fulfilledBy === 'okoza' && order.status === 'delivered' && !order.deliveryDispute;
   const reopenDays = settings?.reopenWindowDays ?? 15;
   const refusedAt = order.returnRequest?.status === 'refused' ? order.returnRequest.createdAt : null;
   const canReopenReturn =
@@ -88,10 +88,10 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
                   <span>
                     <span className="block font-medium">{stop.shopName}</span>
                     <span className="text-xs text-ink-muted">
-                      {stop.fulfilledBy === 'okoume'
+                      {stop.fulfilledBy === 'okoza'
                         ? stop.collectionConfirmedAt
                           ? `Collecte confirmée le ${formatDateTime(stop.collectionConfirmedAt)}`
-                          : 'Collecte par le livreur OKOUMÉ'
+                          : 'Collecte par le livreur OKOZA'
                         : 'Livraison indépendante par la boutique'}
                     </span>
                   </span>
@@ -117,7 +117,7 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
             {returnMessage(order.returnRequest)}
           </p>
         )}
-        {order.fulfilledBy === 'okoume' && order.deliveryDispute && (
+        {order.fulfilledBy === 'okoza' && order.deliveryDispute && (
           <p className="mt-6 flex items-center gap-2 rounded-md bg-[#fbf1dc] p-3 text-sm text-warning">
             <Clock className="size-4 shrink-0" />
             <span>

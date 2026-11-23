@@ -66,14 +66,14 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Paiement',
           body: [
-            'Tous les paiements se font à la livraison : en espèces, par Airtel Money ou par Moov Money. Aucun paiement n’est demandé avant la livraison. Pour les sous-commandes confiées au livreur OKOUMÉ, le paiement est regroupé et réglé une fois à la réception. Les boutiques qui livrent elles-mêmes encaissent leur sous-commande séparément. Pour le Mobile Money, utilisez la référence de panier ou de commande indiquée au récapitulatif.',
+            'Tous les paiements se font à la livraison : en espèces, par Airtel Money ou par Moov Money. Aucun paiement n’est demandé avant la livraison. Pour les sous-commandes confiées au livreur OKOZA, le paiement est regroupé et réglé une fois à la réception. Les boutiques qui livrent elles-mêmes encaissent leur sous-commande séparément. Pour le Mobile Money, utilisez la référence de panier ou de commande indiquée au récapitulatif.',
             'Seul le montant exact dû pour la livraison concernée est accepté. La facture est émise une fois le paiement enregistré par la boutique.',
           ],
         },
         {
           heading: 'Livraison',
           body: [
-            'Pour les commandes centralisées, un livreur OKOUMÉ collecte les produits dans les boutiques concernées et les remet en une seule livraison à l’adresse indiquée. Une boutique peut aussi organiser indépendamment la livraison de sa sous-commande. Les frais sont affichés avant la confirmation ; les délais sont indicatifs. En cas d’absence, une nouvelle tentative ou l’annulation vous est proposée.',
+            'Pour les commandes centralisées, un livreur OKOZA collecte les produits dans les boutiques concernées et les remet en une seule livraison à l’adresse indiquée. Une boutique peut aussi organiser indépendamment la livraison de sa sous-commande. Les frais sont affichés avant la confirmation ; les délais sont indicatifs. En cas d’absence, une nouvelle tentative ou l’annulation vous est proposée.',
             'Les risques sont transférés à la remise du colis. Vérifiez le colis en présence du livreur et signalez tout dommage depuis votre compte ou la page Contact dans les meilleurs délais.',
           ],
         },

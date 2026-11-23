@@ -19,7 +19,7 @@ const settings = {
   currency: 'XAF',
   maxDiscountRate: 0.5,
   mobileMoney: [
-    { method: 'airtel', label: 'Airtel Money', number: '+241 07', beneficiary: 'OKOUME', instructions: '*150#' },
+    { method: 'airtel', label: 'Airtel Money', number: '+241 07', beneficiary: 'OKOZA', instructions: '*150#' },
   ],
   mobileMoneyExpiryHours: 24,
   returnWindowDays: 14,
@@ -27,9 +27,9 @@ const settings = {
   deliveryVatRate: 18,
   maxAddresses: 5,
   supportSla: { high: 4, normal: 24 },
-  legal: { companyName: 'Okoumé SARL', nif: '', rccm: '', vatNote: '' },
-  support: { whatsapp: '24107', phone: '+241 07', email: 'contact@okoume.ga', hours: 'Lun-Sam', address: 'Libreville' },
-  social: { facebook: 'https://facebook.com/okoume' },
+  legal: { companyName: 'OKOZA SARL', nif: '', rccm: '', vatNote: '' },
+  support: { whatsapp: '24107', phone: '+241 07', email: 'contact@okoza.ga', hours: 'Lun-Sam', address: 'Libreville' },
+  social: { facebook: 'https://facebook.com/okoza' },
 };
 
 describe('données publiques lues sur l’API', () => {
@@ -37,7 +37,7 @@ describe('données publiques lues sur l’API', () => {
     fetchMock.mockResolvedValue(json(settings));
     const result = await settingsApi.get();
     expect(String(fetchMock.mock.calls[0]![0])).toBe('http://api.test/api/v1/settings');
-    expect(result.mobileMoney[0]?.beneficiary).toBe('OKOUME');
+    expect(result.mobileMoney[0]?.beneficiary).toBe('OKOZA');
     expect(result).not.toHaveProperty('reviewAmount');
   });
 

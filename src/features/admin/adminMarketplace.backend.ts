@@ -21,7 +21,7 @@ const marketplaceSettingsDto = z.object({
   graceDays: z.number(),
   reminderDays: z.number(),
   aiReviewMonthlyLimit: z.number(),
-  /** Commission d'Okoumé sur les ventes des vendeurs livrées par ses livreurs, en pourcentage (32.6) */
+  /** Commission d'OKOZA sur les ventes des vendeurs livrées par ses livreurs, en pourcentage (32.6) */
   commissionRate: z.number().default(0),
 });
 

@@ -50,7 +50,7 @@ export default function ShopPage() {
           )}
           {shop.data?.description && <p className="mt-3 max-w-3xl text-ink-soft">{shop.data.description}</p>}
           <p className="mt-3 text-sm text-ink-muted">
-            Boutique d’un vendeur inscrit sur Okoumé : vous commandez sur Okoumé et payez à la livraison.
+            Boutique d’un vendeur inscrit sur OKOZA : vous commandez sur OKOZA et payez à la livraison.
           </p>
         </div>
       </header>

@@ -77,7 +77,7 @@ export function Footer() {
               {title === 'Mon compte' && (
                 <li>
                   <Link to={sellerShop ? '/vendeur' : '/devenir-vendeur'} className="transition hover:text-white">
-                    {sellerShop ? 'Gérer ma boutique' : 'Vendre sur OKOUMÉ'}
+                    {sellerShop ? 'Gérer ma boutique' : 'Vendre sur OKOZA'}
                   </Link>
                 </li>
               )}

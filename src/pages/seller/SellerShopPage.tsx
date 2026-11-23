@@ -36,7 +36,7 @@ export default function SellerShopPage() {
         <h2 className="mb-4 text-lg">Fiche de la boutique</h2>
         <p className={shop.verified ? 'mb-4 text-sm text-forest' : 'mb-4 rounded-md bg-ivory p-3 text-sm text-ink-soft'} role="status">
           {shop.verified
-            ? 'Boutique vérifiée par OKOUMÉ.'
+            ? 'Boutique vérifiée par OKOZA.'
             : 'La vérification de votre boutique est en attente. Les produits que vous soumettez sont vérifiés séparément avant leur publication.'}
         </p>
         <ShopForm
@@ -115,7 +115,7 @@ export default function SellerShopPage() {
                 submitLabel="Déclarer le paiement"
                 onSubmit={async (payment) => {
                   await declare.mutateAsync({ planId: chosen.id, ...payment });
-                  toast.success('Paiement déclaré', { description: 'L’équipe Okoumé le vérifie avant d’activer.' });
+                  toast.success('Paiement déclaré', { description: 'L’équipe OKOZA le vérifie avant d’activer.' });
                   setChosen(null);
                 }}
               />

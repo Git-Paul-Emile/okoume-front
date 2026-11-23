@@ -41,7 +41,7 @@ export function useCatalog(filters: CatalogFilters) {
       const { price } = productSalePrice(p);
       if (filters.minPrice !== null && price < filters.minPrice) return false;
       if (filters.maxPrice !== null && price > filters.maxPrice) return false;
-      if (filters.shop && (p.seller?.slug ?? 'okoume') !== filters.shop) return false;
+      if (filters.shop && (p.seller?.slug ?? 'okoza') !== filters.shop) return false;
       if (filters.inStock && !productInStock(p)) return false;
       if (filters.onSale && !isPromotionActive(p.promotion)) return false;
       for (const [attr, values] of Object.entries(filters.attributes)) {

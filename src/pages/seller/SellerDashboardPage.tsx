@@ -43,7 +43,7 @@ export default function SellerDashboardPage() {
       <section className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-forest">Bonjour, {data.shop.name}</p>
-          <h2 className="mt-1 text-xl">Gérez votre boutique sur OKOUMÉ</h2>
+          <h2 className="mt-1 text-xl">Gérez votre boutique sur OKOZA</h2>
         </div>
         <div
           className={data.shop.verified
@@ -54,8 +54,8 @@ export default function SellerDashboardPage() {
           {data.shop.verified ? <BadgeCheck className="mt-0.5 size-5 shrink-0" /> : <Clock3 className="mt-0.5 size-5 shrink-0" />}
           <span>
             {data.shop.verified
-              ? 'Votre boutique est vérifiée par OKOUMÉ.'
-              : 'La vérification de votre boutique est en attente de l’équipe OKOUMÉ.'}{' '}
+              ? 'Votre boutique est vérifiée par OKOZA.'
+              : 'La vérification de votre boutique est en attente de l’équipe OKOZA.'}{' '}
             {!data.shop.verified && (
               <Link to="/vendeur/boutique" className="font-semibold underline underline-offset-2">
                 Voir l’état de ma boutique
@@ -98,7 +98,7 @@ export default function SellerDashboardPage() {
         </div>
         {states.length === 0 ? (
           <p className="text-sm text-ink-soft">
-            Aucun produit pour le moment. Vos produits validés sont publiés sur Okoumé, avec le nom de votre boutique.
+            Aucun produit pour le moment. Vos produits validés sont publiés sur OKOZA, avec le nom de votre boutique.
           </p>
         ) : (
           <ul className="flex flex-wrap gap-2 text-sm">

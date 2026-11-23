@@ -103,7 +103,7 @@ export type ProductModeration = 'in_review' | 'changes_requested' | 'pending_mod
 
 export interface AdminProduct extends Omit<Product, 'variants'> {
   variants: AdminVariant[];
-  /** Produit de vendeur : état de sa vérification, points relevés et note de l'équipe ; null pour Okoumé */
+  /** Produit de vendeur : état de sa vérification, points relevés et note de l'équipe ; null pour OKOZA */
   moderation?: ProductModeration | null;
   moderationIssues?: string[];
   moderationNote?: string | null;

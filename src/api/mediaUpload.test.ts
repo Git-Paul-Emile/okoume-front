@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MAX_PHOTO_BYTES, photoError, uploadPhoto } from './mediaUpload';
 
 const signed = {
-  uploadUrl: 'https://api.cloudinary.com/v1_1/okoume/image/upload',
-  fields: { api_key: 'cle', timestamp: '1700000000', signature: 'sig', asset_folder: 'okoume/test/returns' },
+  uploadUrl: 'https://api.cloudinary.com/v1_1/okoza/image/upload',
+  fields: { api_key: 'cle', timestamp: '1700000000', signature: 'sig', asset_folder: 'okoza/test/returns' },
   expiresAt: '2026-11-11T10:00:00.000Z',
 };
 
@@ -24,15 +24,15 @@ describe('envoi de photos chez l’hébergeur', () => {
 
   it('joint les champs signés au fichier et renvoie l’adresse publique', async () => {
     fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ secure_url: 'https://res.cloudinary.com/okoume/image/upload/r.webp' })),
+      new Response(JSON.stringify({ secure_url: 'https://res.cloudinary.com/okoza/image/upload/r.webp' })),
     );
     const url = await uploadPhoto(signed, new File(['x'], 'r.webp', { type: 'image/webp' }));
-    expect(url).toBe('https://res.cloudinary.com/okoume/image/upload/r.webp');
+    expect(url).toBe('https://res.cloudinary.com/okoza/image/upload/r.webp');
     const [target, init] = fetchMock.mock.calls[0]!;
     expect(target).toBe(signed.uploadUrl);
     const form = init.body as FormData;
     expect(form.get('signature')).toBe('sig');
-    expect(form.get('asset_folder')).toBe('okoume/test/returns');
+    expect(form.get('asset_folder')).toBe('okoza/test/returns');
     expect(form.get('file')).toBeInstanceOf(File);
   });
 

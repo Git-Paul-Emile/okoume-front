@@ -86,8 +86,8 @@ function ModerationNotice({ product }: { product: SellerProduct }) {
   const title = {
     in_review: 'Vérification en cours : le produit sera publié dès qu’elle sera favorable.',
     changes_requested: 'Corrections demandées avant publication',
-    pending_moderation: 'Produit transmis à l’équipe Okoumé pour examen',
-    rejected: 'Produit refusé par l’équipe Okoumé',
+    pending_moderation: 'Produit transmis à l’équipe OKOZA pour examen',
+    rejected: 'Produit refusé par l’équipe OKOZA',
   }[product.moderation];
   return (
     <div className="rounded-md bg-[#fbf1dc] p-4 text-sm" role="status">
@@ -157,7 +157,7 @@ function ProductEditor({ product }: { product: SellerProduct | null }) {
     try {
       const saved = await save.mutateAsync(fields);
       toast.success(product ? 'Produit modifié' : 'Produit enregistré', {
-        description: 'Il est vérifié avant d’être publié sur Okoumé.',
+        description: 'Il est vérifié avant d’être publié sur OKOZA.',
       });
       if (!product) navigate(`/vendeur/produits/${saved.id}`, { replace: true });
     } catch (error) {
@@ -325,7 +325,7 @@ function ProductEditor({ product }: { product: SellerProduct | null }) {
         </div>
         {product?.status === 'published' && (
           <p className="text-sm text-ink-soft">
-            En vente sur Okoumé :{' '}
+            En vente sur OKOZA :{' '}
             <Link to={`/produit/${product.slug}`} className="font-semibold text-forest hover:underline">
               voir la fiche publique
             </Link>

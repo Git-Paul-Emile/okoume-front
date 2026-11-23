@@ -39,7 +39,7 @@ export default function BecomeSellerPage() {
         <div className="p-7 sm:p-10 lg:p-14">
           <p className="text-sm font-semibold text-forest-100">Vous êtes commerçant ?</p>
           <h1 className="mt-2 max-w-2xl text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">
-            Développez votre activité avec OKOUMÉ
+            Développez votre activité avec OKOZA
           </h1>
           <p className="mt-5 max-w-xl text-white/85 sm:text-lg">
             Rejoignez notre marketplace, créez votre boutique en ligne et proposez vos produits à de nouveaux clients.
@@ -47,7 +47,7 @@ export default function BecomeSellerPage() {
           <ButtonLink to={destination} variant="light" size="lg" className="mt-7" icon={<ArrowRight className="size-5" />}>
             {ctaLabel}
           </ButtonLink>
-          <p className="mt-3 text-sm text-white/75">Inscrivez-vous et commencez à vendre sur OKOUMÉ.</p>
+          <p className="mt-3 text-sm text-white/75">Inscrivez-vous et commencez à vendre sur OKOZA.</p>
           {!isAuthenticated && (
             <p className="mt-5 text-sm text-white/80">
               Déjà vendeur ?{' '}
@@ -96,19 +96,19 @@ export default function BecomeSellerPage() {
           <p className="mt-3 text-sm leading-relaxed text-ink-soft">
             Gérez la préparation dans votre espace vendeur. Selon les options configurées pour votre boutique, vos clients
             peuvent retirer leur commande, recevoir une livraison par vos soins ou choisir une livraison effectuée par
-            les livreurs OKOUMÉ. Les commandes de plusieurs boutiques sont traitées séparément.
+            les livreurs OKOZA. Les commandes de plusieurs boutiques sont traitées séparément.
           </p>
         </article>
         <article className="card p-6 sm:p-8">
           <div className="flex items-center gap-3"><ShieldCheck className="size-6 text-forest" /><h2 className="text-xl">Commissions et encaissements</h2></div>
           <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-            Pour une commande encaissée par un livreur OKOUMÉ, le reversement vendeur est calculé sur le montant des
+            Pour une commande encaissée par un livreur OKOZA, le reversement vendeur est calculé sur le montant des
             produits, hors livraison, après déduction de la commission définie par la marketplace. Le taux applicable
-            est défini par OKOUMÉ. Contactez l’équipe pour connaître le taux en vigueur avant de lancer votre boutique.
+            est défini par OKOZA. Contactez l’équipe pour connaître le taux en vigueur avant de lancer votre boutique.
             Si vous livrez vous-même, l’encaissement se fait directement entre vous et l’acheteur.
           </p>
           <Link to="/contact" className="mt-3 inline-block text-sm font-semibold text-forest hover:underline">
-            Contacter l’équipe OKOUMÉ
+            Contacter l’équipe OKOZA
           </Link>
         </article>
       </section>
@@ -119,7 +119,7 @@ export default function BecomeSellerPage() {
           <h2 className="mt-1 text-2xl">Ce qu’il vous faut</h2>
         </div>
         <ul className="mt-5 grid gap-3 text-sm text-ink-soft sm:grid-cols-2">
-          <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Un compte OKOUMÉ avec une adresse e-mail confirmée.</li>
+          <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Un compte OKOZA avec une adresse e-mail confirmée.</li>
           <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Un numéro de téléphone valide et les coordonnées de votre boutique.</li>
           <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Des informations et des produits exacts, conformes aux règles de la marketplace.</li>
           <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Une offre d’accès choisie lors de l’ouverture de votre boutique.</li>
@@ -131,7 +131,7 @@ export default function BecomeSellerPage() {
           <div className="max-w-2xl">
             <p className="text-sm font-semibold text-forest">Offres boutique</p>
             <h2 className="mt-1 text-2xl">Choisissez votre accès</h2>
-            <p className="mt-2 text-sm text-ink-soft">Les tarifs et durées ci-dessous sont les offres actuellement proposées sur OKOUMÉ.</p>
+            <p className="mt-2 text-sm text-ink-soft">Les tarifs et durées ci-dessous sont les offres actuellement proposées sur OKOZA.</p>
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan) => (
@@ -148,7 +148,7 @@ export default function BecomeSellerPage() {
       )}
 
       <section className="rounded-xl bg-ivory px-6 py-10 text-center sm:px-10">
-        <p className="text-sm font-semibold text-forest">Prêt à rejoindre OKOUMÉ ?</p>
+        <p className="text-sm font-semibold text-forest">Prêt à rejoindre OKOZA ?</p>
         <h2 className="mt-2 text-2xl sm:text-3xl">Créez votre boutique et commencez à proposer vos produits</h2>
         <ButtonLink to={destination} size="lg" className="mt-5" icon={<ArrowRight className="size-5" />}>
           {ctaLabel}

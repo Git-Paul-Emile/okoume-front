@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * Environnement des tests de parcours : une base PostgreSQL dédiée (`okoume_e2e`, recréée à chaque
+ * Environnement des tests de parcours : une base PostgreSQL dédiée (`okoza_e2e`, recréée à chaque
  * lancement), les données de départ de l'API, puis l'API, son worker et le front sur des ports à part.
  * La base de développement n'est jamais touchée.
  */
@@ -20,8 +20,8 @@ export const WEB_PORT = 5174;
 export const API_URL = `http://localhost:${API_PORT}`;
 export const WEB_URL = `http://localhost:${WEB_PORT}`;
 /** Mot de passe des comptes de démonstration dans la base de test uniquement */
-export const DEMO_PASSWORD = 'parcours-e2e-Okoume-2026';
-const DB_NAME = 'okoume_e2e';
+export const DEMO_PASSWORD = 'parcours-e2e-OKOZA-2026';
+const DB_NAME = 'okoza_e2e';
 
 /** Adresse de la base de test, construite à partir de celle du développeur (mêmes hôte et identifiants). */
 function testDatabaseUrl() {

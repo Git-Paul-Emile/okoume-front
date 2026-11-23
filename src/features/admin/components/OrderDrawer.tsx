@@ -133,7 +133,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               </Button>
             )}
             {order.status === 'courier_assigned' &&
-              order.fulfilledBy === 'okoume' &&
+              order.fulfilledBy === 'okoza' &&
               !order.shop &&
               !order.collectionConfirmedAt && (
                 <Button
@@ -142,11 +142,11 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
                   onClick={() =>
                     transition(
                       { action: 'confirm_collection' },
-                      `${order.number} : collecte confirmée par la boutique OKOUMÉ`,
+                      `${order.number} : collecte confirmée par la boutique OKOZA`,
                     )
                   }
                 >
-                  Confirmer la collecte OKOUMÉ
+                  Confirmer la collecte OKOZA
                 </Button>
               )}
             {(order.status === 'courier_assigned' || order.status === 'shipping') && (
@@ -178,7 +178,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               Boutique <span className="font-semibold">{order.shop.name}</span> :{' '}
               {order.fulfilledBy === 'seller'
                 ? 'le vendeur prépare, livre et encaisse lui-même.'
-                : 'le vendeur prépare et confirme la remise. Un livreur Okoumé regroupe les collectes et encaisse une seule fois à la livraison.'}
+                : 'le vendeur prépare et confirme la remise. Un livreur OKOZA regroupe les collectes et encaisse une seule fois à la livraison.'}
             </p>
           )}
 
@@ -302,7 +302,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               </ul>
             </section>
           )}
-          {order.fulfilledBy === 'okoume' && order.deliveryDispute && (
+          {order.fulfilledBy === 'okoza' && order.deliveryDispute && (
             <Notice title="Livraison contestée par le client">
               {order.deliveryDispute.status === 'resolved' ? (
                 <>Réclamation close : {order.deliveryDispute.resolution}</>

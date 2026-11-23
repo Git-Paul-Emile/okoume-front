@@ -50,7 +50,7 @@ function OrderPanel({ order }: { order: Order }) {
         </div>
         <p className="text-sm text-ink-soft">
           Passée le {formatDateTime(order.createdAt)} ·{' '}
-          {order.fulfilledBy === 'seller' ? 'vous livrez cette commande' : 'un livreur Okoumé la récupère chez vous'}
+          {order.fulfilledBy === 'seller' ? 'vous livrez cette commande' : 'un livreur OKOZA la récupère chez vous'}
         </p>
         <ul className="divide-y divide-sage text-sm">
           {order.items.map((i) => (
@@ -119,13 +119,13 @@ function OrderPanel({ order }: { order: Order }) {
             {todo}
           </Button>
         )}
-        {!todo && order.fulfilledBy === 'okoume' && order.status === 'ready' && (
+        {!todo && order.fulfilledBy === 'okoza' && order.status === 'ready' && (
           <p className="card p-4 text-sm text-ink-soft">
-            Commande prête. Le livreur Okoumé sera affecté quand toutes les boutiques de la tournée auront terminé leur préparation.
+            Commande prête. Le livreur OKOZA sera affecté quand toutes les boutiques de la tournée auront terminé leur préparation.
             Gardez-la emballée avec son numéro.
           </p>
         )}
-        {!todo && order.fulfilledBy === 'okoume' && order.status === 'courier_assigned' && order.collectionConfirmedAt && (
+        {!todo && order.fulfilledBy === 'okoza' && order.status === 'courier_assigned' && order.collectionConfirmedAt && (
           <p className="card p-4 text-sm text-ink-soft">
             Remise confirmée par {order.collectionConfirmedBy ?? 'votre boutique'} le{' '}
             {formatDateTime(order.collectionConfirmedAt)}. Le livreur partira après les autres collectes.

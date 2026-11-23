@@ -52,7 +52,7 @@ const SHOP_WORDS = [
   'stock',
   'dispo',
   'boutique',
-  'okoume',
+  'okoza',
   'panier',
   'compte',
   'livr',
@@ -78,11 +78,11 @@ const SHOP_WORDS = [
 ];
 
 const OFF_TOPIC =
-  'Je ne suis pas destiné à cela : je suis l’assistant d’achat d’Okoumé et je réponds uniquement aux questions sur la boutique (produits, prix, livraison, paiement, commandes et retours). Que puis-je faire pour votre achat ?';
+  'Je ne suis pas destiné à cela : je suis l’assistant d’achat d’OKOZA et je réponds uniquement aux questions sur la boutique (produits, prix, livraison, paiement, commandes et retours). Que puis-je faire pour votre achat ?';
 
 /** Réponse de présentation : ce que l'assistant sait faire, avec des questions qu'il comprend. */
 const CAPABILITIES = [
-  'Je suis l’assistant d’achat d’Okoumé : je réponds à vos questions sur la boutique et vous aide à choisir. Je peux vous aider à :',
+  'Je suis l’assistant d’achat d’OKOZA : je réponds à vos questions sur la boutique et vous aide à choisir. Je peux vous aider à :',
   '• trouver un produit selon votre budget (« téléphone moins de 300 000 », « parfum pour femme ») ;',
   '• connaître les frais et délais de livraison (« livraison à Owendo ») ;',
   '• comprendre le paiement Airtel Money, Moov Money ou en espèces ;',

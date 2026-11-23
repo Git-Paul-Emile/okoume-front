@@ -15,7 +15,7 @@ const item = {
   variantId: 'v1',
   name: 'Robe wax',
   variantLabel: 'Taille M',
-  image: 'https://res.cloudinary.com/okoume/a.webp',
+  image: 'https://res.cloudinary.com/okoza/a.webp',
   unitPrice: 18_000,
   originalPrice: 20_000,
   vatRate: 18,
@@ -235,9 +235,9 @@ describe('retours, paiement et factures sur l’API', () => {
       items: [{ variantId: 'v1', quantity: 1 }],
       reason: 'Produit endommagé',
       comment: 'Couture déchirée',
-      evidenceUrls: ['https://res.cloudinary.com/okoume/image/upload/r.webp'],
+      evidenceUrls: ['https://res.cloudinary.com/okoza/image/upload/r.webp'],
     });
-    expect(sentBody().evidenceUrls).toEqual(['https://res.cloudinary.com/okoume/image/upload/r.webp']);
+    expect(sentBody().evidenceUrls).toEqual(['https://res.cloudinary.com/okoza/image/upload/r.webp']);
     expect(updated.returnRequest?.status).toBe('pending');
   });
 

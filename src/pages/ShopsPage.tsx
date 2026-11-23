@@ -22,7 +22,7 @@ export default function ShopsPage() {
       <Breadcrumbs items={[{ label: 'Accueil', to: '/' }, { label: 'Boutiques' }]} />
       <header>
         <p className="text-sm font-semibold text-forest">Les boutiques partenaires</p>
-        <h1 className="mt-1 text-2xl sm:text-3xl">Découvrez les vendeurs OKOUMÉ</h1>
+        <h1 className="mt-1 text-2xl sm:text-3xl">Découvrez les vendeurs OKOZA</h1>
         <p className="mt-2 max-w-2xl text-ink-soft">
           Parcourez les boutiques actuellement ouvertes sur la marketplace et découvrez les produits de nos vendeurs
           partenaires.
@@ -33,7 +33,7 @@ export default function ShopsPage() {
         <EmptyState
           icon={<Store className="size-7" />}
           title="Aucune boutique partenaire pour le moment"
-          description="Revenez bientôt pour découvrir les premières boutiques OKOUMÉ."
+          description="Revenez bientôt pour découvrir les premières boutiques OKOZA."
         />
       ) : (
         <>

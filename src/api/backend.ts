@@ -3,7 +3,7 @@ import { ApiError } from './ApiError';
 import type { QueryParams } from './types';
 
 /**
- * Client HTTP de l'API Okoumé (api/), selon son contrat :
+ * Client HTTP de l'API OKOZA (api/), selon son contrat :
  * - réponses enveloppées { success, status, message, data } ; erreurs { message, code, requestId, errors } ;
  * - collections paginées { items, total, page, limit, hasNext } ;
  * - session par cookies HttpOnly (credentials: 'include'), jamais stockée en JavaScript ;

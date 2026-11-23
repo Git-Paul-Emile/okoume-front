@@ -20,7 +20,7 @@ afterEach(() => {
   document.cookie = 'ok_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
 });
 
-describe('client de l’API Okoumé', () => {
+describe('client de l’API OKOZA', () => {
   it('lit les données de l’enveloppe et envoie les cookies de session, sans jeton CSRF en lecture', async () => {
     fetchMock.mockResolvedValue(json({ success: true, status: 200, message: 'OK', data: [{ id: 'a' }] }));
     expect(await backend.get('/categories')).toEqual([{ id: 'a' }]);

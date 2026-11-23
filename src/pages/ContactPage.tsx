@@ -16,13 +16,13 @@ export default function ContactPage() {
       <p className="mt-1.5 max-w-2xl text-ink-soft">
         {advertising
           ? 'Pour toute question sur les espaces publicitaires, contactez directement notre équipe.'
-          : 'Pour toute question sur Okoumé, contactez-nous par téléphone, e-mail ou WhatsApp.'}
+          : 'Pour toute question sur OKOZA, contactez-nous par téléphone, e-mail ou WhatsApp.'}
       </p>
 
       {contact ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
           <a
-            href={whatsappLink(contact.whatsapp, advertising ? 'Bonjour, je souhaite des informations sur les espaces publicitaires.' : 'Bonjour, j’ai une question sur Okoumé.')}
+            href={whatsappLink(contact.whatsapp, advertising ? 'Bonjour, je souhaite des informations sur les espaces publicitaires.' : 'Bonjour, j’ai une question sur OKOZA.')}
             target="_blank"
             rel="noreferrer"
             className="card flex items-center gap-4 p-5 transition hover:border-forest"

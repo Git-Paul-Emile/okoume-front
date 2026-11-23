@@ -46,15 +46,15 @@ export function TotalsList({
         <div className="rounded-md bg-ivory p-3 text-xs text-ink-soft">
           <p className="font-semibold text-ink">Votre panier donne {totals.shipments.length} commandes</p>
           <p className="mt-1">
-            Les commandes confiées à OKOUMÉ partagent un livreur et un paiement. Les vendeurs qui livrent eux-mêmes
+            Les commandes confiées à OKOZA partagent un livreur et un paiement. Les vendeurs qui livrent eux-mêmes
             restent séparés.
           </p>
           <ul className="mt-1 space-y-0.5">
             {totals.shipments.map((s, i) => (
-              <li key={s.shop?.id ?? 'okoume'} className="flex justify-between gap-3">
+              <li key={s.shop?.id ?? 'okoza'} className="flex justify-between gap-3">
                 <span>
-                  {i + 1}. {s.shop ? `Boutique ${s.shop.name ?? ''}` : 'Okoumé'}
-                  {s.fulfilledBy === 'seller' ? ', remise par la boutique' : ', collectée par le livreur OKOUMÉ'}
+                  {i + 1}. {s.shop ? `Boutique ${s.shop.name ?? ''}` : 'OKOZA'}
+                  {s.fulfilledBy === 'seller' ? ', remise par la boutique' : ', collectée par le livreur OKOZA'}
                 </span>
                 <span className="tabular-nums">livraison {formatPrice(s.deliveryFee)}</span>
               </li>

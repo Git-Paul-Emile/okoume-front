@@ -31,7 +31,7 @@ export function AdminSidebar({ collapsed, onNavigate }: { collapsed: boolean; on
         onClick={onNavigate}
         className={cn('flex h-16 shrink-0 items-center gap-2.5 px-5', collapsed && 'justify-center px-0')}
       >
-        <LogoMark className="size-9 shrink-0" />
+        <LogoMark tone="light" className="size-9 shrink-0" />
         {!collapsed && (
           <span className="leading-tight">
             <span className="block text-lg font-extrabold tracking-tight text-white">{brand.name}</span>

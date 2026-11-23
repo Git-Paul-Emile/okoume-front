@@ -1,11 +1,8 @@
-/**
- * Identité de la marque. Le nom et le slogan sont provisoires :
- * modifiez ce fichier (et public/favicon.svg, index.html) quand le nom définitif sera choisi.
- */
+/** Identite officielle de la marque OKOZA. */
 export const brand = {
-  name: 'Okoumé',
+  name: 'OKOZA',
   tagline: 'Votre boutique en ligne au Gabon',
   country: 'Gabon',
   city: 'Libreville',
-  legalName: 'Okoumé SARL (dénomination provisoire)',
+  legalName: 'OKOZA SARL (dénomination provisoire)',
 } as const;

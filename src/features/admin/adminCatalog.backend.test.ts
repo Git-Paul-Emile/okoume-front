@@ -59,8 +59,8 @@ const staffProduct = {
   specs: [],
   usageTips: null,
   tax: { vatRate: 18, hsCode: null },
-  images: ['https://res.cloudinary.com/okoume/image/upload/a.webp'],
-  thumbnail: 'https://res.cloudinary.com/okoume/image/upload/a.webp',
+  images: ['https://res.cloudinary.com/okoza/image/upload/a.webp'],
+  thumbnail: 'https://res.cloudinary.com/okoza/image/upload/a.webp',
   featured: false,
   isNew: true,
   dealOfTheDay: false,
@@ -170,17 +170,17 @@ describe('catégories, stock et images', () => {
           {
             success: true,
             data: {
-              uploadUrl: 'https://api.cloudinary.com/v1_1/okoume/image/upload',
-              fields: { signature: 'sig', asset_folder: 'okoume/test/products' },
+              uploadUrl: 'https://api.cloudinary.com/v1_1/okoza/image/upload',
+              fields: { signature: 'sig', asset_folder: 'okoza/test/products' },
               expiresAt: '2026-11-11T12:00:00.000Z',
             },
           },
           201,
         ),
       )
-      .mockResolvedValueOnce(json({ secure_url: 'https://res.cloudinary.com/okoume/image/upload/n.webp' }));
+      .mockResolvedValueOnce(json({ secure_url: 'https://res.cloudinary.com/okoza/image/upload/n.webp' }));
     const url = await staffImageUploader('products')(new Blob(['x'], { type: 'image/webp' }));
-    expect(url).toBe('https://res.cloudinary.com/okoume/image/upload/n.webp');
+    expect(url).toBe('https://res.cloudinary.com/okoza/image/upload/n.webp');
     expect(calls()[0]).toEqual({ route: 'POST /staff/media/upload-signatures', body: { folder: 'products' } });
   });
 

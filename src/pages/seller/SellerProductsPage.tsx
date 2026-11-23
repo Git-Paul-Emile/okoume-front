@@ -50,7 +50,7 @@ export default function SellerProductsPage() {
         <ErrorState error={error} onRetry={() => void refetch()} />
       ) : data.items.length === 0 ? (
         <p className="card p-6 text-ink-soft">
-          Aucun produit {moderation ? 'dans cet état' : 'pour le moment'}. Vos produits validés sont publiés sur Okoumé,
+          Aucun produit {moderation ? 'dans cet état' : 'pour le moment'}. Vos produits validés sont publiés sur OKOZA,
           avec le nom de votre boutique.
         </p>
       ) : (

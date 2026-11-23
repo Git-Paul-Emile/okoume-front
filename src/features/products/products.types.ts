@@ -51,9 +51,9 @@ export interface Product {
   relatedIds: Id[];
   tags: string[];
   status: 'published' | 'archived' | 'draft';
-  /** Boutique du vendeur qui vend ce produit ; null pour la boutique Okoumé (cahier des charges 32.1) */
+  /** Boutique du vendeur qui vend ce produit ; null pour la boutique OKOZA (cahier des charges 32.1) */
   seller: { slug: string; name: string } | null;
-  /** État annoncé par le vendeur ; null pour la boutique Okoumé */
+  /** État annoncé par le vendeur ; null pour la boutique OKOZA */
   condition: ProductCondition | null;
   createdAt: string;
 }
@@ -72,7 +72,7 @@ export interface CatalogFilters {
   inStock: boolean;
   onSale: boolean;
   attributes: Record<string, string[]>;
-  /** Boutique : adresse d'un vendeur, ou « okoume » pour la boutique Okoumé seule */
+  /** Boutique : adresse d'un vendeur, ou « okoza » pour la boutique OKOZA seule */
   shop: string | null;
   sort: SortKey;
   page: number;

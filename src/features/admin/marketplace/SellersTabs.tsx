@@ -237,7 +237,7 @@ function DecisionList<
       )}
       <Pagination page={page} pageCount={pageCount(query.data)} onChange={setPage} />
       <p className="text-xs text-ink-muted">
-        Validez seulement après avoir constaté la réception des fonds sur le compte Mobile Money de la boutique Okoumé.
+        Validez seulement après avoir constaté la réception des fonds sur le compte Mobile Money de la boutique OKOZA.
       </p>
       <ReasonDialog
         open={!!refusing}

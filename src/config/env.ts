@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  /** API Okoumé (dossier api/), sans /api/v1. Obligatoire : toutes les données viennent de l'API. */
+  /** API OKOZA (dossier api/), sans /api/v1. Obligatoire : toutes les données viennent de l'API. */
   VITE_BACKEND_URL: z
     .string()
     .url({ message: 'VITE_BACKEND_URL doit être une URL valide (ex. http://localhost:3000)' }),
@@ -24,7 +24,7 @@ const backendOrigin = useSameOriginApi ? window.location.origin : parsed.data.VI
 export const env = {
   /** Origine de l'API (même origine via Vercel en production, service direct en local) */
   backendOrigin,
-  /** Adresse de l'API Okoumé, versionnée */
+  /** Adresse de l'API OKOZA, versionnée */
   backendUrl: `${backendOrigin}/api/v1`,
   sentryDsn: parsed.data.VITE_SENTRY_DSN,
 };

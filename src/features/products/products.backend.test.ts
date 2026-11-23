@@ -27,7 +27,7 @@ const dto = {
   specs: [{ label: 'Matière', value: 'Coton' }],
   usageTips: null,
   tax: { vatRate: 18, hsCode: null },
-  images: ['https://res.cloudinary.com/okoume/a.webp'],
+  images: ['https://res.cloudinary.com/okoza/a.webp'],
   thumbnail: null,
   variants: [variant(12, 'in_stock'), variant(2, 'low_stock'), variant(0, 'out_of_stock')],
   promotion: { type: 'percent', value: 10, startsAt: '2026-11-01T00:00:00.000Z', endsAt: '2026-12-01T00:00:00.000Z' },
@@ -48,7 +48,7 @@ describe('produit de l’API dans le format du front', () => {
 
   it('complète ce que l’API ne publie pas encore : vignette, produits associés, statut', () => {
     expect(toProduct(dto)).toMatchObject({
-      thumbnail: 'https://res.cloudinary.com/okoume/a.webp',
+      thumbnail: 'https://res.cloudinary.com/okoza/a.webp',
       relatedIds: [],
       status: 'published',
       tax: { vatRate: 18, hsCode: '' },

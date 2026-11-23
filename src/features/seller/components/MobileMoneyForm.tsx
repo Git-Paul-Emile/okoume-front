@@ -15,7 +15,7 @@ const METHODS: Array<{ id: Method; label: string }> = [
 
 /**
  * Déclaration d'un paiement Mobile Money fait hors plateforme (abonnement ou mise en avant). Rien ne s'active
- * avant que l'équipe Okoumé n'ait vérifié la réception des fonds.
+ * avant que l'équipe OKOZA n'ait vérifié la réception des fonds.
  */
 export function MobileMoneyForm({
   amount,
@@ -55,7 +55,7 @@ export function MobileMoneyForm({
     <form onSubmit={(e) => void submit(e)} noValidate className="space-y-3">
       <p className="text-sm text-ink-soft">
         Payez <strong>{formatPrice(amount)}</strong> par Mobile Money, puis indiquez la référence de la transaction.
-        L’équipe Okoumé vérifie la réception avant d’activer.
+        L’équipe OKOZA vérifie la réception avant d’activer.
       </p>
       <fieldset>
         <legend className="label">Paiement par</legend>

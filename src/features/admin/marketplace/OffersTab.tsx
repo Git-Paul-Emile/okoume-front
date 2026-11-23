@@ -146,7 +146,7 @@ const SETTINGS_FIELDS: Array<{ key: keyof MarketplaceSettings; label: string; hi
   {
     key: 'commissionRate',
     label: 'Commission sur les ventes des vendeurs (%)',
-    hint: 'Retenue sur ce qu’un livreur Okoumé encaisse pour un vendeur, hors frais de livraison.',
+    hint: 'Retenue sur ce qu’un livreur OKOZA encaisse pour un vendeur, hors frais de livraison.',
   },
 ];
 
