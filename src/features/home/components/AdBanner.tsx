@@ -15,7 +15,7 @@ function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
   const cropWideMatte = variant === 'wide' && !ad.imageMobile && ad.image.endsWith('banniere-tech-premium.jpg');
   const imageClass =
     variant === 'side'
-      ? 'size-full rounded-lg object-contain transition-transform duration-500 group-hover:scale-[1.01]'
+      ? 'size-full rounded-xl object-contain transition-transform duration-500 group-hover:scale-[1.01]'
       : cropWideMatte
         ? 'size-full object-cover scale-[1.1] transition-transform duration-500'
         : 'size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]';
@@ -24,7 +24,7 @@ function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
       <div
         className={cn(
           variant === 'side'
-            ? 'absolute inset-y-0 inset-x-2.5 overflow-hidden rounded-lg sm:inset-x-3'
+            ? 'absolute inset-y-0 inset-x-2.5 overflow-hidden rounded-xl sm:inset-x-3'
             : 'block size-full',
         )}
       >
@@ -81,13 +81,14 @@ export function AdBanner({
   }, [count, paused]);
 
   const frame = cn(
-    'relative overflow-hidden rounded-lg bg-transparent',
+    'relative overflow-hidden bg-transparent',
+    variant === 'side' ? 'rounded-xl' : 'rounded-lg',
     variant === 'wide'
       ? cropWideMatte
         ? 'aspect-[5/1] shrink-0'
         : current?.imageMobile
-          ? 'aspect-[4/3] shrink-0 sm:aspect-[7/2]'
-          : 'aspect-[7/2] shrink-0'
+          ? 'aspect-[4/3] shrink-0 sm:aspect-[18/5]'
+          : 'aspect-[18/5] shrink-0'
       : current?.imageMobile
         ? 'aspect-[4/3] sm:aspect-[6/7] lg:flex-none'
         : 'aspect-[6/7] lg:flex-none',
