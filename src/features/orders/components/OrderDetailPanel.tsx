@@ -1,16 +1,14 @@
 import { Clock, FileText } from 'lucide-react';
-import { Link } from 'react-router';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { useSettings } from '@/features/settings/settings.queries';
 import { formatPrice } from '@/utils/formatPrice';
-import { useDecideFeeChange } from '../orders.queries';
 import { formatDateTime } from '@/utils/formatDate';
-import { orderStatusLabel, paymentMethodLabel, paymentStatusLabel } from '../orders.constants';
+import { orderStatusLabel, paymentStatusLabel } from '../orders.constants';
 import type { Order, ReturnRequest } from '../orders.types';
 import { CancelOrderDialog } from './CancelOrderDialog';
-import { OrderMessageDialog, PaymentChangeDialog } from './OrderRequests';
+import { OrderMessageDialog } from './OrderRequests';
 import { OrderItems, OrderTotalsTable } from './OrderSummary';
 import { OrderTimeline } from './OrderTimeline';
 import { ReturnRequestDialog } from './ReturnRequestDialog';
@@ -18,8 +16,8 @@ import { ReturnRequestDialog } from './ReturnRequestDialog';
 const returnStep: Partial<Record<ReturnRequest['status'], string>> = {
   accepted: 'renvoyez le colis',
   expected: 'colis attendu',
-  received: 'colis reçu, inspection en cours',
-  refund_due: 'inspection conforme, remboursement en cours',
+  received: 'colis reçu',
+  refund_due: 'remboursement en cours',
   refunded: 'remboursé',
   closed: 'dossier clôturé',
 };
@@ -38,7 +36,7 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
   const [order, setOrder] = useState(initial);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
-  const [dialog, setDialog] = useState<'payment' | 'dispute' | 'reopen' | null>(null);
+  const [dialog, setDialog] = useState<'dispute' | 'reopen' | null>(null);
   const { data: settings } = useSettings();
   const [now] = useState(() => Date.now());
   // Les démarches sur la commande demandent une session : elles se font depuis le compte
@@ -54,10 +52,7 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
     now - new Date(deliveredAt).getTime() < returnWindow * 86_400_000;
   const canCancel =
     canAct && !['delivered', 'cancelled', 'shipping'].includes(order.status) && !order.cancellationRequest;
-  const active = !['delivered', 'cancelled', 'claim'].includes(order.status);
-  const canChangePayment =
-    canAct && active && order.paymentStatus === 'awaiting_payment' && order.paymentChangeRequest?.status !== 'pending';
-  const canDispute = canAct && order.status === 'delivered' && !order.deliveryDispute;
+  const canDispute = canAct && order.fulfilledBy === 'okoume' && order.status === 'delivered' && !order.deliveryDispute;
   const reopenDays = settings?.reopenWindowDays ?? 15;
   const refusedAt = order.returnRequest?.status === 'refused' ? order.returnRequest.createdAt : null;
   const canReopenReturn =
@@ -66,7 +61,6 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
     !order.returnRequest?.reopenRequestedAt &&
     now - new Date(refusedAt).getTime() < reopenDays * 86_400_000;
   const canInvoice = inAccount && ['paid', 'refund_due', 'refunded'].includes(order.paymentStatus);
-  const change = order.paymentChangeRequest;
 
   return (
     <div className="space-y-6">
@@ -123,37 +117,18 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
             {returnMessage(order.returnRequest)}
           </p>
         )}
-        {change && (
-          <p className="mt-6 flex items-center gap-2 rounded-md bg-ivory p-3 text-sm text-ink-soft">
-            <Clock className="size-4 shrink-0" />
-            {change.status === 'pending'
-              ? `Changement vers ${paymentMethodLabel[change.to]} demandé, en attente de l’accord de la boutique.`
-              : change.status === 'accepted'
-                ? `Moyen de paiement changé : ${paymentMethodLabel[change.to]} au lieu de ${paymentMethodLabel[change.from]}.`
-                : `Changement de paiement refusé${change.decisionReason ? ` : ${change.decisionReason}` : ''}.`}
-          </p>
-        )}
-        {order.deliveryFeeChange?.status === 'pending' && canAct && <FeeChangeNotice order={order} />}
-        {order.deliveryDispute && (
+        {order.fulfilledBy === 'okoume' && order.deliveryDispute && (
           <p className="mt-6 flex items-center gap-2 rounded-md bg-[#fbf1dc] p-3 text-sm text-warning">
             <Clock className="size-4 shrink-0" />
             <span>
               {order.deliveryDispute.status === 'resolved'
                 ? `Réclamation traitée${order.deliveryDispute.resolution ? ` : ${order.deliveryDispute.resolution}` : '.'}`
                 : `Réclamation${order.deliveryDispute.ticketNumber ? ` ${order.deliveryDispute.ticketNumber}` : ''} ouverte : nous enquêtons auprès du livreur.`}{' '}
-              {inAccount && order.deliveryDispute.ticketNumber && (
-                <Link
-                  to={`/compte/assistance/${order.deliveryDispute.ticketNumber}`}
-                  className="font-semibold underline"
-                >
-                  Suivre la réclamation
-                </Link>
-              )}
             </span>
           </p>
         )}
 
-        {(canCancel || canReturn || canChangePayment || canDispute || canReopenReturn || canInvoice) && (
+        {(canCancel || canReturn || canDispute || canReopenReturn || canInvoice) && (
           <div className="mt-6 flex flex-wrap gap-3 border-t border-sage pt-5">
             {canCancel && (
               <Button variant="danger" size="sm" onClick={() => setCancelOpen(true)}>
@@ -163,11 +138,6 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
             {canReturn && (
               <Button variant="outline" size="sm" onClick={() => setReturnOpen(true)}>
                 Demander un retour
-              </Button>
-            )}
-            {canChangePayment && (
-              <Button variant="outline" size="sm" onClick={() => setDialog('payment')}>
-                Changer de moyen de paiement
               </Button>
             )}
             {canReopenReturn && (
@@ -233,39 +203,9 @@ export function OrderDetailPanel({ order: initial, inAccount = false }: { order:
 
       <CancelOrderDialog order={order} open={cancelOpen} onClose={() => setCancelOpen(false)} onDone={setOrder} />
       <ReturnRequestDialog order={order} open={returnOpen} onClose={() => setReturnOpen(false)} onDone={setOrder} />
-      {dialog === 'payment' && <PaymentChangeDialog order={order} onClose={() => setDialog(null)} onDone={setOrder} />}
       {(dialog === 'dispute' || dialog === 'reopen') && (
         <OrderMessageDialog order={order} kind={dialog} onClose={() => setDialog(null)} onDone={setOrder} />
       )}
-    </div>
-  );
-}
-
-/** Nouveaux frais de livraison proposés par la boutique : la livraison attend la réponse du client (9.5). */
-function FeeChangeNotice({ order }: { order: Order }) {
-  const decide = useDecideFeeChange();
-  const change = order.deliveryFeeChange!;
-  return (
-    <div className="mt-6 rounded-md bg-[#fbf1dc] p-4 text-sm" role="status">
-      <p className="font-semibold text-warning">Nouveaux frais de livraison à confirmer</p>
-      <p className="mt-1 text-ink-soft">
-        {formatPrice(change.from)} deviennent {formatPrice(change.to)}
-        {change.reason && ` : ${change.reason}`}. Votre total passerait à{' '}
-        {formatPrice(order.totals.total + change.to - change.from)}. La livraison reprend après votre réponse.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button size="sm" loading={decide.isPending} onClick={() => decide.mutate({ order, accept: true })}>
-          Accepter les nouveaux frais
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={decide.isPending}
-          onClick={() => decide.mutate({ order, accept: false })}
-        >
-          Refuser
-        </Button>
-      </div>
     </div>
   );
 }

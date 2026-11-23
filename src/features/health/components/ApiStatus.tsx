@@ -8,7 +8,7 @@ export function ApiStatus() {
   const online = useOnlineStatus();
   const { isError } = useApiHealth();
   const message = !online
-    ? 'Vous êtes hors ligne. Les pages déjà consultées restent visibles ; la commande sera possible au retour de la connexion.'
+    ? 'Votre connexion est interrompue. Rétablissez-la pour recharger les pages et passer une commande.'
     : isError
       ? 'Le service est momentanément indisponible. Nous réessayons automatiquement.'
       : null;

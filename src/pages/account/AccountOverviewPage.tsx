@@ -1,4 +1,4 @@
-import { Heart, Package, Coins } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
 import { Link } from 'react-router';
 import { Badge } from '@/components/ui/Badge';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
@@ -23,13 +23,6 @@ export default function AccountOverviewPage() {
       sub: `${active.length} en cours`,
     },
     {
-      to: '/compte/fidelite',
-      icon: Coins,
-      label: 'Points fidélité',
-      value: String(user.loyaltyPoints),
-      sub: `Niveau ${user.tier.charAt(0).toUpperCase() + user.tier.slice(1)}`,
-    },
-    {
       to: '/compte/favoris',
       icon: Heart,
       label: 'Favoris',
@@ -42,9 +35,9 @@ export default function AccountOverviewPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl">Bonjour {user.firstName}</h1>
-        <p className="mt-1 text-ink-soft">Retrouvez vos commandes, vos points et vos préférences.</p>
+        <p className="mt-1 text-ink-soft">Retrouvez vos commandes et vos préférences.</p>
       </div>
-      <RevealGroup className="grid gap-4 sm:grid-cols-3">
+      <RevealGroup className="grid gap-4 sm:grid-cols-2">
         {tiles.map((t) => (
           <RevealItem key={t.to}>
             <Link to={t.to} className="group card block p-5 transition hover:border-forest">

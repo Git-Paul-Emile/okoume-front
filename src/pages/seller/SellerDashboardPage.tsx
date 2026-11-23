@@ -3,7 +3,6 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { ButtonLink } from '@/components/ui/Button';
 import { useSellerDashboard } from '@/features/seller/seller.queries';
-import { formatPrice } from '@/utils/formatPrice';
 
 function Tile({ label, value, to }: { label: string; value: string | number; to: string }) {
   return (
@@ -14,7 +13,7 @@ function Tile({ label, value, to }: { label: string; value: string | number; to:
   );
 }
 
-/** Tableau de bord du vendeur (32.8) : commandes à traiter, état des produits et ce qu'Okoumé lui doit. */
+/** Tableau de bord du vendeur (32.8) : commandes à traiter et état des produits. */
 export default function SellerDashboardPage() {
   const { data, isLoading, error, refetch } = useSellerDashboard();
   if (isLoading) return <PageLoader />;
@@ -44,7 +43,6 @@ export default function SellerDashboardPage() {
         <Tile label="Commandes à préparer" value={orders.toPrepare} to="/vendeur/commandes?etat=confirmed" />
         <Tile label="Commandes à livrer" value={orders.toDeliver} to="/vendeur/commandes?etat=ready" />
         <Tile label="Encaissements à déclarer" value={orders.toCollect} to="/vendeur/commandes?etat=delivered" />
-        <Tile label="Okoumé vous doit" value={formatPrice(data.payouts.due)} to="/vendeur/reversements" />
       </div>
 
       <section className="card p-5">

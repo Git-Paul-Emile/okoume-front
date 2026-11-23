@@ -32,7 +32,6 @@ export const registerSchema = z
       .regex(/[0-9]/, 'Ajoutez au moins un chiffre à votre mot de passe.')
       .regex(/[A-Za-z]/, 'Ajoutez au moins une lettre à votre mot de passe.'),
     confirmPassword: z.string(),
-    referralCode: z.string().trim().optional(),
     acceptTerms: z.literal(true, { error: 'Acceptez les conditions pour créer votre compte.' }),
   })
   .refine((d) => d.password === d.confirmPassword, {
@@ -44,7 +43,6 @@ export const profileSchema = z.object({
   firstName: z.string().trim().min(2, 'Saisissez votre prénom (2 caractères minimum).'),
   lastName: z.string().trim().min(2, 'Saisissez votre nom (2 caractères minimum).'),
   phone: gabonPhone,
-  birthday: z.string().optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

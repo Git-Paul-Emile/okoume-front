@@ -3,18 +3,15 @@ import {
   Bike,
   Boxes,
   ChartColumn,
-  ClipboardCheck,
   CreditCard,
   FolderTree,
   History,
   LayoutDashboard,
-  LifeBuoy,
   Lightbulb,
   Megaphone,
   Newspaper,
   Package,
   Settings,
-  FileLock,
   KeyRound,
   Mail,
   ShieldCheck,
@@ -28,7 +25,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { AdminRole } from './admin.types';
-import { can, hasCustomPermission, isOwner, rolesOf, screenDomain } from './permissions';
+import { can, isOwner } from './permissions';
 
 /** Écrans du back-office branchés sur l'API ; les autres restent fermés jusqu'à leur branchement. */
 export const SERVER_SCREENS = [
@@ -40,11 +37,8 @@ export const SERVER_SCREENS = [
   '/admin/produits',
   '/admin/categories',
   '/admin/stock',
-  '/admin/inventaire',
   '/admin/retours',
   '/admin/promotions',
-  '/admin/assistance',
-  '/admin/donnees-personnelles',
   '/admin/avis',
   '/admin/contenus',
   '/admin/editorial',
@@ -69,7 +63,7 @@ const isDashboard = (pathname: string) => pathname === '/admin' || pathname === 
 
 export const availableWithSource = (pathname: string) => isDashboard(pathname) || matches(pathname, SERVER_SCREENS);
 
-export type BadgeKey = 'orders' | 'payments' | 'returns' | 'stock' | 'support' | 'alerts' | 'privacy';
+export type BadgeKey = 'orders' | 'payments' | 'returns' | 'stock' | 'alerts';
 
 export interface AdminNavItem {
   to: string;
@@ -78,14 +72,12 @@ export interface AdminNavItem {
   badge?: BadgeKey;
   /** Rôles autorisés (cahier des charges, 2.3 et 2.4). L'administrateur principal a toujours accès. */
   roles: AdminRole[];
-  /** Aucun rôle standard, mais ouvert à un rôle personnalisé qui accorde la consultation du domaine */
-  customRoles?: boolean;
 }
 
-const ALL: AdminRole[] = ['catalog_manager', 'orders_manager', 'stock_manager'];
-const ORDERS: AdminRole[] = ['orders_manager'];
-const CATALOG: AdminRole[] = ['catalog_manager'];
-const STOCK: AdminRole[] = ['stock_manager'];
+const ALL: AdminRole[] = ['super_admin'];
+const ORDERS: AdminRole[] = ALL;
+const CATALOG: AdminRole[] = ALL;
+const STOCK: AdminRole[] = ALL;
 
 /** Menu du back-office, regroupé par domaine. Sert aussi de référence aux droits par rôle. */
 export const adminNavigation: Array<{ title: string; items: AdminNavItem[] }> = [
@@ -115,7 +107,6 @@ export const adminNavigation: Array<{ title: string; items: AdminNavItem[] }> = 
       { to: '/admin/produits', label: 'Produits', icon: Package, roles: CATALOG },
       { to: '/admin/categories', label: 'Catégories', icon: FolderTree, roles: CATALOG },
       { to: '/admin/stock', label: 'Stock', icon: Boxes, badge: 'stock', roles: [...STOCK, ...CATALOG] },
-      { to: '/admin/inventaire', label: 'Inventaire', icon: ClipboardCheck, roles: STOCK },
       { to: '/admin/promotions', label: 'Promotions', icon: BadgePercent, roles: CATALOG },
     ],
   },
@@ -124,27 +115,19 @@ export const adminNavigation: Array<{ title: string; items: AdminNavItem[] }> = 
     items: [
       { to: '/admin/clients', label: 'Clients', icon: Users, roles: ORDERS },
       { to: '/admin/emails', label: 'Suivi des e-mails', icon: Mail, roles: ORDERS },
-      {
-        to: '/admin/donnees-personnelles',
-        label: 'Données personnelles',
-        icon: FileLock,
-        badge: 'privacy',
-        roles: ORDERS,
-      },
       { to: '/admin/avis', label: 'Avis', icon: Star, roles: [...ORDERS, ...CATALOG] },
-      { to: '/admin/assistance', label: 'Assistance', icon: LifeBuoy, badge: 'support', roles: ORDERS },
     ],
   },
   {
     title: 'Place de marché',
-    items: [{ to: '/admin/place-de-marche', label: 'Vendeurs et annonces', icon: Store, roles: [], customRoles: true }],
+    items: [{ to: '/admin/place-de-marche', label: 'Vendeurs et annonces', icon: Store, roles: ALL }],
   },
   {
     title: 'Configuration',
     items: [
       { to: '/admin/contenus', label: 'Bannières et publicités', icon: Megaphone, roles: CATALOG },
-      { to: '/admin/editorial', label: 'Articles et pages légales', icon: Newspaper, roles: CATALOG },
-      { to: '/admin/equipe', label: 'Équipe et rôles', icon: ShieldCheck, roles: [] },
+      { to: '/admin/editorial', label: 'Pages légales', icon: Newspaper, roles: CATALOG },
+      { to: '/admin/equipe', label: 'Équipe', icon: ShieldCheck, roles: [] },
       { to: '/admin/securite', label: 'Ma sécurité', icon: KeyRound, roles: ALL },
       { to: '/admin/journal', label: 'Journal d’activité', icon: History, roles: [] },
       { to: '/admin/parametres', label: 'Paramètres', icon: Settings, roles: [] },
@@ -153,10 +136,7 @@ export const adminNavigation: Array<{ title: string; items: AdminNavItem[] }> = 
 ];
 
 export const adminRoleLabel: Record<AdminRole, string> = {
-  super_admin: 'Administrateur principal',
-  catalog_manager: 'Gestionnaire catalogue',
-  orders_manager: 'Gestionnaire commandes',
-  stock_manager: 'Gestionnaire stock',
+  super_admin: 'Administrateur',
 };
 
 const allItems = adminNavigation.flatMap((g) => g.items);
@@ -168,16 +148,8 @@ const itemFor = (pathname: string) =>
 
 type Who = Parameters<typeof can>[0];
 
-/**
- * Écran visible si l'un des rôles du membre y donne accès, ou si un rôle personnalisé
- * accorde la consultation de son domaine (2.4).
- */
-export const hasRole = (who: Who, item: AdminNavItem) => {
-  if (isOwner(who)) return true;
-  if (rolesOf(who).some((r) => item.roles.includes(r))) return true;
-  const domain = screenDomain(item.to);
-  return !!domain && (item.roles.length > 0 || !!item.customRoles) && hasCustomPermission(who, `${domain}:consulter`);
-};
+/** Tous les administrateurs accèdent aux mêmes écrans. */
+export const hasRole = (who: Who, _item: AdminNavItem) => isOwner(who);
 
 /** Accès à un écran. Contrôle d'interface : l'API doit refaire ce contrôle. */
 export const canAccess = (who: Who, pathname: string) => {

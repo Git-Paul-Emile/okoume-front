@@ -30,9 +30,6 @@ export function OrderTotalsTable({ order }: { order: Order }) {
   const rows: Array<[string, number, boolean?]> = [
     ['Sous-total articles', t.subtotal],
     ...(t.codeDiscount ? [[`Code ${order.promoCode ?? ''}`, -t.codeDiscount, true] as [string, number, boolean]] : []),
-    ...(t.pointsDiscount
-      ? [[`Points fidélité (${order.pointsUsed})`, -t.pointsDiscount, true] as [string, number, boolean]]
-      : []),
     [`Livraison (${order.customer.zoneName})`, t.deliveryFee],
     ...(t.deliveryDiscount ? [['Livraison offerte', -t.deliveryDiscount, true] as [string, number, boolean]] : []),
   ];

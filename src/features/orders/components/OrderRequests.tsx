@@ -4,77 +4,10 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { TextAreaField } from '@/components/ui/TextField';
 import { toast } from '@/stores/toastStore';
-import { cn } from '@/utils/text';
-import { paymentMethodLabel } from '../orders.constants';
-import { useDisputeDelivery, useReopenReturn, useRequestPaymentChange } from '../orders.queries';
-import type { Order, PaymentMethod } from '../orders.types';
+import { useDisputeDelivery, useReopenReturn } from '../orders.queries';
+import type { Order } from '../orders.types';
 
-const METHODS: PaymentMethod[] = ['cash', 'airtel', 'moov'];
-
-/** Demande de changement de moyen de paiement (8.6), soumise à l'accord de la boutique. */
-export function PaymentChangeDialog({
-  order,
-  onClose,
-  onDone,
-}: {
-  order: Order;
-  onClose: () => void;
-  onDone: (o: Order) => void;
-}) {
-  const [to, setTo] = useState<PaymentMethod | null>(null);
-  const change = useRequestPaymentChange();
-
-  return (
-    <Modal
-      open
-      onClose={onClose}
-      title="Changer de moyen de paiement"
-      description={`Actuellement : ${paymentMethodLabel[order.paymentMethod]}. Le changement s’applique tout de suite, tant que rien n’est encaissé.`}
-    >
-      <fieldset className="space-y-2">
-        <legend className="label">Nouveau moyen</legend>
-        {METHODS.filter((m) => m !== order.paymentMethod).map((m) => (
-          <label
-            key={m}
-            className={cn(
-              'flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 text-sm font-medium',
-              to === m ? 'border-forest text-forest' : 'border-sage-dark hover:border-forest',
-            )}
-          >
-            <input type="radio" name="payment" className="accent-forest" checked={to === m} onChange={() => setTo(m)} />
-            {paymentMethodLabel[m]}
-          </label>
-        ))}
-      </fieldset>
-      <div className="mt-5 flex justify-end gap-2">
-        <Button variant="ghost" onClick={onClose}>
-          Annuler
-        </Button>
-        <Button
-          disabled={!to}
-          loading={change.isPending}
-          onClick={() =>
-            change.mutate(
-              { order, to: to! },
-              {
-                onSuccess: (o) => {
-                  toast.success('Moyen de paiement changé', { description: paymentMethodLabel[o.paymentMethod] });
-                  onDone(o);
-                  onClose();
-                },
-                onError: (e) => toast.error(getErrorMessage(e)),
-              },
-            )
-          }
-        >
-          Changer
-        </Button>
-      </div>
-    </Modal>
-  );
-}
-
-/** Message libre envoyé à l'équipe : contestation de livraison (9.6) ou réouverture d'un retour (14.6). */
+/** Motif transmis avec une réclamation de livraison ou une demande de réouverture d'un retour. */
 export function OrderMessageDialog({
   order,
   kind,
@@ -113,7 +46,7 @@ export function OrderMessageDialog({
       { order, message: message.trim() },
       {
         onSuccess: (o) => {
-          toast.success(copy.done, { description: 'Notre équipe vous répond dans votre espace « Assistance ».' });
+          toast.success(copy.done, { description: 'La demande est jointe au dossier de commande.' });
           onDone(o);
           onClose();
         },

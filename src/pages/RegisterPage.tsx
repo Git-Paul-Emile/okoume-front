@@ -22,7 +22,7 @@ export default function RegisterPage() {
           <RegisterForm
             onSuccess={() => {
               toast.success('Compte créé', {
-                description: 'Bienvenue ! Vous pouvez maintenant commander et cumuler des points.',
+                description: 'Bienvenue ! Vous pouvez maintenant passer commande.',
               });
               navigate(back, { replace: true });
             }}

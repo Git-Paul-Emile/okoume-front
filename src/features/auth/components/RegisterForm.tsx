@@ -17,7 +17,6 @@ type Values = {
   phone: string;
   password: string;
   confirmPassword: string;
-  referralCode: string;
   acceptTerms: boolean;
 };
 
@@ -29,7 +28,6 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     phone: '',
     password: '',
     confirmPassword: '',
-    referralCode: '',
     acceptTerms: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -108,12 +106,6 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         type="password"
         autoComplete="new-password"
         {...field('confirmPassword')}
-      />
-      <TextField
-        label="Code de parrainage"
-        optional
-        {...field('referralCode')}
-        hint="Votre parrain sera récompensé après votre première commande livrée et payée."
       />
       <Checkbox
         checked={v.acceptTerms}

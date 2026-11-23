@@ -1,8 +1,6 @@
 import type { PaymentMethod } from '@/features/orders/orders.types';
-import type { Ticket } from '@/features/support/support.types';
 import type { AdminOrder, AdminProduct, Period, SiteStat } from './admin.types';
 import { tableOf, tableToCsv } from './exporters';
-import { isLate } from './support.rules';
 import { gabonFormatter } from '@/utils/formatDate';
 
 const DAY = 86_400_000;
@@ -45,7 +43,7 @@ const counted = (o: AdminOrder) => o.status !== 'cancelled';
 export function grossMargin(o: AdminOrder) {
   // Coût inconnu : marge nulle plutôt qu'une marge surestimée
   const items = o.items.reduce((s, i) => s + (i.unitPrice - (i.unitCost ?? i.unitPrice)) * i.quantity, 0);
-  return items - o.totals.codeDiscount - o.totals.pointsDiscount;
+  return items - o.totals.codeDiscount;
 }
 
 /** Marge après livraison : ajoute les frais facturés et retire le coût réel payé au livreur. Ce n'est pas un bénéfice net. */
@@ -217,7 +215,6 @@ export interface ActionItem {
 export function actionItems(
   orders: AdminOrder[],
   products: AdminProduct[],
-  tickets: Ticket[],
   now = Date.now(),
   waitHours = 24,
 ): ActionItem[] {
@@ -247,32 +244,11 @@ export function actionItems(
       to: '/admin/stock',
     },
     {
-      id: 'late-support',
-      label: 'Demandes d’assistance en retard',
-      count: tickets.filter((t) => isLate(t, now)).length,
-      level: 'critical',
-      to: '/admin/assistance',
-    },
-    {
-      id: 'claims',
-      label: 'Réclamations ouvertes',
-      count: tickets.filter((t) => t.status === 'open' || t.status === 'pending').length,
-      level: 'warning',
-      to: '/admin/assistance',
-    },
-    {
       id: 'cancel',
       label: 'Demandes d’annulation à décider',
       count: orders.filter((o) => o.cancellationRequest?.status === 'pending').length,
       level: 'warning',
       to: '/admin/retours',
-    },
-    {
-      id: 'payment-change',
-      label: 'Changements de moyen de paiement',
-      count: orders.filter((o) => o.paymentChangeRequest?.status === 'pending').length,
-      level: 'warning',
-      to: '/admin/paiements',
     },
     {
       id: 'returns',

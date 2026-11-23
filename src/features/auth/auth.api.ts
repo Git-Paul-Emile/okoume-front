@@ -7,8 +7,6 @@ import type { Address, User } from './auth.types';
 const SERVER_PATCHABLE = new Set<keyof User>([
   'firstName',
   'lastName',
-  'birthday',
-  'birthdayRewardChoice',
   'notificationPrefs',
 ]);
 
@@ -29,10 +27,8 @@ export const authApi = {
     const unsupported = Object.keys(patch).filter((k) => !SERVER_PATCHABLE.has(k as keyof User));
     if (unsupported.length)
       throw new ApiError('Cette modification n’est pas encore disponible.', 501, { fields: unsupported });
-    const { firstName, lastName, birthday, birthdayRewardChoice, notificationPrefs } = patch;
+    const { firstName, lastName, notificationPrefs } = patch;
     if (firstName !== undefined || lastName !== undefined) await authBackend.updateProfile({ firstName, lastName });
-    if (birthday !== undefined || birthdayRewardChoice !== undefined)
-      await authBackend.updateBirthday({ birthDate: birthday, birthdayChoice: birthdayRewardChoice });
     if (notificationPrefs) await authBackend.updateNotificationPrefs(notificationPrefs);
     return authBackend.me();
   },

@@ -52,7 +52,6 @@ const orderDto = {
   status: 'delivered',
   history: [{ status: 'confirmed', at: '2026-11-03T08:00:00.000Z' }],
   cancellationRequest: null,
-  deliveryFeeChange: { fromFee: 2_000, toFee: 3_000, reason: 'Accès difficile', status: 'pending', createdAt: 'x' },
   deliveryDispute: {
     reason: 'Colis jamais reçu, livreur injoignable',
     status: 'open',
@@ -78,7 +77,6 @@ describe('commandes de l’API dans le format du front', () => {
       userId: 'c1',
       customer: { instructions: 'Portail vert' },
       returnRequest: null,
-      deliveryFeeChange: { from: 2_000, to: 3_000, status: 'pending' },
       deliveryDispute: { status: 'open', resolution: null },
     });
   });
@@ -133,12 +131,12 @@ describe('devis et passage de commande', () => {
         },
       }),
     );
-    const result = await quote({ lines: [{ variantId: 'v1', quantity: 2 }], zoneId: null, promoCode: null, points: 0 });
-    expect(sentBody()).toEqual({ lines: [{ variantId: 'v1', quantity: 2 }], points: 0 });
+    const result = await quote({ lines: [{ variantId: 'v1', quantity: 2 }], zoneId: null, promoCode: null });
+    expect(sentBody()).toEqual({ lines: [{ variantId: 'v1', quantity: 2 }] });
     expect(result).toMatchObject({ total: 18_000, itemCount: 2, codeError: null });
   });
 
-  it('envoie seulement articles, livraison, paiement, code et points : jamais de prix', async () => {
+  it('envoie seulement articles, livraison, paiement et code : jamais de prix', async () => {
     fetchMock.mockResolvedValue(json({ success: true, data: orderDto }, 201));
     await ordersBackend.place(
       {
@@ -154,7 +152,6 @@ describe('devis et passage de commande', () => {
         },
         paymentMethod: 'cash',
         promoCode: null,
-        points: 0,
       },
       null,
     );
@@ -242,14 +239,6 @@ describe('retours, paiement et factures sur l’API', () => {
     });
     expect(sentBody().evidenceUrls).toEqual(['https://res.cloudinary.com/okoume/image/upload/r.webp']);
     expect(updated.returnRequest?.status).toBe('pending');
-  });
-
-  it('garde le dossier de retour quand la commande est relue après un changement de paiement', async () => {
-    fetchMock.mockResolvedValue(json({ success: true, data: { ...orderDto, paymentMethod: 'airtel' } }));
-    const order = { ...toOrder(orderDto, 'c1'), returnRequest: toReturnRequest(returnDto) };
-    const updated = await ordersBackend.changePaymentMethod(order, 'airtel');
-    expect(sentBody()).toEqual({ paymentMethod: 'airtel' });
-    expect(updated).toMatchObject({ paymentMethod: 'airtel', returnRequest: { status: 'refused' } });
   });
 
   it('traduit une facture de l’API dans la forme du front', () => {

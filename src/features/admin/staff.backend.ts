@@ -7,15 +7,13 @@ import type { AdminUser } from './admin.types';
  * ou code de secours. Les droits viennent de l'API, qui les relit à chaque requête.
  */
 
-const role = z.enum(['super_admin', 'catalog_manager', 'orders_manager', 'stock_manager']);
-
 const staffMeDto = z.object({
   id: z.string(),
   email: z.string(),
   firstName: z.string(),
   lastName: z.string(),
-  role,
-  roles: z.array(role),
+  role: z.string(),
+  roles: z.array(z.string()),
   permissions: z.array(z.string()),
   owner: z.boolean(),
 });
@@ -31,9 +29,7 @@ export function toAdminUser(raw: unknown): AdminUser {
     firstName: m.firstName,
     lastName: m.lastName,
     email: m.email,
-    role: m.role,
-    extraRoles: m.roles.filter((r) => r !== m.role),
-    customPermissions: m.permissions,
+    role: 'super_admin',
   };
 }
 

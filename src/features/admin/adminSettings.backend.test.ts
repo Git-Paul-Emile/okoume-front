@@ -28,25 +28,15 @@ const patches = () =>
     }));
 
 describe('paramètres sur l’API', () => {
-  it('répartit l’enregistrement entre informations de la boutique et règles de fidélité', async () => {
+  it('enregistre les informations de boutique', async () => {
     await adminSettingsBackend.update({
       reviewAmount: 750000,
       social: { facebook: 'https://facebook.com/okoume', tiktok: '' },
-      tiers: [
-        { id: 'bronze', name: 'Bronze', threshold: 0, perks: [] },
-        { id: 'argent', name: 'Argent', threshold: 200000, perks: [] },
-        { id: 'or', name: 'Or', threshold: 600000, perks: [] },
-      ],
-      welcomeCode: { enabled: false, percent: 0, validDays: 30 },
     });
     expect(patches()).toEqual([
       {
         path: '/staff/settings/shop',
         body: { social: { facebook: 'https://facebook.com/okoume' }, reviewAmount: 750000 },
-      },
-      {
-        path: '/staff/settings/loyalty',
-        body: { silverThreshold: 200000, goldThreshold: 600000, welcomeEnabled: false, welcomeValidDays: 30 },
       },
     ]);
   });

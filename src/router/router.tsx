@@ -29,7 +29,6 @@ const SellerProductsPage = lazy(() => import('@/pages/seller/SellerProductsPage'
 const SellerOrdersPage = lazy(() => import('@/pages/seller/SellerOrdersPage'));
 const SellerOrderPage = lazy(() => import('@/pages/seller/SellerOrderPage'));
 const SellerDeliveryPage = lazy(() => import('@/pages/seller/SellerDeliveryPage'));
-const SellerPayoutsPage = lazy(() => import('@/pages/seller/SellerPayoutsPage'));
 const SellerProductEditPage = lazy(() => import('@/pages/seller/SellerProductEditPage'));
 const AccountLayout = lazy(() => import('@/pages/account/AccountLayout'));
 const AccountOverviewPage = lazy(() => import('@/pages/account/AccountOverviewPage'));
@@ -38,9 +37,6 @@ const AccountOrderDetailPage = lazy(() => import('@/pages/account/AccountOrderDe
 const AccountProfilePage = lazy(() => import('@/pages/account/AccountProfilePage'));
 const AccountAddressesPage = lazy(() => import('@/pages/account/AccountAddressesPage'));
 const AccountFavoritesPage = lazy(() => import('@/pages/account/AccountFavoritesPage'));
-const AccountLoyaltyPage = lazy(() => import('@/pages/account/AccountLoyaltyPage'));
-const AccountSupportPage = lazy(() => import('@/pages/account/AccountSupportPage'));
-const AccountTicketPage = lazy(() => import('@/pages/account/AccountTicketPage'));
 const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AdminForgotPasswordPage = lazy(() => import('@/pages/admin/AdminForgotPasswordPage'));
@@ -59,18 +55,15 @@ const AdminStockPage = lazy(() => import('@/pages/admin/AdminStockPage'));
 const AdminPromotionsPage = lazy(() => import('@/pages/admin/AdminPromotionsPage'));
 const AdminCustomersPage = lazy(() => import('@/pages/admin/AdminCustomersPage'));
 const AdminReviewsPage = lazy(() => import('@/pages/admin/AdminReviewsPage'));
-const AdminSupportPage = lazy(() => import('@/pages/admin/AdminSupportPage'));
 const AdminContentPage = lazy(() => import('@/pages/admin/AdminContentPage'));
 const AdminTeamPage = lazy(() => import('@/pages/admin/AdminTeamPage'));
 const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'));
 const AdminStatsPage = lazy(() => import('@/pages/admin/AdminStatsPage'));
 const AdminCouriersPage = lazy(() => import('@/pages/admin/AdminCouriersPage'));
-const AdminInventoryPage = lazy(() => import('@/pages/admin/AdminInventoryPage'));
 const AdminJournalPage = lazy(() => import('@/pages/admin/AdminJournalPage'));
 const AdminEditorialPage = lazy(() => import('@/pages/admin/AdminEditorialPage'));
 const AdminAssistantPage = lazy(() => import('@/pages/admin/AdminAssistantPage'));
 const AdminAlertsPage = lazy(() => import('@/pages/admin/AdminAlertsPage'));
-const AdminPrivacyPage = lazy(() => import('@/pages/admin/AdminPrivacyPage'));
 const AdminMarketplacePage = lazy(() => import('@/pages/admin/AdminMarketplacePage'));
 
 /** Routes de l'application, partagées par le routeur du navigateur et les tests de parcours. */
@@ -139,18 +132,15 @@ export const routes: RouteObject[] = [
       { path: 'promotions', element: <AdminPromotionsPage /> },
       { path: 'clients', element: <AdminCustomersPage /> },
       { path: 'avis', element: <AdminReviewsPage /> },
-      { path: 'assistance', element: <AdminSupportPage /> },
       { path: 'contenus', element: <AdminContentPage /> },
       { path: 'equipe', element: <AdminTeamPage /> },
       { path: 'parametres', element: <AdminSettingsPage /> },
       { path: 'statistiques', element: <AdminStatsPage /> },
       { path: 'livreurs', element: <AdminCouriersPage /> },
-      { path: 'inventaire', element: <AdminInventoryPage /> },
       { path: 'journal', element: <AdminJournalPage /> },
       { path: 'editorial', element: <AdminEditorialPage /> },
       { path: 'assistant', element: <AdminAssistantPage /> },
       { path: 'alertes', element: <AdminAlertsPage /> },
-      { path: 'donnees-personnelles', element: <AdminPrivacyPage /> },
       { path: 'securite', element: <AdminSecurityPage /> },
       { path: 'emails', element: <AdminEmailsPage /> },
       { path: '*', element: <NotFoundPage /> },
@@ -179,7 +169,6 @@ export const routes: RouteObject[] = [
           { path: 'commandes', element: <SellerOrdersPage /> },
           { path: 'commandes/:id', element: <SellerOrderPage /> },
           { path: 'livraison', element: <SellerDeliveryPage /> },
-          { path: 'reversements', element: <SellerPayoutsPage /> },
         ],
       },
       { path: 'panier', element: <CartPage /> },
@@ -206,9 +195,6 @@ export const routes: RouteObject[] = [
           { path: 'profil', element: <AccountProfilePage /> },
           { path: 'adresses', element: <AccountAddressesPage /> },
           { path: 'favoris', element: <AccountFavoritesPage /> },
-          { path: 'fidelite', element: <AccountLoyaltyPage /> },
-          { path: 'assistance', element: <AccountSupportPage /> },
-          { path: 'assistance/:number', element: <AccountTicketPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

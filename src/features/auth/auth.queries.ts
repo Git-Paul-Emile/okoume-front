@@ -5,7 +5,6 @@ import type { Id } from '@/api/types';
 import { useAuthStore } from '@/stores/authStore';
 import { authApi } from './auth.api';
 import { authBackend } from './auth.backend';
-import { disableDevicePush } from '@/lib/devicePush';
 import type { Address, User } from './auth.types';
 
 export const userKey = (id: string | null) => ['user', id] as const;
@@ -46,17 +45,14 @@ export function useLogout() {
   const qc = useQueryClient();
   const setUserId = useAuthStore((s) => s.setUserId);
   return () => {
-    // L'appareil cesse de recevoir les notifications du compte, puis la session est révoquée côté serveur.
-    // Rien de cela ne bloque la déconnexion locale : sans réseau, le jeton expire seul.
+    // La session est révoquée côté serveur ; la déconnexion locale reste immédiate.
     void (async () => {
-      await disableDevicePush('customer').catch(() => undefined);
       await authApi.logout().catch(() => undefined);
     })();
     setUserId(null);
     qc.removeQueries({ queryKey: ['user'] });
     qc.removeQueries({ queryKey: ['orders'] });
     qc.removeQueries({ queryKey: ['tickets'] });
-    qc.removeQueries({ queryKey: ['loyalty'] });
   };
 }
 

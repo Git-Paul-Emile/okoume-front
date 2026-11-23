@@ -6,9 +6,8 @@ import { PageLoader } from '@/components/feedback/PageLoader';
 import { Toaster } from '@/components/feedback/Toaster';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ButtonLink } from '@/components/ui/Button';
-import { adminPageTitle, adminRoleLabel, availableWithSource, canAccess } from '@/features/admin/admin.navigation';
+import { adminPageTitle, availableWithSource, canAccess } from '@/features/admin/admin.navigation';
 import { AdminSidebar } from '@/features/admin/components/AdminSidebar';
-import { StaffPushButton } from '@/features/admin/components/StaffPushButton';
 import { useSessionGuard } from '@/features/admin/useSessionGuard';
 import { useSessionTimeout } from '@/features/admin/useSessionTimeout';
 import { ChartsTheme } from '@/features/admin/components/ChartsTheme';
@@ -125,7 +124,6 @@ export default function AdminLayout() {
               <Store className="size-4" aria-hidden="true" />
               Voir la boutique
             </Link>
-            <StaffPushButton />
             {admin && (
               <span
                 className="grid size-9 place-items-center rounded-full bg-forest text-sm font-bold text-white"
@@ -161,7 +159,7 @@ export default function AdminLayout() {
                   <EmptyState
                     icon={<Lock />}
                     title="Accès réservé"
-                    description={`Cet écran n’est pas ouvert au rôle « ${adminRoleLabel[admin.role]} ». Demandez l’accès à l’administrateur principal.`}
+                    description="Cet écran n’est pas disponible dans la version actuelle de la plateforme."
                     action={
                       <ButtonLink to="/admin" variant="outline">
                         Revenir au tableau de bord

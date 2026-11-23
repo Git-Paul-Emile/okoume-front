@@ -9,7 +9,6 @@ import {
   useAdminOrders,
   useAdminProducts,
   useAdminSettings,
-  useAdminTickets,
   useSiteStats,
 } from '@/features/admin/admin.queries';
 import type { Period } from '@/features/admin/admin.types';
@@ -59,7 +58,6 @@ export default function AdminDashboardPage() {
   const orders = useAdminOrders();
   const products = useAdminProducts();
   const stats = useSiteStats();
-  const tickets = useAdminTickets();
   const settings = useAdminSettings();
 
   const view = useMemo(() => {
@@ -81,26 +79,23 @@ export default function AdminDashboardPage() {
       actions: actionItems(
         orders.data,
         products.data ?? [],
-        tickets.data ?? [],
         end.getTime(),
         settings.data?.cashPreparationAlertHours ?? 24,
       ),
       summary: dailySummary({
         orders: orders.data,
         products: products.data ?? [],
-        tickets: tickets.data ?? [],
         stats: stats.data,
         end,
       }),
       findings: anomalies({
         orders: orders.data,
         products: products.data ?? [],
-        tickets: tickets.data ?? [],
         stats: stats.data,
         end,
       }).length,
     };
-  }, [orders.data, stats.data, products.data, tickets.data, settings.data, period]);
+  }, [orders.data, stats.data, products.data, settings.data, period]);
 
   if (orders.isError || stats.isError)
     return (

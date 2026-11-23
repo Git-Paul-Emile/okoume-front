@@ -104,7 +104,6 @@ const staffVariantDto = z.object({
   cost: z.number().nullable(),
   stock: z.number(),
   reserved: z.number(),
-  unsellable: z.number(),
   lowStockThreshold: z.number(),
   image: z.string().nullable(),
 });
@@ -355,18 +354,10 @@ export const adminCatalogBackend = {
     return page.items;
   },
 
-  /** Inventaire ou correction : la quantité comptée remplace le stock enregistré, avec son motif. */
+  /** Correction simple : la quantité enregistrée est remplacée et le mouvement reste historisé. */
   setStock: (variantId: Id, counted: number, reason: string) =>
     backend.post(`/staff/variants/${variantId}/stock-movements`, { type: 'ajustement', counted, reason }),
 
-  /** Sortie définitive de stock non revendable, à sa valeur de référence (coût d'achat). */
-  writeOff: (variant: AdminVariant, quantity: number, reason: string) =>
-    backend.post(`/staff/variants/${variant.id}/write-offs`, {
-      quantity,
-      reason,
-      referenceValue: (variant.cost ?? 0) * quantity,
-      occurredAt: new Date().toISOString(),
-    }),
 };
 
 /** Envoi d'images du back-office : autorisation signée par l'API pour ce dossier, puis envoi direct. */

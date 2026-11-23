@@ -15,17 +15,13 @@ import { grossMargin } from '../dashboard.utils';
 import { overpayment, paidAmount, remainingAmount, type PaymentInput, type RefundInput } from '../payments.rules';
 import {
   canDecideReturn,
-  canRestock,
   canReopen,
-  feeChangeBlocks,
-  type inspectionPatch,
   nextStatusAction,
   RETURN_STEPS,
 } from '../orders.actions';
 import { AssignCourierDialog } from './AssignCourierDialog';
 import { DeliveryFailureDialog } from './DeliveryFailureDialog';
 import { AmountReasonDialog } from './AmountReasonDialog';
-import { InspectionDialog } from './InspectionDialog';
 import { RecordPaymentDialog, RefundDialog } from './PaymentDialogs';
 import { ReasonDialog } from './ReasonDialog';
 import { ReturnAcceptDialog } from './ReturnAcceptDialog';
@@ -35,15 +31,12 @@ type Dialog =
   | 'cancel'
   | 'refuseCancel'
   | 'refuseReturn'
-  | 'inspectFail'
-  | 'inspect'
   | 'courier'
   | 'failure'
   | 'payment'
   | 'refund'
   | 'reopen'
   | 'deliveryCost'
-  | 'feeChange'
   | 'resolveDispute'
   | 'acceptReturn'
   | 'clearReview'
@@ -87,28 +80,21 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
   const next = nextStatusAction[order.status];
   // Le plafond de remboursement de chaque membre est vérifié par le serveur
   const zoneCost = zones.find((z) => z.id === order.customer.zoneId)?.courierCost;
-  const feeBlocked = feeChangeBlocks(order);
   // Commande signalée par l'API (19.3) : la préparation attend la vérification d'un membre autorisé
   const reviewPending = order.status === 'confirmed' && order.review?.status === 'pending';
-  const blocked = feeBlocked || reviewPending;
+  const blocked = reviewPending;
   const cancellable = !['delivered', 'cancelled', 'claim'].includes(order.status);
   // Tous les paiements se font à la livraison (espèces ou Mobile Money) : l'encaissement est confirmé ensuite
   const toCollect =
     order.paymentStatus === 'awaiting_payment' && ['courier_assigned', 'shipping', 'delivered'].includes(order.status);
   const checkoutPayment = payments.data?.checkout ?? null;
-  // Facture et points sont traités par le serveur quand la commande devient payée
+  // La facture est émise par le serveur quand la commande est payée
   const recordPayment = (input: PaymentInput) =>
     act(
       () => adminOrdersBackend.recordPayment(order, input),
       `${order.number} : ${formatPrice(input.amount)} enregistrés`,
     );
   // Stock non revendable et montant remboursable sont calculés par le serveur
-  const inspect = (lines: Parameters<typeof inspectionPatch>[1], note: string) =>
-    returnReq &&
-    act(() => adminCommerceBackend.inspectReturn(returnReq, lines, note), `Retour de ${order.number} inspecté`);
-  const restock = () =>
-    returnReq && act(() => adminCommerceBackend.restockReturn(returnReq), `Articles de ${order.number} remis en stock`);
-  // L'avoir et le retrait des points sont faits par le serveur
   const confirmRefund = (input: RefundInput) =>
     act(
       () => adminOrdersBackend.refund(order, { ...input, clientAgreed: input.clientAgreed ?? false }),
@@ -129,9 +115,7 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
           <div className="flex flex-wrap gap-2">
             {blocked && (
               <p className="w-full text-xs text-warning">
-                {reviewPending
-                  ? 'Commande à vérifier avant de commencer la préparation.'
-                  : 'Nouveaux frais de livraison en attente de l’accord du client.'}
+                Commande à vérifier avant de commencer la préparation.
               </p>
             )}
             {next && (
@@ -318,15 +302,9 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
               </ul>
             </section>
           )}
-          {order.deliveryDispute && (
+          {order.fulfilledBy === 'okoume' && order.deliveryDispute && (
             <Notice title="Livraison contestée par le client">
-              {order.deliveryDispute.ticketNumber ? (
-                <>
-                  Réclamation {order.deliveryDispute.ticketNumber} ouverte le{' '}
-                  {formatDateTime(order.deliveryDispute.createdAt)}. Le statut reste « Livrée » pendant l’enquête :
-                  suivez-la dans Assistance.
-                </>
-              ) : order.deliveryDispute.status === 'resolved' ? (
+              {order.deliveryDispute.status === 'resolved' ? (
                 <>Réclamation close : {order.deliveryDispute.resolution}</>
               ) : (
                 <>
@@ -397,49 +375,12 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
                   {returnStep.label}
                 </Button>
               )}
-              {returnReq.status === 'received' && (
-                <>
-                  <Button size="sm" className="mt-3" onClick={() => setDialog('inspect')}>
-                    Inspecter le colis
-                  </Button>
-                  <Button size="sm" variant="outline" className="mt-3 ml-2" onClick={() => setDialog('inspectFail')}>
-                    Inspection non conforme
-                  </Button>
-                </>
-              )}
               {returnReq.status === 'refund_due' && (
                 <>
                   <Button size="sm" className="mt-3" onClick={() => setDialog('refund')}>
                     Confirmer le remboursement
                   </Button>
                 </>
-              )}
-              {returnReq.inspection && (
-                <p className="mt-3 text-xs text-ink-muted">
-                  Inspecté par {returnReq.inspection.by} le {formatDateTime(returnReq.inspection.at)} :{' '}
-                  {returnReq.inspection.lines.reduce((s, l) => s + l.resaleable, 0)} revendable(s),{' '}
-                  {returnReq.inspection.lines.reduce((s, l) => s + l.unsellable, 0)} non revendable(s)
-                  {returnReq.inspection.note && ` · ${returnReq.inspection.note}`}
-                </p>
-              )}
-              {returnReq.restock?.status === 'pending' && (
-                <div className="mt-3 rounded-md bg-ivory p-3">
-                  <p className="font-medium">Remise en stock des articles revendables à valider</p>
-                  {canRestock(admin) ? (
-                    <Button size="sm" className="mt-2" loading={update.isPending} onClick={restock}>
-                      Valider la remise en stock
-                    </Button>
-                  ) : (
-                    <p className="mt-1 text-xs text-ink-muted">Réservé à l’administrateur principal ou au stock.</p>
-                  )}
-                </div>
-              )}
-              {returnReq.restock?.status === 'done' && (
-                <p className="mt-2 text-xs text-ink-muted">
-                  Remis en stock
-                  {returnReq.restock.by && ` par ${returnReq.restock.by}`}
-                  {returnReq.restock.at && ` le ${formatDateTime(returnReq.restock.at)}`}
-                </p>
               )}
             </Notice>
           )}
@@ -475,26 +416,10 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
                 </dd>
               </div>
             </dl>
-            {order.deliveryFeeChange && (
-              <p className={order.deliveryFeeChange.status === 'pending' ? 'text-warning' : 'text-ink-soft'}>
-                Nouveaux frais proposés : {formatPrice(order.deliveryFeeChange.to)} ({order.deliveryFeeChange.reason}) ·{' '}
-                {order.deliveryFeeChange.status === 'pending'
-                  ? 'en attente de l’accord du client'
-                  : order.deliveryFeeChange.status === 'accepted'
-                    ? 'acceptés par le client'
-                    : 'refusés par le client'}
-              </p>
-            )}
             <div className="flex flex-wrap gap-2 pt-1">
               <Button size="sm" variant="outline" onClick={() => setDialog('deliveryCost')}>
                 Modifier le coût réel
               </Button>
-              {!['shipping', 'delivered', 'cancelled'].includes(order.status) &&
-                order.deliveryFeeChange?.status !== 'pending' && (
-                  <Button size="sm" variant="outline" onClick={() => setDialog('feeChange')}>
-                    Modifier les frais facturés
-                  </Button>
-                )}
             </div>
           </Section>
 
@@ -522,10 +447,10 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
           <Section title="Montants">
             <dl className="space-y-1.5">
               <Line label="Sous-total" value={formatPrice(order.totals.subtotal)} />
-              {order.totals.codeDiscount + order.totals.pointsDiscount > 0 && (
+              {order.totals.codeDiscount > 0 && (
                 <Line
                   label="Remises"
-                  value={`−${formatPrice(order.totals.codeDiscount + order.totals.pointsDiscount)}`}
+                  value={`−${formatPrice(order.totals.codeDiscount)}`}
                 />
               )}
               <Line label="Livraison" value={formatPrice(order.totals.deliveryFee - order.totals.deliveryDiscount)} />
@@ -618,22 +543,6 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
         loading={update.isPending}
         onConfirm={(r) => returnReq && act(() => adminCommerceBackend.refuseReturn(returnReq, r), 'Retour refusé')}
       />
-      <ReasonDialog
-        open={dialog === 'inspectFail'}
-        onClose={() => setDialog(null)}
-        title="Inspection non conforme"
-        description="Le dossier est clôturé sans remboursement ; le motif est communiqué au client."
-        confirmLabel="Clôturer le retour"
-        danger
-        loading={update.isPending}
-        onConfirm={(r) =>
-          returnReq &&
-          act(
-            () => adminCommerceBackend.rejectInspection(returnReq, r),
-            `Retour ${order.number} : inspection non conforme`,
-          )
-        }
-      />
       {dialog === 'acceptReturn' && returnReq && (
         <ReturnAcceptDialog
           orderNumber={order.number}
@@ -677,31 +586,6 @@ export function OrderDrawer({ order: listed, onClose }: { order: AdminOrder | nu
           }
         />
       )}
-      {dialog === 'feeChange' && (
-        <AmountReasonDialog
-          title="Modifier les frais facturés"
-          description="Le client doit accepter les nouveaux frais depuis son suivi de commande avant la poursuite de la livraison."
-          amountLabel="Nouveaux frais (FCFA)"
-          initial={order.totals.deliveryFee - order.totals.deliveryDiscount}
-          confirmLabel="Proposer au client"
-          loading={update.isPending}
-          onClose={() => setDialog(null)}
-          onConfirm={(amount, reason) =>
-            act(
-              () => adminOrdersBackend.proposeFeeChange(order, amount, reason, couriers),
-              `${order.number} : nouveaux frais proposés au client`,
-            )
-          }
-        />
-      )}
-      {dialog === 'inspect' && (
-        <InspectionDialog
-          order={order}
-          loading={update.isPending}
-          onClose={() => setDialog(null)}
-          onConfirm={inspect}
-        />
-      )}
       {dialog === 'payment' && (
         <RecordPaymentDialog
           order={order}
@@ -742,7 +626,6 @@ const returnStatusLabel: Record<NonNullable<AdminOrder['returnRequest']>['status
   refused: 'refusé',
   expected: 'colis attendu',
   received: 'colis reçu',
-  inspecting: 'en contrôle',
   refund_due: 'remboursement à effectuer',
   refunded: 'remboursé',
   closed: 'clôturé',

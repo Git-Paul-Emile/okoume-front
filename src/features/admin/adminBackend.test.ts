@@ -80,7 +80,6 @@ const staffOrder = {
     { status: 'courier_assigned', at: 'b', actor: 'staff', by: 'Inès Moussavou' },
   ],
   cancellationRequest: null,
-  deliveryFeeChange: null,
   deliveryDispute: null,
   createdAt: 'a',
   customerId: 'k1',
@@ -96,9 +95,7 @@ describe('connexion de l’équipe sur l’API', () => {
       firstName: 'Inès',
       lastName: 'Moussavou',
       email: 'ines@okoume.ga',
-      role: 'orders_manager',
-      extraRoles: ['stock_manager'],
-      customPermissions: ['commandes:consulter', 'stock:modifier'],
+      role: 'super_admin',
     });
   });
 

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { ordersApi, type ReturnInput } from './orders.api';
-import type { CancellationRequest, Order, PaymentMethod } from './orders.types';
+import type { CancellationRequest, Order } from './orders.types';
 
 export function useMyOrders({ enabled = true }: { enabled?: boolean } = {}) {
   const userId = useAuthStore((s) => s.userId);
@@ -58,16 +58,8 @@ export function useRequestReturn() {
   return useOrderMutation<{ request: ReturnInput }>((order, v) => ordersApi.requestReturn(order, v.request));
 }
 
-export function useRequestPaymentChange() {
-  return useOrderMutation<{ to: PaymentMethod }>((order, v) => ordersApi.requestPaymentChange(order, v.to));
-}
-
 export function useDisputeDelivery() {
   return useOrderMutation<{ message: string }>((order, v) => ordersApi.disputeDelivery(order, v.message));
-}
-
-export function useDecideFeeChange() {
-  return useOrderMutation<{ accept: boolean }>((order, v) => ordersApi.decideFeeChange(order, v.accept));
 }
 
 export function useReopenReturn() {

@@ -17,8 +17,6 @@ export interface Ad {
   /** Nom de l'entreprise annonceuse ; null pour le visuel « espace disponible » de la boutique. */
   advertiser: string | null;
   /** Début et fin de campagne (ISO) ; null = sans limite. */
-  startsAt: string | null;
-  endsAt: string | null;
   /** Si plusieurs campagnes sont en cours, la plus prioritaire s'affiche. */
   priority: number;
   /** Visuel ordinateur, 1200 × 400 px conseillé. */

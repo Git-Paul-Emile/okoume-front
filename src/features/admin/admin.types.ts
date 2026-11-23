@@ -2,8 +2,8 @@ import type { Id } from '@/api/types';
 import type { Order, OrderItem, PaymentMethod } from '@/features/orders/orders.types';
 import type { Product, Variant } from '@/features/products/products.types';
 
-/** Rôles du back-office (cahier des charges, 2.3 et 2.4). */
-export type AdminRole = 'super_admin' | 'catalog_manager' | 'orders_manager' | 'stock_manager';
+/** Rôle unique du back-office dans le MVP. */
+export type AdminRole = 'super_admin';
 
 export interface AdminUser {
   id: Id;
@@ -11,15 +11,11 @@ export interface AdminUser {
   lastName: string;
   email: string;
   role: AdminRole;
-  /** Rôles standards cumulés avec le rôle principal (2.4). */
-  extraRoles?: AdminRole[];
-  /** Droits des rôles personnalisés, calculés à la connexion. */
-  customPermissions?: string[];
   /** Ouverture de la session, pour la révocation (19.2). */
   loginAt?: string;
 }
 
-/** Membre de l'équipe vu depuis l'écran « Équipe et rôles ». */
+/** Membre de l'équipe vu depuis l'écran « Équipe ». */
 export interface TeamMember extends AdminUser {
   status: 'active' | 'invited' | 'suspended';
   /**
@@ -28,7 +24,6 @@ export interface TeamMember extends AdminUser {
    */
   refundLimit?: number | null;
   backupCodesLeft?: number;
-  customRoleIds?: string[];
   sessionsRevokedAt?: string | null;
   inviteToken?: string | null;
   inviteExpiresAt?: string | null;

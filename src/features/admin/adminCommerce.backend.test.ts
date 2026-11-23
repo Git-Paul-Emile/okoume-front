@@ -71,19 +71,13 @@ const apiCode = {
 };
 
 describe('retours de l’équipe', () => {
-  it('rattache le dossier à sa commande, avec l’inspection et la remise en stock à valider', () => {
+  it('rattache le dossier simplifié à sa commande', () => {
     const { orderId, request } = toStaffReturn(staffReturn);
     expect(orderId).toBe('o1');
     expect(request).toMatchObject({
       id: 'r1',
       status: 'refund_due',
-      inspection: {
-        lines: [{ variantId: 'v1', resaleable: 1, unsellable: 1 }],
-        note: 'Une pièce tachée',
-        by: 'Paul Ndong',
-        at: 'd',
-      },
-      restock: { status: 'pending' },
+      items: [{ variantId: 'v1', quantity: 2 }],
     });
   });
 
@@ -107,8 +101,7 @@ describe('retours de l’équipe', () => {
       shippingPaidBy: 'shop',
       shippingReason: 'Défaut de fabrication',
     });
-    await adminCommerceBackend.rejectInspection(request, 'Produit porté');
-    await adminCommerceBackend.restockReturn(request);
+    await adminCommerceBackend.receiveReturn(request);
     expect(calls()).toEqual([
       {
         route: 'POST /staff/returns/r1/decision',
@@ -119,8 +112,7 @@ describe('retours de l’équipe', () => {
           shippingReason: 'Défaut de fabrication',
         },
       },
-      { route: 'POST /staff/returns/r1/inspection', body: { outcome: 'non_conforming', note: 'Produit porté' } },
-      { route: 'POST /staff/returns/r1/restock', body: null },
+      { route: 'POST /staff/returns/r1/reception', body: null },
     ]);
   });
 
@@ -131,14 +123,14 @@ describe('retours de l’équipe', () => {
 });
 
 describe('codes promo et écrans', () => {
-  it('traduit les limites absentes : sans limite d’utilisation, 0 par client', () => {
-    expect(toPromoCode(apiCode)).toMatchObject({ maxUses: null, perCustomer: 0, value: 0, freeDelivery: true });
-    expect(toPromoCode({ ...apiCode, customerId: 'k1' }).userId).toBe('k1');
+  it('traduit un code public sans règles de ciblage client', () => {
+    expect(toPromoCode(apiCode)).toMatchObject({ maxUses: null, value: 0, freeDelivery: true });
+    expect(toPromoCode(apiCode)).not.toHaveProperty('userId');
   });
 
-  it('n’envoie que les champs fournis, 0 par client devenant sans limite', () => {
+  it('n’envoie que les champs fournis', () => {
     expect(promoCodeBody({ active: false })).toEqual({ active: false });
-    expect(promoCodeBody({ perCustomer: 0, maxUses: null })).toEqual({ perCustomer: null, maxUses: null });
+    expect(promoCodeBody({ maxUses: null })).toEqual({ maxUses: null });
     expect(promoCodeBody({ ...toPromoCode(apiCode), id: 'pc1', uses: 9 })).not.toHaveProperty('uses');
   });
 

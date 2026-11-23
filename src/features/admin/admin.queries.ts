@@ -5,7 +5,6 @@ import { toast } from '@/stores/toastStore';
 import { adminApi } from './admin.api';
 import { invoicesApi } from '@/features/invoices/invoices.api';
 import { staffBackend } from './staff.backend';
-import { disableDevicePush } from '@/lib/devicePush';
 
 const list =
   <T>(key: string, fn: (signal?: AbortSignal) => Promise<T>) =>
@@ -18,24 +17,18 @@ export const useStockMovements = list('stockMovements', adminApi.stockMovements)
 export const useAdminCategories = list('categories', adminApi.categories);
 export const useAdminPromoCodes = list('promoCodes', adminApi.promoCodes);
 export const useAdminCustomers = list('customers', adminApi.customers);
-export const usePrivacyRequests = list('privacyRequests', adminApi.privacyRequests);
 export const useAdminReviews = list('reviews', adminApi.reviews);
 export const useAdminReviewReports = list('reviewReports', adminApi.reviewReports);
-export const useAdminTickets = list('tickets', adminApi.tickets);
 export const useAdminAds = list('ads', adminApi.ads);
 export const useAdminBanners = list('banners', adminApi.banners);
 export const useAdminZones = list('deliveryZones', adminApi.deliveryZones);
 export const useZoneRequests = list('zoneRequests', adminApi.zoneRequests);
 export const useAdminSettings = list('settings', adminApi.settings);
 export const useAdminTeam = list('team', adminApi.team);
-export const useTeamDirectory = list('team-directory', adminApi.teamDirectory);
-export const useCustomRoles = list('customRoles', adminApi.customRoles);
 export const useProposalDecisions = list('proposalDecisions', adminApi.proposalDecisions);
-export const useAssistantRules = list('assistantRules', adminApi.assistantRules);
 export const useAssistantLog = list('assistantLog', adminApi.assistantLog);
 export const useActivityLog = list('activityLog', adminApi.activityLog);
 export const useCouriers = list('couriers', adminApi.couriers);
-export const useAdminArticles = list('articles', adminApi.articles);
 export const useAdminLegalPages = list('legalPages', adminApi.legalPages);
 export const useAssistantActions = list('assistantActions', adminApi.assistantActions);
 export const usePriceChanges = list('priceChanges', adminApi.priceChanges);
@@ -51,8 +44,6 @@ export const useSiteStats = list('siteStats', adminApi.siteStats);
  */
 export function endAdminSession() {
   void (async () => {
-    // L'appareil ne reçoit plus les alertes de l'équipe une fois la session fermée
-    await disableDevicePush('staff').catch(() => undefined);
     await staffBackend.logout().catch(() => undefined);
   })();
   useAdminAuthStore.getState().setAdmin(null);

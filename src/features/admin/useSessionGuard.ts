@@ -5,10 +5,8 @@ import { toast } from '@/stores/toastStore';
 import { staffBackend } from './staff.backend';
 
 /**
- * Révocation des sessions (19.2) : la session se ferme dès que le compte est suspendu, change de rôle
- * ou que ses sessions sont révoquées. Vérification toutes les 30 secondes et au retour sur l'onglet.
- * L'API relit le compte à chaque requête ; le contrôle relit aussi les droits : un changement
- * de rôle se reflète dans le menu sans reconnexion.
+ * Révocation des sessions (19.2) : la session se ferme dès que le compte est suspendu ou que ses sessions sont
+ * révoquées. Vérification toutes les 30 secondes et au retour sur l'onglet.
  */
 export function useSessionGuard() {
   const admin = useAdminAuthStore((s) => s.admin);
@@ -27,8 +25,7 @@ export function useSessionGuard() {
       try {
         const current = await staffBackend.me();
         if (stopped) return;
-        const changed = JSON.stringify(current.customPermissions) !== JSON.stringify(admin.customPermissions);
-        if (changed || current.role !== admin.role) setAdmin({ ...current, loginAt: admin.loginAt });
+        if (current.role !== admin.role) setAdmin({ ...current, loginAt: admin.loginAt });
       } catch (error) {
         // 401 ou 403 : session révoquée ou compte suspendu ; une panne réseau ne ferme rien
         if (!stopped && error instanceof ApiError && (error.status === 401 || error.status === 403)) closed();

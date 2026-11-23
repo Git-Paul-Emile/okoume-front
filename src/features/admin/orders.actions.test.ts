@@ -3,10 +3,8 @@ import {
   advancePatch,
   canDecideReturn,
   canReopen,
-  canRestock,
-  canWriteOff,
-  inspectionPatch,
   nextStatus,
+  RETURN_STEPS,
 } from './orders.actions';
 
 const order = (over: Partial<AdminOrder> = {}): AdminOrder =>
@@ -51,34 +49,13 @@ describe('avancement des commandes', () => {
 });
 
 describe('retours', () => {
-  it('l’inspection classe chaque article avant le remboursement', () => {
-    const received = order({
-      status: 'delivered',
-      paymentStatus: 'paid',
-      returnRequest: {
-        items: [{ variantId: 'v1', quantity: 2 }],
-        reason: 'Défectueux',
-        comment: '',
-        status: 'received',
-        createdAt: NOW,
-      },
-    });
-    expect(() => inspectionPatch(received, [{ variantId: 'v1', resaleable: 1, unsellable: 0 }], '', 'Nadia')).toThrow(
-      /Classez/,
-    );
-    const inspected = {
-      ...received,
-      ...inspectionPatch(received, [{ variantId: 'v1', resaleable: 1, unsellable: 1 }], 'Écran fissuré', 'Nadia'),
-    } as AdminOrder;
-    expect(inspected.returnRequest?.status).toBe('refund_due');
-    expect(inspected.returnRequest?.restock).toEqual({ status: 'pending' });
-    expect(inspected.paymentStatus).toBe('refund_due');
+  it('confirme la réception puis passe directement au remboursement', () => {
+    expect(RETURN_STEPS).toEqual([
+      { from: 'accepted', to: 'refund_due', label: 'Confirmer la réception du retour' },
+    ]);
   });
 
   it('réserve chaque décision au bon rôle', () => {
-    expect(canRestock('stock_manager')).toBe(true);
-    expect(canRestock('orders_manager')).toBe(false);
-    expect(canWriteOff('stock_manager')).toBe(false);
     expect(canDecideReturn('super_admin')).toBe(true);
     expect(canDecideReturn('orders_manager')).toBe(false);
     expect(canReopen('orders_manager')).toBe(true);

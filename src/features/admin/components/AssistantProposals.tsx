@@ -7,20 +7,14 @@ import { TextField } from '@/components/ui/TextField';
 import { useAdminAuthStore } from '@/stores/adminAuthStore';
 import { formatDateTime } from '@/utils/formatDate';
 import { cn } from '@/utils/text';
-import { uid } from '@/utils/ids';
 import { adminApi } from '../admin.api';
 import { useAdminMutation, useAssistantLog } from '../admin.queries';
 import type { Proposal } from '../adminAssistant';
 import {
-  activeParams,
   decisionError,
-  nextVersion,
-  paramsError,
   proposalStatus,
   STALE_HOURS,
-  type AssistantParams,
   type ProposalDecision,
-  type RulesVersion,
 } from '../assistantRules';
 import { ReasonDialog } from './ReasonDialog';
 
@@ -239,103 +233,6 @@ function PostponeDialog({
         </div>
       </div>
     </Modal>
-  );
-}
-
-const FIELDS: Array<{ key: keyof AssistantParams; label: string }> = [
-  { key: 'slowDays', label: 'Jours sans vente avant une remise' },
-  { key: 'slowDiscount', label: 'Remise proposée (%)' },
-  { key: 'promoDays', label: 'Durée de la remise (jours)' },
-  { key: 'minStock', label: 'Stock minimum concerné' },
-];
-
-/** Règles de l'assistant (17.8) : chaque changement crée une version ; une version passée peut être restaurée. */
-export function AssistantRulesPanel({ versions }: { versions: RulesVersion[] }) {
-  const admin = useAdminAuthStore((s) => s.admin);
-  const by = admin ? `${admin.firstName} ${admin.lastName}` : 'Équipe';
-  const current = activeParams(versions);
-  const [v, setV] = useState<Record<keyof AssistantParams, string>>(() => ({
-    slowDays: String(current.slowDays),
-    slowDiscount: String(current.slowDiscount),
-    promoDays: String(current.promoDays),
-    minStock: String(current.minStock),
-  }));
-  const [note, setNote] = useState('');
-  const [error, setError] = useState('');
-  const save = useAdminMutation(
-    (x: { params: AssistantParams; note: string }) =>
-      adminApi.saveAssistantRules(nextVersion(versions, x.params, x.note, by, uid())),
-    (x) => `Règles de l’assistant : nouvelle version (${x.note})`,
-  );
-  const submit = () => {
-    const params = Object.fromEntries(FIELDS.map((f) => [f.key, Number(v[f.key])])) as unknown as AssistantParams;
-    const e = paramsError(params) ?? (note.trim().length < 5 ? 'Indiquez la raison du changement.' : null);
-    if (e) return setError(e);
-    setError('');
-    save.mutate({ params, note: note.trim() }, { onSuccess: () => setNote('') });
-  };
-
-  return (
-    <section className="card mt-6 p-5 sm:p-6">
-      <h2 className="text-base">Règles de l’assistant</h2>
-      <p className="mt-1 text-sm text-ink-muted">
-        Réservé à l’administrateur principal. Chaque changement est versionné et peut être annulé en restaurant une
-        version précédente. En production, il est testé en environnement de test avant d’être appliqué.
-      </p>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        {FIELDS.map((f) => (
-          <TextField
-            key={f.key}
-            label={f.label}
-            inputMode="numeric"
-            value={v[f.key]}
-            onChange={(e) => setV((x) => ({ ...x, [f.key]: e.target.value }))}
-          />
-        ))}
-      </div>
-      <TextField
-        label="Raison du changement"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        containerClassName="mt-4"
-      />
-      {error && (
-        <p className="mt-3 text-sm font-medium text-danger" role="alert">
-          {error}
-        </p>
-      )}
-      <Button className="mt-4" loading={save.isPending} onClick={submit}>
-        Enregistrer une nouvelle version
-      </Button>
-      {versions.length > 0 && (
-        <ul className="mt-5 divide-y divide-sage text-sm">
-          {versions.map((ver, i) => (
-            <li key={ver.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
-              <span>
-                <span className="block font-medium">
-                  Version {ver.version}
-                  {i === 0 && ' (en vigueur)'} : {ver.note}
-                </span>
-                <span className="block text-xs text-ink-muted">
-                  {formatDateTime(ver.at)} · {ver.by} · {ver.params.slowDays} j, {ver.params.slowDiscount} %,{' '}
-                  {ver.params.promoDays} j, stock {ver.params.minStock}
-                </span>
-              </span>
-              {i > 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  loading={save.isPending}
-                  onClick={() => save.mutate({ params: ver.params, note: `Restauration de la version ${ver.version}` })}
-                >
-                  Restaurer
-                </Button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 

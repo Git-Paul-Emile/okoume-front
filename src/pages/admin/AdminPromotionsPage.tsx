@@ -12,7 +12,6 @@ import {
   useAdminProducts,
   useAdminPromoCodes,
 } from '@/features/admin/admin.queries';
-import type { TierId } from '@/features/settings/settings.types';
 import { matches } from '@/features/admin/admin.utils';
 import { AdminTable, type Column } from '@/features/admin/components/AdminTable';
 import { StateBadge } from '@/features/admin/components/StatusBadges';
@@ -59,11 +58,8 @@ export default function AdminPromotionsPage() {
         <span className="text-ink-soft">
           {[
             c.minAmount ? `Dès ${formatPrice(c.minAmount)}` : null,
-            c.newCustomersOnly ? '1re commande' : null,
-            c.tiers.length ? `Niveaux ${c.tiers.join(', ')}` : null,
             c.categoryIds.length ? `${c.categoryIds.length} catégorie(s)` : null,
             c.productIds.length ? `${c.productIds.length} produit(s)` : null,
-            c.perCustomer ? `${c.perCustomer} par client` : null,
           ]
             .filter(Boolean)
             .join(' · ') || 'Aucune'}
@@ -98,8 +94,7 @@ export default function AdminPromotionsPage() {
           </Button>
         }
       >
-        Les remises s’appliquent dans cet ordre : promotion du produit, code promo, puis points de fidélité, dans la
-        limite du plafond de remise défini dans les paramètres.
+        Les codes promo sont actifs immédiatement, avec une date de fin et une limite globale d’utilisation.
       </PageIntro>
       <StatRow
         items={[
@@ -129,12 +124,9 @@ function CodeDialog({ code, codes, onClose }: { code: PromoCode | null; codes: P
     minAmount: String(code?.minAmount ?? 0),
     maxUses: code ? (code.maxUses === null ? '' : String(code.maxUses)) : '100',
     endsAt: (code?.endsAt ?? new Date(Date.now() + 30 * 86_400_000).toISOString()).slice(0, 10),
-    newCustomersOnly: code?.newCustomersOnly ?? false,
     freeDelivery: code?.freeDelivery ?? false,
-    perCustomer: String(code?.perCustomer ?? 1),
     productIds: code?.productIds ?? [],
     categoryIds: code?.categoryIds ?? [],
-    tiers: code?.tiers ?? [],
   }));
   const { data: categories = [] } = useAdminCategories();
   const { data: products = [] } = useAdminProducts();
@@ -159,15 +151,11 @@ function CodeDialog({ code, codes, onClose }: { code: PromoCode | null; codes: P
     if (codes.some((c) => c.code === codeValue && c.id !== code?.id)) return setError('Ce code existe déjà.');
     if (!v.freeDelivery && (!Number.isInteger(value) || value <= 0 || (v.type === 'percent' && value > 90)))
       return setError('La valeur doit être un entier positif (90 % au maximum).');
-    const perCustomer = Number(v.perCustomer);
-    if (!Number.isInteger(perCustomer) || perCustomer < 0)
-      return setError('Limite par client : un entier, 0 pour illimité.');
     save.mutate(
       {
         id: code?.id ?? uid(),
         uses: 0,
         active: true,
-        startsAt: new Date().toISOString(),
         ...code,
         code: codeValue,
         label: v.label.trim() || codeValue,
@@ -176,12 +164,9 @@ function CodeDialog({ code, codes, onClose }: { code: PromoCode | null; codes: P
         minAmount: Number(v.minAmount) || 0,
         maxUses: v.maxUses.trim() === '' ? null : Number(v.maxUses) || 1,
         endsAt: new Date(`${v.endsAt}T23:59:00`).toISOString(),
-        newCustomersOnly: v.newCustomersOnly,
         freeDelivery: v.freeDelivery,
-        perCustomer,
         productIds: v.productIds,
         categoryIds: v.categoryIds,
-        tiers: v.tiers,
       },
       { onSuccess: onClose },
     );
@@ -233,34 +218,6 @@ function CodeDialog({ code, codes, onClose }: { code: PromoCode | null; codes: P
           />
           <TextField label="Fin" type="date" value={v.endsAt} onChange={(e) => set({ endsAt: e.target.value })} />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextField
-            label="Utilisations par client"
-            inputMode="numeric"
-            value={v.perCustomer}
-            onChange={(e) => set({ perCustomer: e.target.value })}
-            hint="0 pour illimité."
-          />
-          <fieldset>
-            <legend className="mb-1.5 text-sm font-medium">Niveaux de fidélité</legend>
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {(['bronze', 'argent', 'or'] as TierId[]).map((t) => (
-                <Checkbox
-                  key={t}
-                  label={{ bronze: 'Bronze', argent: 'Argent', or: 'Or' }[t]}
-                  checked={v.tiers.includes(t)}
-                  onChange={() => set({ tiers: toggle(v.tiers, t) })}
-                />
-              ))}
-            </div>
-            <p className="mt-1 text-xs text-ink-muted">Aucun coché : tous les clients.</p>
-          </fieldset>
-        </div>
-        <Checkbox
-          label="Réservé à la première commande"
-          checked={v.newCustomersOnly}
-          onChange={(e) => set({ newCustomersOnly: e.target.checked })}
-        />
         {!v.freeDelivery && (
           <fieldset className="space-y-3 rounded-lg border border-sage p-3">
             <legend className="px-1 text-sm font-medium">Articles éligibles</legend>

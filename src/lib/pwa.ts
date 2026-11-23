@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react';
-import { env } from '@/config/env';
-
-/**
- * Enregistre le service worker (application installable, consultation hors ligne).
- * Uniquement en production : en développement il masquerait les mises à jour à chaud.
- */
-export function registerServiceWorker() {
+/** Remplace les anciens workers hors ligne par un worker de nettoyage sans interception réseau. */
+export function retireOfflineWorker() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`/sw.js?api=${encodeURIComponent(env.backendUrl)}`).catch(() => {
-      // Sans service worker, le site fonctionne normalement en ligne
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Le site reste utilisable en ligne si le nettoyage du worker échoue.
     });
   });
 }

@@ -20,8 +20,6 @@ export interface Variant {
   /** Facultatifs, renseignés dans le back-office (4.3). */
   weightGrams?: number | null;
   dimensions?: { length: number; width: number; height: number } | null;
-  /** Articles retournés non revendables : stock séparé, jamais proposé à la vente (14.3). */
-  unsellable?: number;
 }
 
 export interface ProductSpec {

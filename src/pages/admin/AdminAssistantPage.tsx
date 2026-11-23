@@ -10,10 +10,7 @@ import {
   useAdminMutation,
   useAdminOrders,
   useAdminProducts,
-  useAdminSettings,
-  useAdminTickets,
   useAssistantActions,
-  useAssistantRules,
   useProposalDecisions,
   useSiteStats,
 } from '@/features/admin/admin.queries';
@@ -26,10 +23,8 @@ import {
   type Answer,
   type AssistantContext,
 } from '@/features/admin/adminAssistant';
-import { activeParams } from '@/features/admin/assistantRules';
 import {
   AssistantJournal,
-  AssistantRulesPanel,
   ProposalsSection,
 } from '@/features/admin/components/AssistantProposals';
 import { logEntry } from '@/features/admin/assistantLog';
@@ -55,12 +50,9 @@ export default function AdminAssistantPage() {
   const admin = useAdminAuthStore((s) => s.admin);
   const orders = useAdminOrders();
   const { data: products = [] } = useAdminProducts();
-  const { data: tickets = [] } = useAdminTickets();
   const { data: stats = [] } = useSiteStats();
-  const { data: settings } = useAdminSettings();
   const { data: actions = [] } = useAssistantActions();
   const { data: decisions = [] } = useProposalDecisions();
-  const { data: rulesVersions = [] } = useAssistantRules();
   const revert = useAdminMutation(
     (a: (typeof actions)[number]) => adminApi.revertProposal(a),
     (a) => `Proposition annulée : ${a.title}`,
@@ -72,13 +64,11 @@ export default function AdminAssistantPage() {
         ? {
             orders: orders.data,
             products,
-            tickets,
             stats,
             end: referenceEnd(orders.data, stats),
-            sla: settings?.supportSla,
           }
         : null,
-    [orders.data, products, tickets, stats, settings],
+    [orders.data, products, stats],
   );
 
   if (!ctx) return <PageLoader />;
@@ -87,7 +77,7 @@ export default function AdminAssistantPage() {
   const findings = anomalies(ctx);
   // Propositions sur le catalogue : réservées aux rôles qui ont accès aux produits (17.7)
   const canEdit = !!admin && canAccess(admin, '/admin/produits');
-  const proposed = canEdit ? proposals(ctx, activeParams(rulesVersions)) : [];
+  const proposed = canEdit ? proposals(ctx) : [];
 
   return (
     <div className="mx-auto max-w-[1400px]">
@@ -212,7 +202,6 @@ export default function AdminAssistantPage() {
 
       <AskPanel ctx={ctx} />
 
-      {isOwner(admin) && <AssistantRulesPanel versions={rulesVersions} />}
       {isOwner(admin) && <AssistantJournal decisions={decisions} actions={actions} />}
 
       <p className="mt-4 text-xs text-ink-muted">
@@ -246,7 +235,7 @@ function AskPanel({ ctx }: { ctx: AssistantContext }) {
     <section className="card mt-6 p-5 sm:p-6">
       <h2 className="text-base">Poser une question</h2>
       <p className="mt-1 text-sm text-ink-muted">
-        Ventes, marge, stock, paiements, annulations, quartiers, assistance.
+        Ventes, marge, stock, paiements, annulations, quartiers.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {SUGGESTED_QUESTIONS.map((s) => (

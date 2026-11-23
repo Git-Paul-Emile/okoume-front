@@ -34,7 +34,6 @@ export const checkoutApi = {
         delivery: input.delivery,
         paymentMethod: input.paymentMethod,
         promoCode: input.appliedCode,
-        points: input.totals.pointsUsed,
       },
       input.user?.id ?? null,
     ),

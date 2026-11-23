@@ -84,11 +84,3 @@ export function useSellerOrder(id: Id | undefined) {
 export function useShopDelivery() {
   return useQuery({ queryKey: [SELLER, 'delivery'], queryFn: ({ signal }) => sellerOrdersBackend.delivery(signal) });
 }
-
-export function useSellerPayouts(page: number) {
-  return useQuery({
-    queryKey: [SELLER, 'payouts', page],
-    queryFn: ({ signal }) => sellerOrdersBackend.payouts(page, signal),
-    placeholderData: keepPreviousData,
-  });
-}

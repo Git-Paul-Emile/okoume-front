@@ -1,5 +1,4 @@
 import type { Id } from '@/api/types';
-import type { TierId } from '@/features/settings/settings.types';
 
 export interface Address {
   id: Id;
@@ -12,17 +11,14 @@ export interface Address {
   isDefault: boolean;
 }
 
-export type NotificationTopic = 'orders' | 'support' | 'loyalty' | 'promotions';
-export type NotificationChannel = 'email' | 'push';
+export type NotificationTopic = 'orders' | 'promotions';
+export type NotificationChannel = 'email';
 
 /**
- * Préférences de notification (26). « email » et « push » restent les interrupteurs généraux ;
- * « topics » précise le choix par type de message. Les e-mails de commande et d'assistance
- * sont des messages de service : ils ne se désactivent pas.
+ * Préférences d'e-mail par sujet. Les e-mails de commande sont des messages de service : ils ne se désactivent pas.
  */
 export interface NotificationPrefs {
   email: boolean;
-  push: boolean;
   topics?: Partial<Record<NotificationTopic, Partial<Record<NotificationChannel, boolean>>>>;
 }
 
@@ -32,18 +28,11 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
-  birthday: string | null;
-  referralCode: string;
-  loyaltyPoints: number;
-  totalSpent: number;
-  tier: TierId;
   favorites: Id[];
   /** Produits récemment consultés, synchronisés entre appareils (3.8). */
   recentlyViewed?: Id[];
   addresses: Address[];
   notificationPrefs: NotificationPrefs;
-  /** Cadeau d'anniversaire choisi par le client (12.5). */
-  birthdayRewardChoice?: 'points' | 'code';
   hasOrdered: boolean;
   /** Adresse e-mail vérifiée par code (19.1). */
   emailVerifiedAt?: string;

@@ -1,13 +1,12 @@
 import type { Id } from '@/api/types';
 import { ordersBackend } from './orders.backend';
-import type { CancellationRequest, Order, PaymentMethod, ReturnRequest } from './orders.types';
+import type { CancellationRequest, Order, ReturnRequest } from './orders.types';
 
 /** Demande de retour, avec les photos qui justifient un produit abîmé. */
 export type ReturnInput = Omit<ReturnRequest, 'status' | 'createdAt'> & { evidenceUrls?: string[] };
 
 /**
- * Démarches après commande. Celles d'une commande passée sans compte demandent une session, et le changement
- * de paiement s'applique tout de suite, sans accord de la boutique.
+   * Démarches disponibles après commande. Celles d'une commande passée sans compte demandent une session.
  */
 export const ordersApi = {
   /** Suivi invité : numéro de commande + code temporaire. */
@@ -31,9 +30,6 @@ export const ordersApi = {
       comment: request.comment,
       evidenceUrls,
     }),
-  requestPaymentChange: (order: Order, to: PaymentMethod) => ordersBackend.changePaymentMethod(order, to),
-  /** Réponse du client aux nouveaux frais de livraison proposés par la boutique (9.5). */
-  decideFeeChange: (order: Order, accept: boolean) => ordersBackend.decideFeeChange(order, accept),
   /** Contestation : ouvre une réclamation prioritaire sans modifier le statut « Livrée ». */
   disputeDelivery: (order: Order, message: string) => ordersBackend.disputeDelivery(order, message),
   /** Réouverture d'un retour refusé : le dossier initial est conservé, une demande est transmise à l'équipe. */

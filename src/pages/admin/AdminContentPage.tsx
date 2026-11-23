@@ -10,10 +10,8 @@ import { useAdminAds, useAdminBanners, useAdminMutation } from '@/features/admin
 import { AdminTable, type Column } from '@/features/admin/components/AdminTable';
 import { ImageUpload } from '@/components/ui/Upload';
 import { staffImageUploader } from '@/features/admin/adminCatalog.backend';
-import { StateBadge } from '@/features/admin/components/StatusBadges';
 import { Switch } from '@/components/ui/Switch';
 import { PageIntro, Segmented, Toolbar } from '@/features/admin/components/Toolbar';
-import { formatDate } from '@/utils/formatDate';
 
 const placementLabel: Record<string, string> = {
   'home-promo': 'Accueil, grande bannière (1200 × 400)',
@@ -21,13 +19,6 @@ const placementLabel: Record<string, string> = {
 };
 
 type Tab = 'ads' | 'banners';
-
-const campaign = (a: Ad, now = new Date()) => {
-  if (!a.advertiser) return <StateBadge tone="neutral">Espace disponible</StateBadge>;
-  if (a.startsAt && new Date(a.startsAt) > now) return <StateBadge tone="warning">Programmée</StateBadge>;
-  if (a.endsAt && new Date(a.endsAt) < now) return <StateBadge tone="neutral">Terminée</StateBadge>;
-  return <StateBadge tone="forest">En cours</StateBadge>;
-};
 
 export default function AdminContentPage() {
   const { data: ads, isLoading } = useAdminAds();
@@ -61,19 +52,6 @@ export default function AdminContentPage() {
       ),
     },
     { key: 'placement', header: 'Emplacement', cell: (a) => placementLabel[a.placement] ?? a.placement },
-    {
-      key: 'period',
-      header: 'Période',
-      cell: (a) =>
-        a.startsAt || a.endsAt ? (
-          <span className="whitespace-nowrap">
-            {a.startsAt ? formatDate(a.startsAt) : '…'} au {a.endsAt ? formatDate(a.endsAt) : '…'}
-          </span>
-        ) : (
-          'Sans limite'
-        ),
-    },
-    { key: 'state', header: 'Campagne', cell: (a) => campaign(a) },
     { key: 'priority', header: 'Priorité', align: 'center', cell: (a) => a.priority },
     {
       key: 'active',
@@ -108,8 +86,8 @@ export default function AdminContentPage() {
   return (
     <>
       <PageIntro>
-        Les espaces publicitaires sont vendus à des entreprises extérieures ; sans campagne en cours, le visuel « espace
-        disponible » de la boutique s’affiche. Chaque publicité porte la mention « Publicité ».
+        Les espaces publicitaires sont gérés ici : activez un visuel d’annonceur ou affichez le visuel « espace
+        disponible » de la boutique. Chaque publicité porte la mention « Publicité ».
       </PageIntro>
       <Toolbar>
         <Segmented
@@ -123,7 +101,7 @@ export default function AdminContentPage() {
         />
         {tab === 'ads' && (
           <Button className="sm:ml-auto" icon={<Plus className="size-4" />} onClick={() => setAd('new')}>
-            Nouvelle campagne
+            Nouvel espace publicitaire
           </Button>
         )}
       </Toolbar>
@@ -150,8 +128,6 @@ export default function AdminContentPage() {
   );
 }
 
-const toDate = (iso: string | null) => (iso ? iso.slice(0, 10) : '');
-
 function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   const [v, setV] = useState(() => ({
     placement: ad?.placement ?? 'home-promo',
@@ -160,8 +136,6 @@ function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
     href: ad?.href ?? '/catalogue',
     image: ad?.image ?? null,
     imageMobile: ad?.imageMobile ?? null,
-    startsAt: toDate(ad?.startsAt ?? null),
-    endsAt: toDate(ad?.endsAt ?? null),
     priority: String(ad?.priority ?? 10),
     active: ad?.active ?? true,
   }));
@@ -175,7 +149,6 @@ function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (v.alt.trim().length < 5) return setError('Décrivez le visuel : ce texte est lu par les lecteurs d’écran.');
-    if (v.startsAt && v.endsAt && v.endsAt < v.startsAt) return setError('La fin doit être après le début.');
     if (!v.image) return setError('Ajoutez le visuel ordinateur.');
     const input: AdInput = {
       placement: v.placement,
@@ -184,8 +157,6 @@ function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
       href: v.href.trim(),
       image: v.image,
       imageMobile: v.imageMobile,
-      startsAt: v.startsAt ? new Date(`${v.startsAt}T00:00:00`).toISOString() : null,
-      endsAt: v.endsAt ? new Date(`${v.endsAt}T23:59:00`).toISOString() : null,
       priority: Number(v.priority) || 0,
       active: v.active,
     };
@@ -196,8 +167,8 @@ function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
     <Modal
       open
       onClose={onClose}
-      title={ad ? 'Modifier la campagne publicitaire' : 'Nouvelle campagne publicitaire'}
-      description="Choisissez un emplacement, un visuel et la période de diffusion."
+      title={ad ? 'Modifier l’espace publicitaire' : 'Nouvel espace publicitaire'}
+      description="Choisissez un emplacement, un visuel et activez ou masquez sa diffusion."
       className="max-w-xl"
     >
       <form onSubmit={submit} noValidate className="max-h-[75vh] space-y-4 overflow-y-auto pr-1">
@@ -240,9 +211,7 @@ function AdDialog({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
           hint="800 × 600 conseillé. Sans visuel mobile, le visuel ordinateur est utilisé."
         />
         {/* Le contrat de l’annonceur n’est pas stocké en ligne : il reste dans les documents de la boutique */}
-        <div className="grid gap-4 sm:grid-cols-3">
-          <TextField label="Début" type="date" value={v.startsAt} onChange={(e) => set({ startsAt: e.target.value })} />
-          <TextField label="Fin" type="date" value={v.endsAt} onChange={(e) => set({ endsAt: e.target.value })} />
+        <div className="grid gap-4 sm:grid-cols-2">
           <TextField
             label="Priorité"
             inputMode="numeric"

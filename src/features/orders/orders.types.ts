@@ -31,7 +31,6 @@ export interface OrderTotals {
   subtotal: number;
   productDiscount: number;
   codeDiscount: number;
-  pointsDiscount: number;
   deliveryFee: number;
   deliveryDiscount: number;
   total: number;
@@ -52,44 +51,14 @@ export interface ReturnRequest {
   reason: string;
   comment: string;
   status:
-    'pending' | 'accepted' | 'refused' | 'expected' | 'received' | 'inspecting' | 'refund_due' | 'refunded' | 'closed';
+    'pending' | 'accepted' | 'refused' | 'expected' | 'received' | 'refund_due' | 'refunded' | 'closed';
   createdAt: string;
   decisionReason?: string; /** Demande de réouverture après un refus (14.6). */
   reopenRequestedAt?: string;
-  /** Inspection après réception (14.3) : quantités revendables et non revendables par article. */
-  inspection?: {
-    lines: Array<{ variantId: Id; resaleable: number; unsellable: number }>;
-    note: string;
-    by: string;
-    at: string;
-  };
-  /** Remise en stock des articles revendables, validée par une personne autorisée au stock. */
-  restock?: { status: 'pending' | 'done'; by?: string; at?: string };
-}
-
-/** Demande du client pour régler autrement (8.6) : acceptée ou refusée par la boutique. */
-export interface PaymentChangeRequest {
-  from: PaymentMethod;
-  to: PaymentMethod;
-  reason: string;
-  status: 'pending' | 'accepted' | 'refused';
-  createdAt: string;
-  decisionReason?: string;
-}
-
-/** Changement des frais de livraison facturés après la commande (9.5) : accord du client requis. */
-export interface DeliveryFeeChange {
-  from: number;
-  to: number;
-  reason: string;
-  status: 'pending' | 'accepted' | 'refused';
-  createdAt: string;
-  decidedAt?: string;
 }
 
 /**
- * Contestation d'une livraison marquée « Livrée » (9.6) : le statut reste inchangé pendant l'enquête.
- * Un dossier suivi par la boutique (status) ; les anciennes contestations renvoient à une demande d'assistance (ticketNumber).
+ * Réclamation sur une livraison centralisée par Okoumé. Les commandes livrées par le vendeur sont exclues.
  */
 export interface DeliveryDispute {
   createdAt: string;
@@ -107,7 +76,6 @@ export interface Order {
   customer: OrderCustomer;
   totals: OrderTotals;
   promoCode: string | null;
-  pointsUsed: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   status: OrderStatus;
@@ -115,11 +83,7 @@ export interface Order {
   history: Array<{ status: OrderStatus; at: string; note?: string; from?: OrderStatus; by?: string }>;
   cancellationRequest: CancellationRequest | null;
   returnRequest: ReturnRequest | null;
-  paymentChangeRequest?: PaymentChangeRequest | null;
-  /** Moyens de paiement précédents, conservés après un changement accepté. */
-  paymentMethodHistory?: Array<{ method: PaymentMethod; until: string }>;
   deliveryDispute?: DeliveryDispute | null;
-  deliveryFeeChange?: DeliveryFeeChange | null;
   /** Boutique qui vend (32.4) ; null pour la boutique Okoumé */
   shop: { slug: string; name: string } | null;
   /** Passage en caisse commun aux commandes d'un même panier */

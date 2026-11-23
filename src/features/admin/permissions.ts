@@ -1,18 +1,14 @@
 import type { AdminRole } from './admin.types';
 
-/**
- * Permissions granulaires (2.4) : un domaine et une action. Un membre peut cumuler plusieurs rôles
- * standards et des rôles personnalisés ; ses droits sont l'union de tous. Contrôle d'interface :
- * en production, l'API applique les mêmes règles.
- */
+/** Domaines fonctionnels conservés pour les journaux et le ciblage des alertes. */
 export const DOMAINS = {
   pilotage: 'Pilotage et statistiques',
   commandes: 'Commandes et livraisons',
   paiements: 'Paiements',
   retours: 'Annulations et retours',
   catalogue: 'Catalogue, promotions et contenus',
-  stock: 'Stock et inventaire',
-  clients: 'Clients, avis et assistance',
+  stock: 'Gestion du stock',
+  clients: 'Clients et avis',
   donnees_sensibles: 'Données personnelles sensibles',
   exports: 'Exports de données',
   vendeurs: 'Place de marché : boutiques et annonces des vendeurs',
@@ -51,12 +47,9 @@ const SCREEN_DOMAIN: Array<[string, Domain]> = [
   ['/admin/contenus', 'catalogue'],
   ['/admin/editorial', 'catalogue'],
   ['/admin/stock', 'stock'],
-  ['/admin/inventaire', 'stock'],
   ['/admin/clients', 'clients'],
   ['/admin/emails', 'clients'],
-  ['/admin/donnees-personnelles', 'donnees_sensibles'],
   ['/admin/avis', 'clients'],
-  ['/admin/assistance', 'clients'],
   ['/admin/statistiques', 'pilotage'],
   ['/admin/alertes', 'pilotage'],
   ['/admin/assistant', 'pilotage'],
@@ -69,68 +62,19 @@ export const screenDomain = (pathname: string): Domain | null => {
   return SCREEN_DOMAIN.find(([p]) => pathname.startsWith(p))?.[1] ?? null;
 };
 
-const all = (domain: Domain, actions: Action[]) => actions.map((a) => `${domain}:${a}` as Permission);
-
-/** Droits des rôles standards. L'administrateur principal a tous les droits. */
-export const ROLE_PERMISSIONS: Record<Exclude<AdminRole, 'super_admin'>, Permission[]> = {
-  catalog_manager: [
-    ...all('pilotage', ['consulter']),
-    ...all('catalogue', ['consulter', 'creer', 'modifier', 'publier']),
-    ...all('stock', ['consulter', 'modifier']),
-    ...all('clients', ['consulter', 'valider']),
-  ],
-  orders_manager: [
-    ...all('pilotage', ['consulter']),
-    ...all('commandes', ['consulter', 'creer', 'modifier', 'annuler', 'valider', 'executer']),
-    ...all('paiements', ['consulter', 'valider', 'annuler']),
-    ...all('retours', ['consulter', 'modifier', 'executer']),
-    ...all('clients', ['consulter', 'modifier', 'valider']),
-    ...all('donnees_sensibles', ['consulter']),
-  ],
-  stock_manager: [...all('pilotage', ['consulter']), ...all('stock', ['consulter', 'creer', 'modifier', 'valider'])],
-};
-
-/** Rôle personnalisé défini par l'administrateur principal. */
-export interface CustomRole {
-  id: string;
-  name: string;
-  permissions: Permission[];
-}
-
-/** Ce qu'il faut savoir d'un membre pour calculer ses droits (session ou fiche d'équipe). */
-export interface Grantee {
-  role: AdminRole;
-  /** Rôles standards cumulés en plus du rôle principal. */
-  extraRoles?: AdminRole[];
-  /** Droits issus des rôles personnalisés, calculés à la connexion. */
-  customPermissions?: string[];
-}
+export interface Grantee { role: AdminRole }
 
 type Who = Grantee | AdminRole | string | null | undefined;
 const asGrantee = (who: Who): Grantee | null =>
   !who ? null : typeof who === 'string' ? { role: who as AdminRole } : who;
 
 export const rolesOf = (who: Who): AdminRole[] => {
-  const g = asGrantee(who);
-  return g ? [...new Set([g.role, ...(g.extraRoles ?? [])])] : [];
+  return asGrantee(who) ? ['super_admin'] : [];
 };
 
-export const isOwner = (who: Who) => rolesOf(who).includes('super_admin');
+/** Tous les comptes du back-office ont les mêmes droits d'administration dans le MVP. */
+export const isOwner = (who: Who) => !!asGrantee(who);
 
-export function permissionsOf(who: Who): Set<string> {
-  const g = asGrantee(who);
-  const set = new Set<string>(g?.customPermissions ?? []);
-  rolesOf(who).forEach((r) => r !== 'super_admin' && ROLE_PERMISSIONS[r].forEach((p) => set.add(p)));
-  return set;
-}
+export const permissionsOf = (_who: Who): Set<string> => new Set();
 
-export const can = (who: Who, permission: Permission) => isOwner(who) || permissionsOf(who).has(permission);
-
-/** Droits issus des rôles personnalisés attribués à un membre. */
-export const customPermissions = (customRoleIds: string[] = [], roles: CustomRole[]) => [
-  ...new Set(roles.filter((r) => customRoleIds.includes(r.id)).flatMap((r) => r.permissions)),
-];
-
-/** Droit accordé par un rôle personnalisé (l'accès aux écrans des rôles standards suit le menu). */
-export const hasCustomPermission = (who: Who, permission: Permission) =>
-  !!asGrantee(who)?.customPermissions?.includes(permission);
+export const can = (who: Who, _permission: Permission) => isOwner(who);

@@ -1,4 +1,3 @@
-import type { Ticket } from '@/features/support/support.types';
 import { formatPrice } from '@/utils/formatPrice';
 import { normalizeText } from '@/utils/text';
 import type { AdminOrder, AdminProduct, SiteStat } from './admin.types';
@@ -11,8 +10,7 @@ import {
   topProducts,
   type AlertLevel,
 } from './dashboard.utils';
-import { DEFAULT_SLA, isLate } from './support.rules';
-import { DEFAULT_PARAMS, URGENCY_ORDER, type AssistantParams } from './assistantRules';
+import { URGENCY_ORDER } from './assistantRules';
 
 /**
  * Assistant de l'administration (cahier des charges, 17). Les chiffres sont calculés ici à partir
@@ -22,11 +20,9 @@ import { DEFAULT_PARAMS, URGENCY_ORDER, type AssistantParams } from './assistant
 export interface AssistantContext {
   orders: AdminOrder[];
   products: AdminProduct[];
-  tickets: Ticket[];
   stats: SiteStat[];
   /** Fin de la période observée (début du jour qui suit la dernière activité). */
   end: Date;
-  sla?: { high: number; normal: number };
 }
 
 const DAY = 86_400_000;
@@ -171,18 +167,6 @@ export function anomalies(ctx: AssistantContext): Finding[] {
       to: '/admin/paiements',
     });
 
-  // Assistance en retard
-  const late = ctx.tickets.filter((t) => isLate(t, now, ctx.sla ?? DEFAULT_SLA));
-  if (late.length)
-    out.push({
-      id: 'support-late',
-      level: 'critical',
-      title: 'Demandes d’assistance en retard',
-      evidence: `${late.length} demande${late.length > 1 ? 's' : ''} sans réponse dans le délai prévu.`,
-      advice: 'Répondez d’abord aux demandes de priorité haute ou attribuez-les à un membre disponible.',
-      to: '/admin/assistance',
-    });
-
   return out;
 }
 
@@ -211,7 +195,7 @@ export interface Proposal {
 }
 
 /** Modifications proposées (17.5) : rien n'est appliqué sans validation, et tout peut être annulé (17.8). */
-export function proposals(ctx: AssistantContext, params: AssistantParams = DEFAULT_PARAMS): Proposal[] {
+export function proposals(ctx: AssistantContext): Proposal[] {
   const out: Proposal[] = [];
   const available = (p: AdminProduct) => p.variants.reduce((n, v) => n + Math.max(0, v.stock - v.reserved), 0);
 
@@ -236,43 +220,6 @@ export function proposals(ctx: AssistantContext, params: AssistantParams = DEFAU
       })),
     });
 
-  const since = ctx.end.getTime() - params.slowDays * DAY;
-  const sold = new Set(
-    ctx.orders
-      .filter((o) => o.status !== 'cancelled' && new Date(o.createdAt).getTime() >= since)
-      .flatMap((o) => o.items.map((i) => i.productId)),
-  );
-  const slow = ctx.products.filter(
-    (p) => p.status === 'published' && !p.promotion && !sold.has(p.id) && available(p) >= params.minStock,
-  );
-  if (slow.length) {
-    const startsAt = ctx.end.toISOString();
-    const endsAt = new Date(ctx.end.getTime() + params.promoDays * DAY).toISOString();
-    const picked = slow.slice(0, 6);
-    const tied = picked.reduce(
-      (s, p) => s + p.variants.reduce((n, v) => n + Math.max(0, v.stock - v.reserved) * (v.cost ?? 0), 0),
-      0,
-    );
-    out.push({
-      id: 'promote-slow-movers',
-      title: `Remise de ${params.slowDiscount} % sur les produits sans vente depuis ${params.slowDays} jours`,
-      reason: `Du stock immobilisé sans vente : une remise limitée à ${params.promoDays} jours aide à l’écouler sans toucher au prix de base.`,
-      evidence: picked.map((p) => `${p.name} : ${available(p)} en stock, aucune vente en ${params.slowDays} jours`),
-      period: `${params.slowDays} derniers jours`,
-      limits:
-        'L’absence de vente peut venir d’autres causes (photos, prix, saison) : la remise n’est pas la seule explication possible.',
-      impact: `${formatPrice(tied)} de stock au coût d’achat concernés ; marge réduite de ${params.slowDiscount} % sur les ventes obtenues.`,
-      urgency: 'moyenne',
-      risk: `Ventes au prix réduit qui se seraient faites au prix normal ; vérifiez que le prix remisé reste au-dessus du coût.`,
-      benefit: 'Trésorerie libérée et place faite pour des produits qui se vendent.',
-      changes: picked.map((p) => ({
-        productId: p.id,
-        label: p.name,
-        before: { promotion: null },
-        after: { promotion: { type: 'percent', value: params.slowDiscount, startsAt, endsAt } },
-      })),
-    });
-  }
   // Priorité : urgence d'abord (17.4)
   return out.sort((a, b) => URGENCY_ORDER[a.urgency] - URGENCY_ORDER[b.urgency]);
 }
@@ -371,11 +318,6 @@ export function answer(question: string, ctx: AssistantContext): Answer {
         link: { to: '/admin/livraisons', label: 'Voir les livraisons' },
       };
     })();
-  if (has('assistance', 'reclamation', 'retard', 'client'))
-    return {
-      text: `${ctx.tickets.filter((t) => t.status === 'open' || t.status === 'pending').length} demandes d’assistance en cours, dont ${ctx.tickets.filter((t) => isLate(t, ctx.end.getTime(), ctx.sla ?? DEFAULT_SLA)).length} en retard.`,
-      link: { to: '/admin/assistance', label: 'Ouvrir l’assistance' },
-    };
   if (has('vend', 'chiffre', ' ca ', 'commande', 'revenu'))
     return {
       text: `${label[0].toUpperCase()}${label.slice(1)} : ${m.count} commande${m.count > 1 ? 's' : ''} pour ${formatPrice(m.revenue)}, panier moyen ${formatPrice(m.avgBasket)}.`,
@@ -385,7 +327,7 @@ export function answer(question: string, ctx: AssistantContext): Answer {
       link: { to: '/admin/commandes', label: 'Voir les commandes' },
     };
   return {
-    text: 'Je réponds aux questions sur les ventes, la marge, le stock, les paiements, les annulations, les quartiers et l’assistance, à partir des données de la boutique.',
+    text: 'Je réponds aux questions sur les ventes, la marge, le stock, les paiements, les annulations et les quartiers, à partir des données de la boutique.',
     bullets: SUGGESTED_QUESTIONS.slice(0, 3),
   };
 }

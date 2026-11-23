@@ -1,17 +1,16 @@
-import type { ShopSettings } from '@/features/settings/settings.types';
 import type { CartLine, CartTotals } from './cart.types';
 
 /**
- * TVA incluse dans les prix TTC (5.3, 25.4) : par taux, remises (code, points) réparties au prorata,
+ * TVA incluse dans les prix TTC (5.3, 25.4) : par taux, remise du code répartie au prorata,
  * livraison à son propre taux. Indicatif : la facture fait foi.
  */
 export function vatIncluded(
   lines: CartLine[],
-  totals: Pick<CartTotals, 'subtotal' | 'codeDiscount' | 'pointsDiscount' | 'deliveryFee' | 'deliveryDiscount'>,
+  totals: Pick<CartTotals, 'subtotal' | 'codeDiscount' | 'deliveryFee' | 'deliveryDiscount'>,
   deliveryVat: number | null,
 ) {
   const goods = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
-  const discount = totals.codeDiscount + totals.pointsDiscount;
+  const discount = totals.codeDiscount;
   const byRate = new Map<number, number>();
   for (const l of lines) {
     const ttc = l.unitPrice * l.quantity;
@@ -31,12 +30,11 @@ export function vatIncluded(
 
 /**
  * Estimation du panier affichée pendant le tout premier devis serveur : prix des articles et livraison,
- * sans code promo ni points (seul le devis de l'API les vérifie et les applique).
+ * sans code promo (seul le devis de l'API le vérifie et l'applique).
  */
 export function estimateTotals(
   lines: CartLine[],
   deliveryFee: number | null,
-  loyalty: Pick<ShopSettings['loyalty'], 'earnPer'>,
 ): CartTotals {
   const baseSubtotal = lines.reduce((s, l) => s + l.originalPrice * l.quantity, 0);
   const subtotal = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
@@ -46,14 +44,10 @@ export function estimateTotals(
     subtotal,
     productDiscount: baseSubtotal - subtotal,
     codeDiscount: 0,
-    pointsUsed: 0,
-    pointsDiscount: 0,
     deliveryFee: fee,
     deliveryDiscount: 0,
     total: subtotal + fee,
-    pointsEarned: Math.floor(subtotal / loyalty.earnPer),
     itemCount: lines.reduce((s, l) => s + l.quantity, 0),
     codeError: null,
-    pointsError: null,
   };
 }

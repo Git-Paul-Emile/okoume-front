@@ -25,6 +25,7 @@ export function ShopForm({
   const [v, setV] = useState<ShopFields>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [phoneVerificationSimulated, setPhoneVerificationSimulated] = useState(Boolean(initial.phone));
   const set = (patch: Partial<ShopFields>) => setV((x) => ({ ...x, ...patch }));
 
   const submit = async (e: FormEvent) => {
@@ -35,6 +36,7 @@ export function ShopForm({
     if (v.district.trim().length < 2) next.district = 'Indiquez le quartier.';
     const phone = gabonPhone.safeParse(v.phone);
     if (!phone.success) next.phone = phone.error.issues[0]?.message ?? 'Numéro invalide.';
+    else if (!phoneVerificationSimulated) next.phoneVerification = 'Simulez la vérification du numéro avant de continuer.';
     if (!v.acceptedPaymentMethods.length) next.acceptedPaymentMethods = 'Indiquez au moins un moyen de paiement.';
     if (!v.handoverModes.length) next.handoverModes = 'Indiquez au moins un mode de remise.';
     setErrors(next);
@@ -85,10 +87,30 @@ export function ShopForm({
         label="Téléphone de la boutique"
         type="tel"
         value={v.phone}
-        onChange={(e) => set({ phone: e.target.value })}
+        onChange={(e) => {
+          set({ phone: e.target.value });
+          setPhoneVerificationSimulated(false);
+        }}
         error={errors.phone}
         hint="Communiqué à l’acheteur seulement après acceptation de sa demande."
       />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={!gabonPhone.safeParse(v.phone).success || phoneVerificationSimulated}
+          onClick={() => setPhoneVerificationSimulated(true)}
+        >
+          Simuler la vérification
+        </Button>
+        <span className="text-xs text-ink-muted">
+          {phoneVerificationSimulated
+            ? 'Simulation effectuée : aucun SMS envoyé et le propriétaire du numéro n’est pas vérifié.'
+            : 'Mode simulation uniquement : la vérification réelle par SMS n’est pas encore disponible.'}
+        </span>
+      </div>
+      {errors.phoneVerification && <p className="text-sm font-medium text-danger">{errors.phoneVerification}</p>}
       <fieldset>
         <legend className="label">Paiements acceptés (réglés directement avec l’acheteur)</legend>
         <div className="flex flex-wrap gap-4">

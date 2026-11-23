@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Heart, LayoutDashboard, LifeBuoy, LogOut, MapPin, Package, Coins, Store, User } from 'lucide-react';
+import { Heart, LayoutDashboard, LogOut, MapPin, Package, Store, User } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { useCurrentUser, useLogout } from '@/features/auth/auth.queries';
@@ -11,9 +11,7 @@ const links = [
   { to: '/compte/commandes', label: 'Mes commandes', icon: Package },
   { to: '/vendeur', label: 'Espace vendeur', icon: Store },
   { to: '/compte/favoris', label: 'Mes favoris', icon: Heart },
-  { to: '/compte/fidelite', label: 'Fidélité et parrainage', icon: Coins },
   { to: '/compte/adresses', label: 'Mes adresses', icon: MapPin },
-  { to: '/compte/assistance', label: 'Assistance', icon: LifeBuoy },
   { to: '/compte/profil', label: 'Profil et préférences', icon: User },
 ];
 

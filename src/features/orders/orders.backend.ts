@@ -10,7 +10,7 @@ import type { Order, PaymentMethod, ReturnRequest } from './orders.types';
 
 /**
  * Commandes sur l'API (api/src/features/orders). L'API recalcule tout : le navigateur n'envoie que les
- * articles, les quantités, la livraison, le paiement, le code et les points. Chaque réponse est validée.
+ * articles, les quantités, la livraison, le paiement et le code promo. Chaque réponse est validée.
  */
 
 const status = z.enum([
@@ -37,7 +37,6 @@ const totals = z.object({
   subtotal: z.number(),
   productDiscount: z.number(),
   codeDiscount: z.number(),
-  pointsDiscount: z.number(),
   deliveryFee: z.number(),
   deliveryDiscount: z.number(),
   total: z.number(),
@@ -72,7 +71,6 @@ const orderDto = z.object({
   }),
   totals,
   promoCode: z.string().nullable(),
-  pointsUsed: z.number(),
   paymentMethod,
   paymentStatus,
   status,
@@ -84,15 +82,6 @@ const orderDto = z.object({
       status: z.enum(['pending', 'accepted', 'refused']),
       createdAt: z.string(),
       decisionReason: z.string().optional(),
-    })
-    .nullable(),
-  deliveryFeeChange: z
-    .object({
-      fromFee: z.number(),
-      toFee: z.number(),
-      reason: z.string(),
-      status: z.enum(['pending', 'accepted', 'refused']),
-      createdAt: z.string(),
     })
     .nullable(),
   deliveryDispute: z
@@ -147,14 +136,10 @@ const quoteDto = z.object({
     subtotal: z.number(),
     productDiscount: z.number(),
     codeDiscount: z.number(),
-    pointsUsed: z.number(),
-    pointsDiscount: z.number(),
     deliveryFee: z.number(),
     deliveryDiscount: z.number(),
     total: z.number(),
-    pointsEarned: z.number(),
     codeError: z.string().nullable(),
-    pointsError: z.string().nullable(),
   }),
   shipments: z
     .array(
@@ -184,7 +169,6 @@ export function toOrder(raw: unknown, ownerId: Id | null): Order {
     customer: o.customer,
     totals: o.totals,
     promoCode: o.promoCode,
-    pointsUsed: o.pointsUsed,
     paymentMethod: o.paymentMethod,
     paymentStatus: o.paymentStatus,
     status: o.status,
@@ -196,13 +180,6 @@ export function toOrder(raw: unknown, ownerId: Id | null): Order {
     fulfilledBy: o.fulfilledBy,
     collectionConfirmedAt: o.collectionConfirmedAt,
     collectionConfirmedBy: o.collectionConfirmedBy,
-    deliveryFeeChange: o.deliveryFeeChange && {
-      from: o.deliveryFeeChange.fromFee,
-      to: o.deliveryFeeChange.toFee,
-      reason: o.deliveryFeeChange.reason,
-      status: o.deliveryFeeChange.status,
-      createdAt: o.deliveryFeeChange.createdAt,
-    },
     deliveryDispute: o.deliveryDispute && {
       createdAt: o.deliveryDispute.createdAt,
       status: o.deliveryDispute.status,
@@ -224,7 +201,6 @@ export function toTrackedOrder(raw: unknown): Order {
     customer: { recipient: '', phone: '', email: '', zoneId: '', zoneName: o.zoneName, landmark: '', instructions: '' },
     totals: o.totals,
     promoCode: null,
-    pointsUsed: 0,
     paymentMethod: o.paymentMethod,
     paymentStatus: o.paymentStatus,
     status: o.status,
@@ -245,7 +221,6 @@ export interface QuoteRequest {
   lines: Array<Pick<CartLine, 'variantId' | 'quantity'>>;
   zoneId: Id | null;
   promoCode: string | null;
-  points: number;
 }
 
 /** Totaux du panier calculés par l'API ; le nombre d'articles reste compté sur l'appareil. */
@@ -257,7 +232,6 @@ export async function quote(request: QuoteRequest, signal?: AbortSignal): Promis
         lines: request.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
         ...(request.zoneId ? { zoneId: request.zoneId } : {}),
         ...(request.promoCode ? { promoCode: request.promoCode } : {}),
-        points: request.points,
       },
       signal,
     ),
@@ -271,7 +245,6 @@ export interface PlaceOrderRequest {
   delivery: DeliveryInput;
   paymentMethod: PaymentMethod;
   promoCode: string | null;
-  points: number;
 }
 
 /** Dossier de retour vu par le client (api/src/features/returns/returns.dto.ts). */
@@ -378,7 +351,6 @@ export const ordersBackend = {
       },
       paymentMethod: request.paymentMethod,
       ...(request.promoCode ? { promoCode: request.promoCode } : {}),
-      points: request.points,
     });
     const { checkout } = placedDto.parse(raw);
     return { ...toOrder(raw, ownerId), checkout: checkout.map((o) => toOrder(o, ownerId)) };
@@ -410,18 +382,8 @@ export const ordersBackend = {
   cancel: async (order: Order, reason: string, comment: string) =>
     refreshed(order, await backend.post(`/orders/${order.id}/cancellation-requests`, { reason, comment })),
 
-  decideFeeChange: async (order: Order, accept: boolean) =>
-    refreshed(
-      order,
-      await backend.patch(`/orders/${order.id}/delivery-fee-change`, { status: accept ? 'accepted' : 'refused' }),
-    ),
-
   disputeDelivery: async (order: Order, reason: string) =>
     refreshed(order, await backend.post(`/orders/${order.id}/delivery-disputes`, { reason })),
-
-  /** Changement immédiat du moyen de paiement, tant que rien n'est encaissé (8.6). */
-  changePaymentMethod: async (order: Order, paymentMethod: PaymentMethod) =>
-    refreshed(order, await backend.put(`/orders/${order.id}/payment-method`, { paymentMethod })),
 
   /** Autorisation d'envoyer une photo justificative pour le retour de cette commande. */
   signEvidenceUpload: async (order: Order): Promise<SignedUpload> =>

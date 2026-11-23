@@ -141,7 +141,7 @@ export default function CheckoutPage() {
               <Link to="/connexion?retour=/commande" className="font-semibold text-forest hover:underline">
                 Connectez-vous
               </Link>{' '}
-              pour utiliser vos adresses et vos points. Sinon, continuez sans compte.
+              pour utiliser vos adresses. Sinon, continuez sans compte.
             </p>
           )}
         </section>
@@ -182,7 +182,7 @@ export default function CheckoutPage() {
               </p>
             )}
             <Link to="/panier" className="mt-4 block text-center text-sm font-semibold text-forest hover:underline">
-              Modifier le panier, le code promo ou les points
+              Modifier le panier ou le code promo
             </Link>
           </div>
         </aside>

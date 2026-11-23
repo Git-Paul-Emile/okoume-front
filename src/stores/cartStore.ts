@@ -8,7 +8,6 @@ import { expired } from '@/features/privacy/retention';
 interface CartState {
   lines: CartLine[];
   promoCode: string | null;
-  pointsRequested: number;
   /** Dernière modification, pour la durée de conservation des paniers abandonnés (30 jours). */
   updatedAt: number | null;
   add: (line: Omit<CartLine, 'key' | 'quantity'>, quantity?: number) => void;
@@ -17,7 +16,6 @@ interface CartState {
   /** Met à jour le prix d'une ligne après acceptation par le client du nouveau prix. */
   acceptPrice: (key: string, unitPrice: number, originalPrice: number, hasPromotion: boolean) => void;
   setPromoCode: (code: string | null) => void;
-  setPointsRequested: (points: number) => void;
   clear: () => void;
 }
 
@@ -28,7 +26,6 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       lines: [],
       promoCode: null,
-      pointsRequested: 0,
       updatedAt: null,
       add: (line, quantity = 1) => {
         recordEvent({ kind: 'add_to_cart', productId: line.productId });
@@ -58,8 +55,7 @@ export const useCartStore = create<CartState>()(
           lines: s.lines.map((l) => (l.key === key ? { ...l, unitPrice, originalPrice, hasPromotion } : l)),
         })),
       setPromoCode: (promoCode) => set({ promoCode }),
-      setPointsRequested: (pointsRequested) => set({ pointsRequested }),
-      clear: () => set({ lines: [], promoCode: null, pointsRequested: 0, updatedAt: null }),
+      clear: () => set({ lines: [], promoCode: null, updatedAt: null }),
     }),
     {
       name: 'shop-cart',

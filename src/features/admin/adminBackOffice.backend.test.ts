@@ -27,9 +27,7 @@ const member = {
   email: 'paul@okoume.ga',
   firstName: 'Paul',
   lastName: 'Obame',
-  role: 'orders_manager',
-  extraRoles: [],
-  customRoleIds: [],
+  role: 'super_admin',
   status: 'active',
   refundLimit: null,
   inviteExpiresAt: null,
@@ -39,17 +37,10 @@ const member = {
 };
 
 describe('back-office sur l’API', () => {
-  it('n’envoie que les droits gérés par l’API, jamais la date de fermeture des sessions', async () => {
+  it('n’envoie que le statut géré par l’API, jamais la date de fermeture des sessions', async () => {
     fetchMock.mockResolvedValue(json(member));
-    await adminTeamBackend.update('m1', { role: 'catalog_manager', sessionsRevokedAt: '2026-11-03T08:00:00.000Z' });
-    expect(call()).toEqual({ route: 'PATCH /staff/team/m1', body: { role: 'catalog_manager' } });
-  });
-
-  it('écarte un droit inconnu de l’interface dans un rôle personnalisé', async () => {
-    fetchMock.mockResolvedValue(json([{ id: 'r1', name: 'Caisse', permissions: ['paiements:valider', 'inconnu:x'] }]));
-    expect(await adminTeamBackend.customRoles()).toEqual([
-      { id: 'r1', name: 'Caisse', permissions: ['paiements:valider'] },
-    ]);
+    await adminTeamBackend.update('m1', { status: 'suspended', sessionsRevokedAt: '2026-11-03T08:00:00.000Z' });
+    expect(call()).toEqual({ route: 'PATCH /staff/team/m1', body: { status: 'suspended' } });
   });
 
   it('présente un client du fichier comme un compte, sans adresses ni favoris', () => {
@@ -60,15 +51,12 @@ describe('back-office sur l’API', () => {
       email: 'aw•••@example.ga',
       phone: null,
       status: 'active',
-      referralCode: 'AWA',
       createdAt: '2026-01-01T08:00:00.000Z',
       lastLoginAt: null,
-      points: 120,
-      tier: 'or',
       orderCount: 2,
       totalSpent: 90_000,
     });
-    expect(user).toMatchObject({ phone: '', loyaltyPoints: 120, hasOrdered: true, addresses: [], favorites: [] });
+    expect(user).toMatchObject({ phone: '', hasOrdered: true, addresses: [], favorites: [] });
     expect(user).not.toHaveProperty('lastLoginAt');
   });
 

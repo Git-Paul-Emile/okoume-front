@@ -143,14 +143,12 @@ export default function AdminStatsPage() {
       rows: customers.length,
       table: () =>
         tableOf(
-          ['Prénom', 'Nom', 'E-mail', 'Téléphone', 'Niveau', 'Points', 'Inscription'],
+          ['Prénom', 'Nom', 'E-mail', 'Téléphone', 'Inscription'],
           customers.map((u) => [
             u.firstName,
             u.lastName,
             u.email,
             u.phone,
-            u.tier,
-            u.loyaltyPoints,
             u.createdAt.slice(0, 10),
           ]),
         ),

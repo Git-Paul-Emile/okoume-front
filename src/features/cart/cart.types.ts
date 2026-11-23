@@ -25,15 +25,11 @@ export interface CartTotals {
   subtotal: number;
   productDiscount: number;
   codeDiscount: number;
-  pointsUsed: number;
-  pointsDiscount: number;
   deliveryFee: number;
   deliveryDiscount: number;
   total: number;
-  pointsEarned: number;
   itemCount: number;
   codeError: string | null;
-  pointsError: string | null;
   /** Une commande par boutique du panier (32.4), calculée par l'API : qui vend, qui livre, frais */
   shipments?: Shipment[];
 }

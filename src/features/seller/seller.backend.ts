@@ -104,7 +104,6 @@ const dashboardDto = z.object({
     rejected: z.number(),
   }),
   orders: z.object({ toPrepare: z.number(), toDeliver: z.number(), toCollect: z.number() }),
-  payouts: z.object({ due: z.number() }),
 });
 
 export type SellerDashboard = z.infer<typeof dashboardDto>;

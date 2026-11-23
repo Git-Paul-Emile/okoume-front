@@ -78,7 +78,7 @@ const SHOP_WORDS = [
 ];
 
 const OFF_TOPIC =
-  'Je ne suis pas destiné à cela : je suis l’assistant d’achat d’Okoumé et je réponds uniquement aux questions sur la boutique (produits, prix, livraison, paiement, commandes, retours, fidélité). Que puis-je faire pour votre achat ?';
+  'Je ne suis pas destiné à cela : je suis l’assistant d’achat d’Okoumé et je réponds uniquement aux questions sur la boutique (produits, prix, livraison, paiement, commandes et retours). Que puis-je faire pour votre achat ?';
 
 /** Réponse de présentation : ce que l'assistant sait faire, avec des questions qu'il comprend. */
 const CAPABILITIES = [
@@ -87,7 +87,7 @@ const CAPABILITIES = [
   '• connaître les frais et délais de livraison (« livraison à Owendo ») ;',
   '• comprendre le paiement Airtel Money, Moov Money ou en espèces ;',
   '• suivre une commande, l’annuler ou faire un retour ;',
-  '• utiliser vos points de fidélité et les codes promo ;',
+  '• utiliser les codes promo disponibles ;',
   '• comprendre votre compte et la commande sans compte ;',
   '• vous mettre en relation avec notre équipe.',
   'Que cherchez-vous ?',
@@ -209,16 +209,6 @@ export function answer(message: string, data: AssistantData): AssistantReply {
     return {
       text: `Avant la préparation, vous pouvez annuler depuis votre suivi ou votre compte. Pour un retour, faites la demande sous ${settings?.returnWindowDays ?? 14} jours ; le remboursement intervient après réception et vérification du produit.`,
       links: [{ label: 'Conditions de retour', to: '/legal/retours' }],
-    };
-  }
-
-  if (has(q, ['point', 'fidelite', 'parrain'])) {
-    const l = settings?.loyalty;
-    return {
-      text: l
-        ? `Vous gagnez 1 point par tranche de ${formatPrice(l.earnPer)} d’achats (hors livraison), crédités après livraison et paiement. 1 point = ${formatPrice(l.pointValue)}, utilisable à partir de ${l.minRedeem} points. Les points n’expirent pas.`
-        : 'Le programme de fidélité vous fait gagner des points à chaque commande livrée et payée.',
-      links: [{ label: 'Mon espace fidélité', to: '/compte/fidelite' }],
     };
   }
 

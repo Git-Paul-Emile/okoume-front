@@ -154,16 +154,13 @@ describe('catégories, stock et images', () => {
     ).toMatchObject({ isCollection: true, parentId: null, memberIds: ['robes'], imageFit: 'contain' });
   });
 
-  it('remplace le stock par la quantité comptée, et sort le non revendable à son coût', async () => {
+  it('remplace le stock par la quantité comptée', async () => {
     fetchMock.mockImplementation(() => Promise.resolve(json({ success: true, data: {} }, 201)));
     await adminCatalogBackend.setStock('v1', 7, 'Inventaire : comptage');
-    const product = toAdminProduct(staffProduct, categories);
-    await adminCatalogBackend.writeOff({ ...product.variants[0]!, cost: 9_000 }, 2, 'Tache indélébile');
     expect(calls()[0]).toEqual({
       route: 'POST /staff/variants/v1/stock-movements',
       body: { type: 'ajustement', counted: 7, reason: 'Inventaire : comptage' },
     });
-    expect(calls()[1]!.body).toMatchObject({ quantity: 2, referenceValue: 18_000 });
   });
 
   it('envoie une image avec une autorisation signée pour le dossier demandé', async () => {

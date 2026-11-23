@@ -5,7 +5,6 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { ButtonLink } from '@/components/ui/Button';
 import { CartIssues } from '@/features/cart/components/CartIssues';
 import { CartLineItem } from '@/features/cart/components/CartLineItem';
-import { PointsField } from '@/features/cart/components/PointsField';
 import { PromoCodeField } from '@/features/cart/components/PromoCodeField';
 import { TotalsList } from '@/features/cart/components/TotalsList';
 import { useCartTotals } from '@/features/cart/useCartTotals';
@@ -15,7 +14,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { vatIncluded } from '@/features/cart/cart.utils';
 
 export default function CartPage() {
-  const { lines, totals, appliedCode, promoLoading, quoteError, settings, user } = useCartTotals();
+  const { lines, totals, appliedCode, promoLoading, quoteError } = useCartTotals();
   const { issues, blocking, products } = useCartValidation();
   const clear = useCartStore((s) => s.clear);
 
@@ -67,13 +66,6 @@ export default function CartPage() {
           <div className="card space-y-4 p-5">
             <h2 className="text-lg">Récapitulatif</h2>
             <PromoCodeField error={totals.codeError} loading={promoLoading} applied={!!appliedCode} />
-            <PointsField
-              balance={user ? user.loyaltyPoints : null}
-              pointValue={settings?.loyalty.pointValue ?? 50}
-              minRedeem={settings?.loyalty.minRedeem ?? 100}
-              used={totals.pointsUsed}
-              error={totals.pointsError}
-            />
             <TotalsList
               totals={totals}
               deliveryKnown={false}

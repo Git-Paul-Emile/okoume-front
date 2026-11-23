@@ -26,8 +26,8 @@ export default function AccountOrderDetailPage() {
       <OrderDetailPanel order={order} inAccount />
       <p className="mt-6 text-sm text-ink-soft">
         Un problème avec cette commande ?{' '}
-        <Link to={`/compte/assistance?commande=${order.number}`} className="font-semibold text-forest hover:underline">
-          Ouvrir une demande d’assistance
+        <Link to="/contact" className="font-semibold text-forest hover:underline">
+          Nous contacter
         </Link>
       </p>
     </div>

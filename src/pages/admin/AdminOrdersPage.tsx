@@ -38,9 +38,7 @@ const requestNote = (o: AdminOrder) =>
     o.returnRequest &&
       ['pending', 'accepted', 'received', 'refund_due'].includes(o.returnRequest.status) &&
       'Retour en cours',
-    o.paymentChangeRequest?.status === 'pending' && 'Changement de paiement demandé',
-    o.deliveryFeeChange?.status === 'pending' && 'Frais en attente d’accord',
-    o.deliveryDispute && 'Livraison contestée',
+    o.fulfilledBy === 'okoume' && o.deliveryDispute && 'Livraison contestée',
   ].filter(Boolean) as string[];
 
 const deliveryLabel = (o: AdminOrder) =>

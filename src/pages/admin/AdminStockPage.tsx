@@ -10,8 +10,6 @@ import { AdminTable, type Column } from '@/features/admin/components/AdminTable'
 import { StateBadge } from '@/features/admin/components/StatusBadges';
 import { PageIntro, SearchInput, Segmented, StatRow, Toolbar } from '@/features/admin/components/Toolbar';
 import { matches } from '@/features/admin/admin.utils';
-import { canWriteOff } from '@/features/admin/orders.actions';
-import { useAdminAuthStore } from '@/stores/adminAuthStore';
 import { formatDateTime } from '@/utils/formatDate';
 import { formatPrice } from '@/utils/formatPrice';
 
@@ -25,12 +23,12 @@ interface Row {
 
 const movementLabel: Record<StockMovementType, string> = {
   reception: 'Réception',
-  ajustement: 'Ajustement ou inventaire',
+  ajustement: 'Correction de stock',
   commande: 'Sortie commande',
   annulation: 'Retour annulation',
   retour: 'Retour client',
-  non_vendable: 'Non revendable (stock séparé)',
-  mise_au_rebut: 'Sortie définitive',
+  non_vendable: 'Mouvement ancien',
+  mise_au_rebut: 'Mouvement ancien',
 };
 
 export default function AdminStockPage() {
@@ -184,112 +182,12 @@ export default function AdminStockPage() {
           { key: 'by', header: 'Par', cell: (m) => m.by },
         ]}
       />
-      <UnsellableStock products={products} />
       {editing && <AdjustDialog key={editing.id} row={editing} onClose={() => setEditing(null)} />}
     </>
   );
 }
 
-/** Stock non revendable issu des retours (14.3) : hors vente, sortie définitive par l'administrateur principal. */
-function UnsellableStock({ products }: { products: AdminProduct[] }) {
-  const admin = useAdminAuthStore((s) => s.admin);
-  const [target, setTarget] = useState<{ product: AdminProduct; variant: AdminVariant } | null>(null);
-  const [qty, setQty] = useState('');
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState('');
-  const writeOff = useAdminMutation(
-    ({ product, variant, n }: { product: AdminProduct; variant: AdminVariant; n: number }) =>
-      adminApi.writeOffUnsellable(product, variant.id, n, reason.trim()),
-    (v) => `Sortie définitive : ${v.n} × ${v.product.name} · ${v.variant.label} (${reason.trim()})`,
-  );
-  const rows = products.flatMap((p) =>
-    p.variants.filter((v) => (v.unsellable ?? 0) > 0).map((v) => ({ product: p, variant: v })),
-  );
-  if (!rows.length) return null;
-
-  const submit = () => {
-    if (!target) return;
-    const n = Number(qty);
-    if (!Number.isInteger(n) || n <= 0 || n > (target.variant.unsellable ?? 0))
-      return setError(`Quantité entre 1 et ${target.variant.unsellable}.`);
-    if (reason.trim().length < 5)
-      return setError('Indiquez le motif de la sortie (destruction, don, retour fournisseur…).');
-    writeOff.mutate({ ...target, n }, { onSuccess: () => setTarget(null) });
-  };
-
-  return (
-    <section className="mt-8">
-      <h2 className="mb-1 text-lg">Stock non revendable</h2>
-      <p className="mb-3 text-sm text-ink-soft">
-        Articles retournés jugés non revendables : jamais proposés à la vente. La sortie définitive est décidée par
-        l’administrateur principal.
-      </p>
-      <ul className="divide-y divide-sage rounded-xl border border-sage bg-white text-sm">
-        {rows.map(({ product, variant }) => (
-          <li key={variant.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <span>
-              <span className="block font-semibold">
-                {product.name} · {variant.label}
-              </span>
-              <span className="block text-xs text-ink-muted">
-                {variant.unsellable} article(s) · valeur de référence{' '}
-                {formatPrice((variant.cost ?? 0) * (variant.unsellable ?? 0))}
-              </span>
-            </span>
-            {canWriteOff(admin) && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setTarget({ product, variant });
-                  setQty(String(variant.unsellable));
-                  setReason('');
-                  setError('');
-                }}
-              >
-                Sortir définitivement
-              </Button>
-            )}
-          </li>
-        ))}
-      </ul>
-      <Modal
-        open={!!target}
-        onClose={() => setTarget(null)}
-        title="Sortie définitive du stock"
-        description={
-          target
-            ? `${target.product.name} · ${target.variant.label} : ${target.variant.unsellable} non revendable(s).`
-            : ''
-        }
-      >
-        <div className="space-y-4">
-          <TextField label="Quantité" inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} />
-          <TextAreaField label="Motif" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
-          {target && (
-            <p className="text-sm text-ink-soft">
-              Valeur de référence : {formatPrice((target.variant.cost ?? 0) * (Number(qty) || 0))}
-            </p>
-          )}
-          {error && (
-            <p className="text-sm font-medium text-danger" role="alert">
-              {error}
-            </p>
-          )}
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setTarget(null)}>
-              Annuler
-            </Button>
-            <Button variant="danger" loading={writeOff.isPending} onClick={submit}>
-              Sortir du stock
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    </section>
-  );
-}
-
+/** Correction simple du stock disponible pour la vente. */
 function AdjustDialog({ row, onClose }: { row: Row; onClose: () => void }) {
   const [quantity, setQuantity] = useState(String(row.variant.stock));
   const [reason, setReason] = useState('');
@@ -304,7 +202,7 @@ function AdjustDialog({ row, onClose }: { row: Row; onClose: () => void }) {
     const q = Number(quantity);
     if (!Number.isInteger(q) || q < row.variant.reserved)
       return setError(`Quantité entière, au moins égale aux ${row.variant.reserved} unités réservées.`);
-    if (reason.trim().length < 3) return setError('Indiquez le motif : réception, inventaire, casse…');
+    if (reason.trim().length < 3) return setError('Indiquez un motif pour cette correction de stock.');
     save.mutate({ quantity: q, reason: reason.trim() }, { onSuccess: onClose });
   };
 

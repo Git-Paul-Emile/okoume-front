@@ -1,6 +1,5 @@
 import { brand } from '@/config/brand';
 import type { ShopSettings } from '@/features/settings/settings.types';
-import { formatPrice } from '@/utils/formatPrice';
 
 export interface LegalDoc {
   title: string;
@@ -8,13 +7,12 @@ export interface LegalDoc {
 }
 
 /** Paramètres de la boutique repris dans les textes : un seul endroit à modifier, le site reste cohérent. */
-export type LegalSettings = Pick<ShopSettings, 'returnWindowDays' | 'loyalty'> &
+export type LegalSettings = Pick<ShopSettings, 'returnWindowDays'> &
   Partial<Pick<ShopSettings, 'legal' | 'support'>>;
 
 /** Valeurs par défaut de l'API (RETURN_WINDOW_DAYS, données de départ), en attendant les paramètres réels. */
 export const DEFAULT_LEGAL_SETTINGS: LegalSettings = {
   returnWindowDays: 14,
-  loyalty: { pointValue: 50, minRedeem: 100, earnPer: 1000 },
 };
 
 /** Valeur obligatoire pas encore fournie : signalée clairement plutôt qu'inventée. */
@@ -32,7 +30,6 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
   const contactEmail = filled(settings.support?.email);
   const contactPhone = filled(settings.support?.phone);
   const address = filled(settings.support?.address || `${brand.city}, ${brand.country}`);
-  const { earnPer, pointValue, minRedeem } = settings.loyalty;
   const days = settings.returnWindowDays;
 
   return {
@@ -43,7 +40,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
           heading: 'Objet et champ d’application',
           body: [
             `Les présentes conditions régissent les ventes conclues sur le site ${brand.name} entre ${company} (« la boutique ») et toute personne qui achète, avec ou sans compte client. Elles sont acceptées à chaque commande ; la version applicable est celle en vigueur au jour de la commande.`,
-            `Des vendeurs indépendants, inscrits sur ${brand.name}, y publient aussi leurs produits. Chaque fiche indique la boutique qui vend. Un panier qui réunit plusieurs boutiques donne une commande par boutique : chacune est préparée par sa boutique, livrée par les livreurs de ${brand.name} ou par le vendeur, et payée à la livraison. Pour les produits d’un vendeur, le vendeur est responsable du produit ; ${brand.name} vérifie les produits avant publication, encaisse pour le vendeur quand ses livreurs livrent, et arbitre les litiges.`,
+            `Des vendeurs indépendants, inscrits sur ${brand.name}, y publient aussi leurs produits. Chaque fiche indique la boutique qui vend. Un panier qui réunit plusieurs boutiques donne une commande par boutique : chacune est préparée par sa boutique, livrée par les livreurs de ${brand.name} ou par le vendeur, et payée à la livraison. Pour les produits d’un vendeur, le vendeur est responsable du produit. ${brand.name} vérifie les produits avant publication et encaisse pour le vendeur lorsque la livraison est assurée par ses livreurs. Les différends concernant une vente ou une livraison organisée par un vendeur sont à régler directement entre l’acheteur et la boutique ; ${brand.name} ne les instruit ni ne les arbitre.`,
           ],
         },
         {
@@ -84,7 +81,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
           heading: 'Annulation, retours et remboursements',
           body: [
             'Avant le début de la préparation, vous pouvez annuler votre commande depuis votre compte. Ensuite, une demande d’annulation est examinée par la boutique, qui vous informe de sa décision et de son motif.',
-            `Un retour peut être demandé dans les ${days} jours suivant la livraison, selon les modalités de la page Retours et remboursements. Le remboursement intervient après réception et inspection, par le moyen de paiement initial lorsque c’est possible.`,
+            `Un retour peut être demandé dans les ${days} jours suivant la livraison, selon les modalités de la page Retours et remboursements. Le remboursement intervient après confirmation de réception, par le moyen de paiement initial lorsque c’est possible.`,
           ],
         },
         {
@@ -94,13 +91,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
           ],
         },
         {
-          heading: 'Programme de fidélité',
-          body: [
-            `Les points sont crédités après livraison et paiement effectifs, à raison d’un point par tranche de ${formatPrice(earnPer)} dépensés sur les produits. Un point vaut ${formatPrice(pointValue)} ; ils s’utilisent à partir de ${minRedeem} points. Les points gagnés sur des articles remboursés sont retirés. Les points n’expirent pas.`,
-          ],
-        },
-        {
-          heading: 'Service client et litiges',
+          heading: 'Contact et recours',
           body: [
             `Pour toute question ou réclamation : ${contactEmail}, ${contactPhone}, ou la page Contact. Une solution amiable est recherchée en priorité.`,
             'Les présentes conditions sont soumises au droit gabonais. À défaut d’accord amiable, le litige est porté devant les juridictions compétentes de Libreville, sous réserve des règles protectrices dont bénéficie le consommateur.',
@@ -120,14 +111,14 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Données collectées',
           body: [
-            'Commande : nom, téléphone, adresse e-mail, quartier, repère et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes, points de fidélité, préférences de notification. Assistance : vos messages et les photos jointes. Commande auprès d’une boutique de vendeur : les informations nécessaires à la préparation et à la livraison (nom, téléphone, quartier, repère, consignes) sont transmises à ce vendeur.',
+            'Commande : nom, téléphone, adresse e-mail, quartier, repère et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes et préférences d’e-mail. Assistance : vos messages et les photos jointes. Commande auprès d’une boutique de vendeur : les informations nécessaires à la préparation et à la livraison (nom, téléphone, quartier, repère, consignes) sont transmises à ce vendeur.',
             'Le mot de passe n’est jamais conservé en clair. Aucune donnée de carte bancaire n’est collectée : les paiements Mobile Money se font hors du site.',
           ],
         },
         {
           heading: 'Finalités et bases légales',
           body: [
-            'Exécution du contrat : préparer, livrer et facturer vos commandes, gérer retours et remboursements, le compte et la fidélité. Obligation légale : conservation des factures. Intérêt légitime : sécurité du site et prévention de la fraude (vérification de commandes inhabituelles). Consentement : mesure d’audience, notifications sur l’appareil, offres promotionnelles.',
+            'Exécution du contrat : préparer, livrer et facturer vos commandes, gérer retours et remboursements et votre compte. Obligation légale : conservation des factures. Intérêt légitime : sécurité du site et prévention de la fraude (vérification de commandes inhabituelles). Consentement : mesure d’audience et offres promotionnelles par e-mail.',
           ],
         },
         {
@@ -226,7 +217,7 @@ export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS)
         {
           heading: 'Remboursement',
           body: [
-            'Le remboursement correspond au montant payé pour les articles retournés, remises comprises au prorata. Il est effectué après réception et vérification, par le moyen de paiement initial lorsque c’est possible ; un autre moyen nécessite votre accord. Les points gagnés sur ces articles sont retirés.',
+            'Le remboursement correspond au montant payé pour les articles retournés, remises comprises au prorata. Il est effectué après confirmation de réception du retour, par le moyen de paiement initial lorsque c’est possible ; un autre moyen nécessite votre accord.',
           ],
         },
       ],

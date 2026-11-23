@@ -1,11 +1,8 @@
-import { ApiError } from '@/api/ApiError';
 import { adminOrdersBackend } from './adminOrders.backend';
 import { adminZonesBackend } from './adminZones.backend';
 import { adminCatalogBackend } from './adminCatalog.backend';
 import { adminCommerceBackend } from './adminCommerce.backend';
-import { supportBackend } from '@/features/support/support.backend';
 import type { Id } from '@/api/types';
-import type { Article } from '@/features/articles/articles.types';
 import type { Category } from '@/features/categories/categories.types';
 import type { DeliveryZone, ZoneRequest } from '@/features/delivery/delivery.types';
 import type { Ad, AdInput, Banner } from '@/features/home/home.types';
@@ -13,7 +10,6 @@ import type { PromoCode } from '@/features/promotions/promotions.types';
 import type { LegalPageRecord } from '@/features/legal/legal.api';
 import type { Review } from '@/features/reviews/reviews.types';
 import type { ShopSettings } from '@/features/settings/settings.types';
-import { privacyBackend } from '@/features/privacy/privacy.backend';
 import { reviewsBackend } from '@/features/reviews/reviews.backend';
 import { contentBackend } from '@/features/home/content.backend';
 import { adminSettingsBackend } from './adminSettings.backend';
@@ -23,10 +19,7 @@ import { adminAssistantBackend } from './adminAssistant.backend';
 import { adminAnalyticsBackend } from './adminAnalytics.backend';
 import { adminCustomersBackend, toUser } from './adminCustomers.backend';
 import type { User } from '@/features/auth/auth.types';
-import type { PrivacyRequest } from '@/features/privacy/privacy.types';
-import type { Ticket } from '@/features/support/support.types';
-import type { CustomRole } from './permissions';
-import type { ProposalDecision, RulesVersion } from './assistantRules';
+import type { ProposalDecision } from './assistantRules';
 import type { AssistantLogEntry } from './assistantLog';
 import type { AlertRecord } from './alerts.rules';
 import type { ProductViewEntry } from './stats.rules';
@@ -55,12 +48,6 @@ export const adminApi = {
   proposalDecisions: (signal?: AbortSignal): Promise<ProposalDecision[]> => adminAssistantBackend.decisions(signal),
   decideProposal: (d: Omit<ProposalDecision, 'id' | 'at'>): Promise<ProposalDecision> =>
     adminAssistantBackend.decide(d),
-  assistantRules: (signal?: AbortSignal): Promise<RulesVersion[]> => adminAssistantBackend.rules(signal),
-  /** Le numéro de version est attribué par le serveur. */
-  saveAssistantRules: (v: RulesVersion): Promise<RulesVersion> => adminAssistantBackend.saveRules(v),
-  customRoles: (signal?: AbortSignal): Promise<CustomRole[]> => adminTeamBackend.customRoles(signal),
-  /** Les membres qui ont ce rôle sont déconnectés par le serveur pour recevoir les nouveaux droits. */
-  saveCustomRole: (role: CustomRole) => adminTeamBackend.saveCustomRole(role),
 
   /** Le nom du livreur de chaque commande vient du répertoire des livreurs. */
   orders: async (signal?: AbortSignal): Promise<AdminOrder[]> => {
@@ -88,17 +75,9 @@ export const adminApi = {
   /** 100 derniers mouvements de toutes les variantes (journal général tenu par l'API) */
   stockMovements: (signal?: AbortSignal): Promise<StockMovement[]> => adminCatalogBackend.stockJournal(signal),
   /** Ajustement manuel : la quantité comptée remplace le stock, le mouvement et son auteur sont tracés par le serveur. */
-  /** Quantité comptée ; un inventaire physique est signalé dans le motif du mouvement d'ajustement */
-  adjustStock: (variantId: Id, quantity: number, reason: string, origin: 'correction' | 'inventaire' = 'correction') =>
-    adminCatalogBackend.setStock(variantId, quantity, origin === 'inventaire' ? `Inventaire : ${reason}` : reason),
-  /** Sortie définitive du stock non revendable : motif et quantité, l'auteur est tracé par le serveur. */
-  async writeOffUnsellable(product: AdminProduct, variantId: Id, quantity: number, reason: string) {
-    const v = product.variants.find((x) => x.id === variantId)!;
-    const before = v.unsellable ?? 0;
-    if (quantity <= 0 || quantity > before) throw new ApiError('Quantité supérieure au stock non revendable.', 400);
-    return adminCatalogBackend.writeOff(v, quantity, reason);
-  },
-
+  /** Correction manuelle du stock, avec un motif conservé dans l'historique. */
+  adjustStock: (variantId: Id, quantity: number, reason: string) =>
+    adminCatalogBackend.setStock(variantId, quantity, reason),
   categories: (signal?: AbortSignal) => adminCatalogBackend.categories(signal),
   createCategory: (category: Category) => adminCatalogBackend.saveCategory(category, false),
   updateCategory: (id: Id, category: Category) => adminCatalogBackend.saveCategory({ ...category, id }, true),
@@ -109,14 +88,12 @@ export const adminApi = {
 
   customers: async (signal?: AbortSignal): Promise<User[]> => (await adminCustomersBackend.list(signal)).map(toUser),
 
-  privacyRequests: (signal?: AbortSignal): Promise<PrivacyRequest[]> => privacyBackend.staffList(signal),
 
   reviews: async (signal?: AbortSignal): Promise<Review[]> => (await reviewsBackend.staffList(signal)).reviews,
   /** Les signalements en attente sont lus avec la file de modération. */
   reviewReports: async (signal?: AbortSignal): Promise<ReviewReport[]> =>
     (await reviewsBackend.staffList(signal)).reports,
 
-  tickets: (signal?: AbortSignal): Promise<Ticket[]> => supportBackend.staffList(signal),
 
   ads: (signal?: AbortSignal): Promise<Ad[]> => contentBackend.staffAds(signal),
   createAd: (ad: AdInput): Promise<Ad> => contentBackend.createAd(ad),
@@ -137,10 +114,9 @@ export const adminApi = {
   updateSettings: (patch: Partial<ShopSettings>): Promise<ShopSettings> => adminSettingsBackend.update(patch),
 
   team: (signal?: AbortSignal): Promise<TeamMember[]> => adminTeamBackend.team(signal),
-  /** Annuaire réduit de l'équipe (membres actifs), lisible par tous ses membres */
-  teamDirectory: (signal?: AbortSignal) => adminTeamBackend.directory(signal),
   /** Invitation (19.2) : le lien est envoyé par e-mail par le serveur. */
-  inviteMember: (member: Omit<TeamMember, 'status'>): Promise<TeamMember> => adminTeamBackend.invite(member),
+  inviteMember: (member: Pick<TeamMember, 'id' | 'firstName' | 'lastName' | 'email'>): Promise<TeamMember> =>
+    adminTeamBackend.invite(member),
   renewInvite: (id: Id) => adminTeamBackend.renewInvite(id),
   /** Mesure d'audience collectée par l'API, sur les 13 mois conservés. */
   productViews: (signal?: AbortSignal): Promise<ProductViewEntry[]> => adminAnalyticsBackend.productViews(signal),
@@ -155,9 +131,6 @@ export const adminApi = {
   couriers: (signal?: AbortSignal) => adminOrdersBackend.couriers(signal),
   saveCourier: (courier: Courier) => adminOrdersBackend.saveCourier(courier, !!courier.id),
 
-  articles: (signal?: AbortSignal): Promise<Article[]> => contentBackend.staffArticles(signal),
-  /** Auteur et nature du changement sont établis par le serveur, qui tient l'historique (3.6). */
-  saveArticle: (article: Article) => contentBackend.saveArticle(article),
   legalPages: (signal?: AbortSignal): Promise<LegalPageRecord[]> => contentBackend.staffLegalPages(signal),
   saveLegalPage: (page: LegalPageRecord): Promise<LegalPageRecord> => contentBackend.saveLegalPage(page),
 

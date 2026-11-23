@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/config/env', () => ({ env: { backendUrl: 'http://api.test/api/v1' } }));
 
 const { settingsApi } = await import('./settings.api');
-const { loyaltyApi, toMovement } = await import('@/features/loyalty/loyalty.api');
 const { promotionsApi } = await import('@/features/promotions/promotions.api');
 
 const json = (body: unknown) =>
@@ -18,18 +17,13 @@ afterEach(() => vi.unstubAllGlobals());
 
 const settings = {
   currency: 'XAF',
-  loyalty: { pointValue: 50, minRedeem: 100, earnPer: 1000 },
   maxDiscountRate: 0.5,
-  tiers: [{ id: 'bronze', name: 'Bronze', threshold: 0, perks: [] }],
   mobileMoney: [
     { method: 'airtel', label: 'Airtel Money', number: '+241 07', beneficiary: 'OKOUME', instructions: '*150#' },
   ],
   mobileMoneyExpiryHours: 24,
   returnWindowDays: 14,
   reopenWindowDays: 14,
-  referralReward: 300,
-  welcomeCode: { enabled: true, percent: 10, validDays: 30 },
-  birthdayReward: { enabled: true, points: 200, percent: 10 },
   deliveryVatRate: 18,
   maxAddresses: 5,
   supportSla: { high: 4, normal: 24 },
@@ -52,47 +46,22 @@ describe('données publiques lues sur l’API', () => {
     await expect(settingsApi.get()).rejects.toThrow();
   });
 
-  it('lit l’historique des points du compte, points rendus compris', async () => {
-    expect(
-      toMovement(
-        { id: 'm1', points: 120, type: 'restore', label: 'Commande annulée', orderId: 'o1', createdAt: 'x' },
-        'c1',
-      ),
-    ).toEqual({
-      id: 'm1',
-      userId: 'c1',
-      points: 120,
-      type: 'restore',
-      label: 'Commande annulée',
-      orderId: 'o1',
-      createdAt: 'x',
-    });
-    fetchMock.mockResolvedValue(json({ items: [], total: 0, page: 1, limit: 100, hasNext: false }));
-    await loyaltyApi.movements('c1');
-    expect(String(fetchMock.mock.calls[0]![0])).toBe('http://api.test/api/v1/loyalty/movements?page=1&limit=100');
-  });
-
-  it('lit les codes publics et les codes personnels du client', async () => {
-    fetchMock
-      .mockResolvedValueOnce(
-        json([
-          {
-            id: 'p1',
-            code: 'NOEL10',
-            label: 'Noël',
-            type: 'percent',
-            value: 10,
-            minAmount: 0,
-            freeDelivery: false,
-            tiers: [],
-            startsAt: 'a',
-            endsAt: 'b',
-          },
-        ]),
-      )
-      .mockResolvedValueOnce(json([{ code: 'MERCI-AWA', label: 'Merci', type: 'percent', value: 10, endsAt: 'b' }]));
+  it('lit les codes promo publics', async () => {
+    fetchMock.mockResolvedValueOnce(
+      json([
+        {
+          id: 'p1',
+          code: 'NOEL10',
+          label: 'Noël',
+          type: 'percent',
+          value: 10,
+          minAmount: 0,
+          freeDelivery: false,
+          endsAt: 'b',
+        },
+      ]),
+    );
     expect((await promotionsApi.publicCodes()).map((c) => c.code)).toEqual(['NOEL10']);
-    expect((await promotionsApi.mine()).map((c) => c.code)).toEqual(['MERCI-AWA']);
-    expect(String(fetchMock.mock.calls[1]![0])).toBe('http://api.test/api/v1/loyalty/codes');
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('http://api.test/api/v1/promo-codes');
   });
 });

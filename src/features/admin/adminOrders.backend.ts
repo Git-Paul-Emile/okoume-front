@@ -153,9 +153,6 @@ export const adminOrdersBackend = {
   setDeliveryCost: async (order: AdminOrder, amount: number, couriers: readonly Courier[]) =>
     toAdminOrder(await backend.put(`/staff/orders/${order.id}/delivery-cost`, { amount }), couriers),
 
-  proposeFeeChange: async (order: AdminOrder, toFee: number, reason: string, couriers: readonly Courier[]) =>
-    toAdminOrder(await backend.post(`/staff/orders/${order.id}/delivery-fee-changes`, { toFee, reason }), couriers),
-
   resolveDispute: async (order: AdminOrder, resolution: string, couriers: readonly Courier[]) =>
     toAdminOrder(await backend.patch(`/staff/orders/${order.id}/delivery-dispute`, { resolution }), couriers),
 
@@ -176,7 +173,7 @@ export const adminOrdersBackend = {
   payments: async (order: AdminOrder, signal?: AbortSignal) =>
     toPaymentsSummary(await backend.get(`/staff/orders/${order.id}/payments`, undefined, signal)),
 
-  /** Encaissement vérifié ; l'API émet la facture et crédite les points quand la commande est payée. */
+  /** Encaissement vérifié ; l'API émet la facture quand la commande est payée. */
   recordPayment: (order: AdminOrder, entry: PaymentEntry) =>
     backend.post(`/staff/orders/${order.id}/payments`, {
       amount: entry.amount,
@@ -184,7 +181,7 @@ export const adminOrdersBackend = {
       reference: entry.reference.trim() || null,
     }),
 
-  /** Remboursement ; l'API émet l'avoir et retire les points. */
+  /** Remboursement ; l'API émet l'avoir. */
   refund: (order: AdminOrder, entry: RefundEntry) =>
     backend.post(`/staff/orders/${order.id}/refunds`, {
       amount: entry.amount,

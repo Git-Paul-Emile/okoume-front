@@ -5,7 +5,6 @@ import { useCurrentUser, useUpdateUser } from '@/features/auth/auth.queries';
 import { profileSchema } from '@/features/auth/auth.schemas';
 import { ContactSettings } from '@/features/auth/components/ContactSettings';
 import { NotificationPreferences } from '@/features/auth/components/NotificationPreferences';
-import { PrivacySection } from '@/features/privacy/components/PrivacySection';
 import { toast } from '@/stores/toastStore';
 import { fieldErrors } from '@/utils/zodErrors';
 
@@ -15,22 +14,17 @@ export default function AccountProfilePage() {
   const [v, setV] = useState({
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
-    phone: user?.phone ?? '',
-    birthday: user?.birthday ?? '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   if (!user) return null;
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    // Le téléphone se change à part, avec vérification par code
-    const r = profileSchema.safeParse({ ...v, phone: user.phone });
+    const r = profileSchema.safeParse(v);
     if (!r.success) return setErrors(fieldErrors(r.error));
     setErrors({});
-    const { phone: _phone, ...profile } = r.data;
-    void _phone;
     update.mutate(
-      { ...profile, birthday: profile.birthday || null },
+      r.data,
       {
         onSuccess: () => toast.success('Profil enregistré'),
         onError: () => toast.error('Le profil n’a pas pu être enregistré. Réessayez.'),
@@ -53,13 +47,6 @@ export default function AccountProfilePage() {
           <TextField label="Prénom" autoComplete="given-name" {...field('firstName')} />
           <TextField label="Nom" autoComplete="family-name" {...field('lastName')} />
         </div>
-        <TextField
-          label="Date de naissance"
-          type="date"
-          optional
-          {...field('birthday')}
-          hint="Pour recevoir une attention le jour de votre anniversaire."
-        />
         <Button type="submit" loading={update.isPending}>
           Enregistrer
         </Button>
@@ -69,7 +56,6 @@ export default function AccountProfilePage() {
 
       <NotificationPreferences user={user} />
 
-      <PrivacySection />
     </div>
   );
 }

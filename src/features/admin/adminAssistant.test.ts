@@ -45,7 +45,6 @@ const product = (id: string, over: Partial<AdminProduct> = {}): AdminProduct =>
 const ctx = (over: Partial<AssistantContext> = {}): AssistantContext => ({
   orders: [order('1', day(1)), order('2', day(1)), order('3', day(8))],
   products: [product('p1'), product('p2')],
-  tickets: [],
   stats: [],
   end: END,
   ...over,
@@ -96,11 +95,6 @@ describe('propositions', () => {
     });
   });
 
-  it('propose une remise sur un produit en stock sans vente depuis 60 jours', () => {
-    const out = proposals(ctx());
-    const promo = out.find((p) => p.id === 'promote-slow-movers');
-    expect(promo?.changes.map((c) => c.productId)).toEqual(['p2']);
-  });
 });
 
 describe('questions', () => {

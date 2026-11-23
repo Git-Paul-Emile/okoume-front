@@ -48,10 +48,8 @@ describe('administration des boutiques de vendeurs', () => {
 describe('accès à l’écran de la place de marché', () => {
   const item = adminNavigation.flatMap((g) => g.items).find((i) => i.to === '/admin/place-de-marche')!;
 
-  it('existe avec l’API, réservé à l’administrateur principal ou à un rôle personnalisé du domaine', () => {
+  it('existe avec l’API et est accessible au rôle unique administrateur', () => {
     expect(availableWithSource('/admin/place-de-marche')).toBe(true);
     expect(hasRole({ role: 'super_admin' }, item)).toBe(true);
-    expect(hasRole({ role: 'orders_manager' }, item)).toBe(false);
-    expect(hasRole({ role: 'orders_manager', customPermissions: ['vendeurs:consulter'] }, item)).toBe(true);
   });
 });

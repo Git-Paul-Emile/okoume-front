@@ -17,7 +17,7 @@ export default function PromotionsPage() {
   const { data: ratings } = useRatingStats();
   const { data: codes } = usePublicPromoCodes();
   const onSale = (products ?? []).filter((p) => isPromotionActive(p.promotion));
-  const activeCodes = (codes ?? []).filter((c) => new Date(c.endsAt) > new Date() && c.tiers.length === 0);
+  const activeCodes = (codes ?? []).filter((c) => new Date(c.endsAt) > new Date());
 
   return (
     <div className="container-page py-6 lg:py-8">

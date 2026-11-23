@@ -20,24 +20,13 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
   const [support, setSupport] = useState(settings.support);
   const [social, setSocial] = useState({ facebook: '', instagram: '', tiktok: '', ...settings.social });
   const [rules, setRules] = useState({
-    maxDiscount: String(Math.round(settings.maxDiscountRate * 100)),
     returnDays: String(settings.returnWindowDays),
-    earnPer: String(settings.loyalty.earnPer),
-    pointValue: String(settings.loyalty.pointValue),
-    minRedeem: String(settings.loyalty.minRedeem),
     reopenDays: String(settings.reopenWindowDays ?? 15),
     maxAddresses: String(settings.maxAddresses ?? 5),
     cashAlertHours: String(settings.cashPreparationAlertHours ?? 24),
     assistantBudget: String(settings.assistantMonthlyBudget ?? 0),
     escalationHours: String(settings.alertEscalationHours ?? 4),
     reviewAmount: String(settings.reviewAmount ?? 500000),
-    referralReward: String(settings.referralReward ?? 300),
-    argent: String(settings.tiers.find((t) => t.id === 'argent')?.threshold ?? 0),
-    or: String(settings.tiers.find((t) => t.id === 'or')?.threshold ?? 0),
-    welcomePercent: String(settings.welcomeCode?.enabled ? settings.welcomeCode.percent : 0),
-    welcomeDays: String(settings.welcomeCode?.validDays ?? 30),
-    birthdayPoints: String(settings.birthdayReward?.points ?? 200),
-    birthdayPercent: String(settings.birthdayReward?.percent ?? 10),
   });
   const [error, setError] = useState('');
   // Valeur du point, délais de retour et de réouverture, nombre d'adresses sont fixés par le serveur, qui
@@ -54,10 +43,6 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
       number
     >;
     if (Object.values(n).some((v) => Number.isNaN(v))) return setError('Les règles doivent être des nombres entiers.');
-    if (!(n.argent > 0 && n.or > n.argent)) return setError('Seuils de fidélité : Or doit être supérieur à Argent.');
-    if (n.welcomePercent < 0 || n.welcomePercent > 50) return setError('Code de bienvenue : entre 0 et 50 %.');
-    if (n.maxDiscount < 0 || n.maxDiscount > 90)
-      return setError('Le plafond de remise doit être compris entre 0 et 90 %.');
     if (Object.values(social).some((url) => url.trim() && !/^https:\/\/\S+$/.test(url.trim())))
       return setError('Les liens des réseaux sociaux doivent commencer par https://');
     if (mm.some((m) => !m.number.trim() || !m.beneficiary.trim()))
@@ -67,25 +52,13 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
       mobileMoney: mm,
       support,
       social: Object.fromEntries(Object.entries(social).map(([k, v]) => [k, v.trim()])),
-      maxDiscountRate: n.maxDiscount / 100,
       returnWindowDays: n.returnDays,
-      loyalty: { earnPer: n.earnPer, pointValue: n.pointValue, minRedeem: n.minRedeem },
       reopenWindowDays: n.reopenDays,
       maxAddresses: Math.min(20, Math.max(1, n.maxAddresses)),
       cashPreparationAlertHours: Math.max(1, n.cashAlertHours),
       assistantMonthlyBudget: n.assistantBudget,
       alertEscalationHours: Math.max(1, n.escalationHours),
       reviewAmount: n.reviewAmount,
-      referralReward: n.referralReward,
-      tiers: settings.tiers.map((t) =>
-        t.id === 'argent' ? { ...t, threshold: n.argent } : t.id === 'or' ? { ...t, threshold: n.or } : t,
-      ),
-      welcomeCode: { enabled: n.welcomePercent > 0, percent: n.welcomePercent, validDays: Math.max(1, n.welcomeDays) },
-      birthdayReward: {
-        enabled: n.birthdayPoints > 0 || n.birthdayPercent > 0,
-        points: n.birthdayPoints,
-        percent: n.birthdayPercent,
-      },
     });
   };
 
@@ -193,13 +166,6 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
         <Panel title="Règles de vente">
           <div className="grid gap-4 sm:grid-cols-3">
             <TextField
-              label="Remise maximale (%)"
-              inputMode="numeric"
-              value={rules.maxDiscount}
-              onChange={setRule('maxDiscount')}
-              hint="Toutes remises cumulées."
-            />
-            <TextField
               label="Délai de retour (jours)"
               inputMode="numeric"
               value={rules.returnDays}
@@ -249,78 +215,6 @@ function SettingsForm({ settings }: { settings: ShopSettings }) {
               value={rules.reviewAmount}
               onChange={setRule('reviewAmount')}
               hint="Au-delà, la commande attend une vérification avant la préparation, avec les autres signaux. 0 pour ne pas contrôler le montant."
-            />
-          </div>
-        </Panel>
-
-        <Panel title="Fidélité">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <TextField
-              label="1 point par tranche de (FCFA)"
-              inputMode="numeric"
-              value={rules.earnPer}
-              onChange={setRule('earnPer')}
-              disabled
-            />
-            <TextField
-              label="Valeur d’un point (FCFA)"
-              inputMode="numeric"
-              value={rules.pointValue}
-              onChange={setRule('pointValue')}
-              disabled
-            />
-            <TextField
-              label="Minimum pour utiliser ses points"
-              inputMode="numeric"
-              value={rules.minRedeem}
-              onChange={setRule('minRedeem')}
-              disabled
-            />
-            <TextField
-              label="Parrainage : points du parrain"
-              inputMode="numeric"
-              value={rules.referralReward}
-              onChange={setRule('referralReward')}
-              hint="À la première commande livrée du filleul."
-            />
-            <TextField
-              label="Niveau Argent à partir de (FCFA)"
-              inputMode="numeric"
-              value={rules.argent}
-              onChange={setRule('argent')}
-              hint="Achats livrés et payés, nets des remboursements."
-            />
-            <TextField
-              label="Niveau Or à partir de (FCFA)"
-              inputMode="numeric"
-              value={rules.or}
-              onChange={setRule('or')}
-            />
-            <TextField
-              label="Code de bienvenue (%)"
-              inputMode="numeric"
-              value={rules.welcomePercent}
-              onChange={setRule('welcomePercent')}
-              hint="Après la première commande livrée et payée. 0 pour désactiver."
-            />
-            <TextField
-              label="Validité du code de bienvenue (jours)"
-              inputMode="numeric"
-              value={rules.welcomeDays}
-              onChange={setRule('welcomeDays')}
-            />
-            <TextField
-              label="Anniversaire : points bonus"
-              inputMode="numeric"
-              value={rules.birthdayPoints}
-              onChange={setRule('birthdayPoints')}
-            />
-            <TextField
-              label="Anniversaire : code de réduction (%)"
-              inputMode="numeric"
-              value={rules.birthdayPercent}
-              onChange={setRule('birthdayPercent')}
-              hint="Le client choisit entre les deux. 0 et 0 désactive le cadeau."
             />
           </div>
         </Panel>

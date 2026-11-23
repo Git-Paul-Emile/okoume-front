@@ -9,7 +9,14 @@ const order = (over: Partial<AdminOrder> = {}): AdminOrder =>
     status: 'confirmed',
     paymentMethod: 'airtel',
     paymentStatus: 'awaiting_verification',
-    totals: { subtotal: 20_000, codeDiscount: 0, pointsDiscount: 0, total: 22_000 },
+    totals: {
+      subtotal: 20_000,
+      productDiscount: 0,
+      codeDiscount: 0,
+      deliveryFee: 2_000,
+      deliveryDiscount: 0,
+      total: 22_000,
+    },
     items: [
       { variantId: 'v1', unitPrice: 15_000, quantity: 1 },
       { variantId: 'v2', unitPrice: 5_000, quantity: 1 },
@@ -67,7 +74,14 @@ describe('remboursements', () => {
   it('un retour partiel rembourse les articles concernés, remises réparties', () => {
     const o = order({
       paymentStatus: 'refund_due',
-      totals: { subtotal: 20_000, codeDiscount: 2_000, pointsDiscount: 0, total: 20_000 } as AdminOrder['totals'],
+      totals: {
+        subtotal: 20_000,
+        productDiscount: 0,
+        codeDiscount: 2_000,
+        deliveryFee: 2_000,
+        deliveryDiscount: 0,
+        total: 20_000,
+      } as AdminOrder['totals'],
       returnRequest: { items: [{ variantId: 'v2', quantity: 1 }], status: 'refund_due' } as AdminOrder['returnRequest'],
     });
     expect(refundableAmount(o)).toBe(4_500);

@@ -1,10 +1,9 @@
 import { motion } from 'motion/react';
-import { Heart, Package, Coins } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
 
 export function AuthAside() {
   const perks = [
     { icon: Package, text: 'Historique et suivi de toutes vos commandes' },
-    { icon: Coins, text: 'Points de fidélité et codes exclusifs' },
     { icon: Heart, text: 'Favoris et adresses enregistrés' },
   ];
   return (

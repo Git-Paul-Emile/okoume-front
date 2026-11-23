@@ -4,7 +4,7 @@ import { adminCatalogBackend } from './adminCatalog.backend';
 import type { Id } from '@/api/types';
 import type { AdminProduct, AssistantAction } from './admin.types';
 import type { AssistantLogEntry } from './assistantLog';
-import type { ProposalDecision, RulesVersion } from './assistantRules';
+import type { ProposalDecision } from './assistantRules';
 
 /**
  * Assistant d'administration sur l'API (api/src/features/staff-assistant). L'analyse tourne dans l'interface sur
@@ -62,24 +62,6 @@ const decisionDto = z
     at: d.createdAt,
   }));
 
-const versionDto = z
-  .object({
-    id: z.string(),
-    version: z.number(),
-    params: z.object({ slowDays: z.number(), slowDiscount: z.number(), promoDays: z.number(), minStock: z.number() }),
-    note: z.string(),
-    staffName: z.string(),
-    createdAt: z.string(),
-  })
-  .transform((v): RulesVersion => ({
-    id: v.id,
-    version: v.version,
-    params: v.params,
-    note: v.note,
-    by: v.staffName,
-    at: v.createdAt,
-  }));
-
 const questionDto = z
   .object({
     id: z.string(),
@@ -104,7 +86,6 @@ type ProductUpdater = (id: Id, patch: Partial<AdminProduct>) => Promise<unknown>
 const overviewDto = z.object({
   decisions: z.array(decisionDto),
   actions: z.array(actionDto),
-  rules: z.array(versionDto),
 });
 
 const overview = async (signal?: AbortSignal) =>
@@ -113,7 +94,6 @@ const overview = async (signal?: AbortSignal) =>
 export const adminAssistantBackend = {
   actions: async (signal?: AbortSignal) => (await overview(signal)).actions,
   decisions: async (signal?: AbortSignal) => (await overview(signal)).decisions,
-  rules: async (signal?: AbortSignal) => (await overview(signal)).rules,
   questions: async (signal?: AbortSignal) =>
     z.array(questionDto).parse(await backend.get('/staff/assistant/questions', undefined, signal)),
 
@@ -126,9 +106,6 @@ export const adminAssistantBackend = {
         ...(d.until ? { until: d.until } : {}),
       }),
     ),
-
-  saveRules: async (v: Pick<RulesVersion, 'params' | 'note'>) =>
-    versionDto.parse(await backend.post('/staff/assistant/rules', { params: v.params, note: v.note })),
 
   logQuestion: async (entry: Pick<AssistantLogEntry, 'question' | 'answer' | 'source'>) =>
     questionDto.parse(
@@ -165,10 +142,9 @@ export const adminAssistantBackend = {
   },
 };
 
-/** Seuls « mis en avant » et la promotion sont modifiés par une proposition. */
+/** L’assistant peut uniquement proposer une mise en avant de produit. */
 function pick(patch: AssistantAction['changes'][number]['before']) {
   return {
     ...(patch.featured !== undefined ? { featured: patch.featured } : {}),
-    ...(patch.promotion !== undefined ? { promotion: patch.promotion } : {}),
   };
 }

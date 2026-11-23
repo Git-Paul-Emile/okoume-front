@@ -16,7 +16,6 @@ const links = [
   { to: '/vendeur/produits', label: 'Produits' },
   { to: '/vendeur/commandes', label: 'Commandes' },
   { to: '/vendeur/livraison', label: 'Livraison' },
-  { to: '/vendeur/reversements', label: 'Reversements' },
   { to: '/vendeur/boutique', label: 'Boutique et offre' },
 ];
 

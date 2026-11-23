@@ -50,11 +50,11 @@ export function paymentError(order: AdminOrder, input: PaymentInput): string | n
 /** Montant à rembourser : articles retournés (montant réellement payé) ou somme encaissée pour une annulation. */
 export function refundableAmount(order: AdminOrder) {
   const request = order.returnRequest;
-  if (request && ['refund_due', 'received', 'inspecting'].includes(request.status)) {
+  if (request && ['refund_due', 'received'].includes(request.status)) {
     const t = order.totals;
     const goods = t.subtotal;
     // Les remises sont réparties au prorata des articles ; la livraison est examinée séparément
-    const discounts = t.codeDiscount + t.pointsDiscount;
+    const discounts = t.codeDiscount;
     const items = request.items.reduce(
       (s, r) => s + (order.items.find((i) => i.variantId === r.variantId)?.unitPrice ?? 0) * r.quantity,
       0,

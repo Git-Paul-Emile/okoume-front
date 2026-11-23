@@ -1,6 +1,5 @@
 import { env } from '@/config/env';
 import { ApiError } from './ApiError';
-import { isPublicData, readOffline, saveOffline } from './offlineCache';
 import type { QueryParams } from './types';
 
 /**
@@ -122,7 +121,6 @@ async function request(method: string, path: string, options: RequestOptions = {
 
 async function send(method: string, path: string, options: RequestOptions = {}): Promise<unknown> {
   const url = buildUrl(path, options.params);
-  const offline = method === 'GET' && isPublicData(path);
   const csrf = SAFE_METHODS.has(method) ? null : readCookie(CSRF_COOKIE);
   let response: Response;
   try {
@@ -141,9 +139,6 @@ async function send(method: string, path: string, options: RequestOptions = {}):
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
-    // Hors ligne : dernière copie connue des données publiques du catalogue (20.2)
-    const copy = offline ? await readOffline(url) : null;
-    if (copy?.text) return unwrap(JSON.parse(copy.text));
     throw new ApiError('Réseau indisponible', 0, error);
   }
 
@@ -153,7 +148,6 @@ async function send(method: string, path: string, options: RequestOptions = {}):
     const message = isRecord(body) && typeof body.message === 'string' ? body.message : `Erreur ${response.status}`;
     throw new ApiError(message, response.status, errorDetails(body));
   }
-  if (offline) void saveOffline(url, text, null);
   return unwrap(body);
 }
 

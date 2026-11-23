@@ -189,7 +189,7 @@ export function ProductEditDialog({ product, onClose }: { product: AdminProduct;
             ? {
                 type: 'percent',
                 value: rate,
-                startsAt: product.promotion?.startsAt ?? now.toISOString(),
+                startsAt: now.toISOString(),
                 endsAt: product.promotion?.endsAt ?? new Date(now.getTime() + 30 * 86_400_000).toISOString(),
               }
             : null,

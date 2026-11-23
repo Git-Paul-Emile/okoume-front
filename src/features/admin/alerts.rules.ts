@@ -9,11 +9,11 @@ export const alertStateLabel: Record<AlertState, string> = {
   closed: 'Clôturée',
 };
 
-/** Canaux par niveau (17.6) : l'envoi des e-mails et des notifications push est fait par l'API. */
+/** Canaux de signalement par niveau : les alertes critiques déclenchent aussi un e-mail. */
 export const alertChannels: Record<AlertLevel, string> = {
   info: 'Tableau de bord',
   warning: 'Tableau de bord et e-mail',
-  critical: 'Notification prioritaire et push',
+  critical: 'Tableau de bord et e-mail prioritaire',
 };
 
 /** Situation détectée par le serveur : une clé stable par problème, pour regrouper ses répétitions. */

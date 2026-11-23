@@ -32,13 +32,6 @@ export function TotalsList({
       {totals.codeDiscount > 0 && (
         <Row label={`Code ${promoCode ?? ''}`} value={`− ${formatPrice(totals.codeDiscount)}`} tone="discount" />
       )}
-      {totals.pointsDiscount > 0 && (
-        <Row
-          label={`Points (${totals.pointsUsed})`}
-          value={`− ${formatPrice(totals.pointsDiscount)}`}
-          tone="discount"
-        />
-      )}
       {deliveryKnown ? (
         <>
           <Row label="Livraison" value={formatPrice(totals.deliveryFee)} />
@@ -85,11 +78,6 @@ export function TotalsList({
           Prix TTC, dont TVA {formatPrice(vat.total)}
           {vat.rows.length > 1 && ` (${vat.rows.map((r) => `${r.rate} % : ${formatPrice(r.vat)}`).join(', ')})`}
           {!deliveryKnown && ', hors livraison'}.
-        </p>
-      )}
-      {totals.pointsEarned > 0 && (
-        <p className="text-xs text-ink-muted">
-          Vous gagnerez {totals.pointsEarned} points de fidélité après livraison et paiement.
         </p>
       )}
     </dl>

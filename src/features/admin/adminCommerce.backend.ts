@@ -6,20 +6,19 @@ import type { InvoiceDocument } from '@/features/invoices/invoice.rules';
 import { toInvoiceDocument } from '@/features/orders/orders.backend';
 import type { ReturnRequest } from '@/features/orders/orders.types';
 import type { PromoCode } from '@/features/promotions/promotions.types';
-import type { InspectionLine } from './orders.actions';
 
 /**
  * Retours, codes promo et factures de l'équipe sur l'API (api/src/features/staff-returns, staff-promo-codes,
- * invoices). Chaque étape d'un retour est une action de l'API, qui en trace l'auteur et en applique les effets
- * (stock non revendable, remise en stock, montant remboursable).
+ * invoices). Les retours passent par décision, réception et remboursement.
  */
 
 const API_TO_FRONT_STATUS = {
   pending: 'pending',
   refused: 'refused',
-  // Retour accepté : le colis est attendu (le back-office l'affiche « accepté, colis attendu »)
+  // Retour accepté : le colis est attendu.
   expected: 'accepted',
-  received: 'received',
+  // Les dossiers déjà reçus sous l'ancien parcours sont proposés à la même confirmation simplifiée.
+  received: 'accepted',
   refund_due: 'refund_due',
   refunded: 'refunded',
   closed: 'closed',
@@ -35,13 +34,9 @@ const staffReturnDto = z.object({
     z.object({
       variantId: z.string(),
       quantity: z.number(),
-      resaleable: z.number().nullable(),
-      unsellable: z.number().nullable(),
     }),
   ),
   decisionReason: z.string().nullable(),
-  inspectionNote: z.string().nullable(),
-  restockStatus: z.enum(['none', 'pending', 'done']),
   reopenRequestedAt: z.string().nullable(),
   history: z.array(
     z.object({
@@ -57,8 +52,6 @@ const staffReturnDto = z.object({
 /** Dossier de retour de l'équipe dans la forme du back-office, rattaché à sa commande par orderId. */
 export function toStaffReturn(raw: unknown): { orderId: Id; request: ReturnRequest } {
   const r = staffReturnDto.parse(raw);
-  const inspected = r.items.every((i) => i.resaleable !== null && i.unsellable !== null);
-  const inspection = r.history.findLast((e) => e.status === 'refund_due');
   const request: ReturnRequest = {
     id: r.id,
     items: r.items.map(({ variantId, quantity }) => ({ variantId, quantity })),
@@ -68,21 +61,6 @@ export function toStaffReturn(raw: unknown): { orderId: Id; request: ReturnReque
     createdAt: r.createdAt,
     ...(r.decisionReason ? { decisionReason: r.decisionReason } : {}),
     ...(r.reopenRequestedAt ? { reopenRequestedAt: r.reopenRequestedAt } : {}),
-    ...(inspected && inspection
-      ? {
-          inspection: {
-            lines: r.items.map((i) => ({
-              variantId: i.variantId,
-              resaleable: i.resaleable ?? 0,
-              unsellable: i.unsellable ?? 0,
-            })),
-            note: r.inspectionNote ?? '',
-            by: inspection.by ?? 'Équipe',
-            at: inspection.at,
-          },
-        }
-      : {}),
-    ...(r.restockStatus !== 'none' ? { restock: { status: r.restockStatus } } : {}),
   };
   return { orderId: r.orderId, request };
 }
@@ -107,23 +85,17 @@ const promoCodeDto = z.object({
   value: z.number(),
   minAmount: z.number(),
   freeDelivery: z.boolean(),
-  newCustomersOnly: z.boolean(),
-  tiers: z.array(z.enum(['bronze', 'argent', 'or'])),
-  startsAt: z.string(),
   endsAt: z.string(),
   maxUses: z.number().nullable(),
-  perCustomer: z.number().nullable(),
   uses: z.number(),
   active: z.boolean(),
-  customerId: z.string().nullable(),
   productIds: z.array(z.string()),
   categoryIds: z.array(z.string()),
 });
 
-/** Code de l'API dans la forme du back-office : une limite absente s'écrit null (illimité) ou 0 par client. */
+/** Les champs de ciblage personnalisés historiques ne sont plus exposés dans le MVP. */
 export function toPromoCode(raw: unknown): PromoCode {
-  const { customerId, perCustomer, ...code } = promoCodeDto.parse(raw);
-  return { ...code, perCustomer: perCustomer ?? 0, ...(customerId ? { userId: customerId } : {}) };
+  return promoCodeDto.parse(raw);
 }
 
 const PROMO_FIELDS = [
@@ -133,9 +105,6 @@ const PROMO_FIELDS = [
   'value',
   'minAmount',
   'freeDelivery',
-  'newCustomersOnly',
-  'tiers',
-  'startsAt',
   'endsAt',
   'maxUses',
   'active',
@@ -144,13 +113,11 @@ const PROMO_FIELDS = [
 ] as const;
 
 /**
- * Champs du back-office dans la forme de l'API, seulement ceux fournis ; 0 par client signifie sans limite.
- * Le titulaire d'un code personnel ne se change pas depuis le back-office.
+ * Champs de coupon simple acceptés par l'API ; les anciennes règles personnalisées restent historiques.
  */
 export function promoCodeBody(code: Partial<PromoCode>) {
   const body: Record<string, unknown> = {};
   for (const key of PROMO_FIELDS) if (code[key] !== undefined) body[key] = code[key];
-  if (code.perCustomer !== undefined) body.perCustomer = code.perCustomer > 0 ? code.perCustomer : null;
   return body;
 }
 
@@ -174,11 +141,6 @@ export const adminCommerceBackend = {
   refuseReturn: (request: ReturnRequest, decisionReason: string) =>
     backend.post(returnRoute(request, 'decision'), { status: 'refused', decisionReason }),
   receiveReturn: (request: ReturnRequest) => backend.post(returnRoute(request, 'reception')),
-  inspectReturn: (request: ReturnRequest, lines: InspectionLine[], note: string) =>
-    backend.post(returnRoute(request, 'inspection'), { outcome: 'conforming', lines, note: note.trim() }),
-  rejectInspection: (request: ReturnRequest, note: string) =>
-    backend.post(returnRoute(request, 'inspection'), { outcome: 'non_conforming', note }),
-  restockReturn: (request: ReturnRequest) => backend.post(returnRoute(request, 'restock')),
 
   promoCodes: (signal?: AbortSignal) => getAll('/staff/promo-codes', {}, toPromoCode, signal),
 
