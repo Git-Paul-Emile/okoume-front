@@ -117,7 +117,10 @@ export default function SellerLayout() {
   return (
     <div className="container-page py-6 lg:py-8">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-2xl">{shop.data.name}</h1>
+        <div>
+          <h1 className="text-2xl">Mon espace vendeur</h1>
+          <p className="mt-1 text-sm text-ink-soft">Bonjour, {shop.data.name}</p>
+        </div>
         <p className="text-sm text-ink-muted">
           {shop.data.plan.name}, {accessLabel[access.state].toLowerCase()}
           {access.endsAt && access.state !== 'expired' && `, jusqu’au ${formatDate(access.endsAt)}`}

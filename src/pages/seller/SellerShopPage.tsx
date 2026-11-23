@@ -34,6 +34,11 @@ export default function SellerShopPage() {
     <div className="grid gap-6 lg:grid-cols-2">
       <section className="card p-5">
         <h2 className="mb-4 text-lg">Fiche de la boutique</h2>
+        <p className={shop.verified ? 'mb-4 text-sm text-forest' : 'mb-4 rounded-md bg-ivory p-3 text-sm text-ink-soft'} role="status">
+          {shop.verified
+            ? 'Boutique vérifiée par OKOUMÉ.'
+            : 'La vérification de votre boutique est en attente. Les produits que vous soumettez sont vérifiés séparément avant leur publication.'}
+        </p>
         <ShopForm
           initial={{
             name: shop.name,
@@ -50,7 +55,6 @@ export default function SellerShopPage() {
             toast.success('Boutique enregistrée');
           }}
         />
-        {shop.verified && <p className="mt-4 text-sm text-forest">Boutique vérifiée par Okoumé.</p>}
       </section>
 
       <div className="space-y-6">

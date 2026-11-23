@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { BadgeCheck, ClipboardList, Clock3, PackagePlus, Store } from 'lucide-react';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { ButtonLink } from '@/components/ui/Button';
@@ -39,6 +40,49 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <section className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-forest">Bonjour, {data.shop.name}</p>
+          <h2 className="mt-1 text-xl">Gérez votre boutique sur OKOUMÉ</h2>
+        </div>
+        <div
+          className={data.shop.verified
+            ? 'flex items-start gap-2 rounded-lg bg-forest-50 p-3 text-sm text-forest'
+            : 'flex items-start gap-2 rounded-lg bg-ivory p-3 text-sm text-ink-soft'}
+          role="status"
+        >
+          {data.shop.verified ? <BadgeCheck className="mt-0.5 size-5 shrink-0" /> : <Clock3 className="mt-0.5 size-5 shrink-0" />}
+          <span>
+            {data.shop.verified
+              ? 'Votre boutique est vérifiée par OKOUMÉ.'
+              : 'La vérification de votre boutique est en attente de l’équipe OKOUMÉ.'}{' '}
+            {!data.shop.verified && (
+              <Link to="/vendeur/boutique" className="font-semibold underline underline-offset-2">
+                Voir l’état de ma boutique
+              </Link>
+            )}
+          </span>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-lg">Actions rapides</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Link to="/vendeur/produits/nouveau" className="card flex items-center gap-3 p-4 hover:border-forest">
+            <PackagePlus className="size-5 text-forest" />
+            <span><strong className="block">Ajouter un produit</strong><span className="text-xs text-ink-soft">Publier un nouvel article</span></span>
+          </Link>
+          <Link to="/vendeur/commandes" className="card flex items-center gap-3 p-4 hover:border-forest">
+            <ClipboardList className="size-5 text-forest" />
+            <span><strong className="block">Mes commandes</strong><span className="text-xs text-ink-soft">Traiter les commandes reçues</span></span>
+          </Link>
+          <Link to="/vendeur/boutique" className="card flex items-center gap-3 p-4 hover:border-forest">
+            <Store className="size-5 text-forest" />
+            <span><strong className="block">Ma boutique</strong><span className="text-xs text-ink-soft">Modifier ma vitrine et mon offre</span></span>
+          </Link>
+        </div>
+      </section>
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Tile label="Commandes à préparer" value={orders.toPrepare} to="/vendeur/commandes?etat=confirmed" />
         <Tile label="Commandes à livrer" value={orders.toDeliver} to="/vendeur/commandes?etat=ready" />

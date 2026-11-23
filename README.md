@@ -1,5 +1,8 @@
 # Okoumé : boutique en ligne (front client)
 
+Les pages publiques `/boutiques` et `/devenir-vendeur` présentent les boutiques partenaires et le parcours vendeur.
+Un vendeur connecté accède à son espace de gestion sur `/vendeur`.
+
 Front-end client de la plateforme e-commerce pour le marché gabonais, conforme au cahier des charges (boutique à vendeur unique, prix en FCFA, paiement en espèces, Airtel Money ou Moov Money).
 
 > **Nom et logo provisoires.** « Okoumé » et la feuille stylisée sont des espaces réservés. Pour les changer : `src/config/brand.ts`, `src/components/ui/Logo.tsx`, `public/favicon.svg`, `public/manifest.webmanifest` et le `<title>` de `index.html`.

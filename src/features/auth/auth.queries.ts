@@ -53,6 +53,7 @@ export function useLogout() {
     qc.removeQueries({ queryKey: ['user'] });
     qc.removeQueries({ queryKey: ['orders'] });
     qc.removeQueries({ queryKey: ['tickets'] });
+    qc.removeQueries({ queryKey: ['seller'] });
   };
 }
 

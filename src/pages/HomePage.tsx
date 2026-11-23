@@ -13,6 +13,7 @@ import { PromotionsSection } from '@/features/home/components/PromotionsSection'
 import { TopRatedSection } from '@/features/home/components/TopRatedSection';
 import { TraditionalWearSection } from '@/features/home/components/TraditionalWearSection';
 import { RecentlyViewed } from '@/features/products/components/RecentlyViewed';
+import { SellerCallout } from '@/features/seller/components/SellerCallout';
 
 export function HomePage() {
   return (
@@ -51,6 +52,8 @@ export function HomePage() {
       <TopRatedSection />
 
       <PromotionsSection />
+
+      <SellerCallout />
 
       <RecentlyViewed />
 

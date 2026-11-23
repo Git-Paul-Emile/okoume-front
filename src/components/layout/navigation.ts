@@ -1,6 +1,7 @@
 export const mainLinks = [
   { to: '/', label: 'Accueil' },
-  { to: '/catalogue', label: 'Catalogue' },
+  { to: '/boutiques', label: 'Boutiques' },
+  { to: '/catalogue', label: 'Produits' },
   { to: '/catalogue?tri=newest', label: 'Nouveautés' },
   { to: '/contact', label: 'Contact' },
 ];

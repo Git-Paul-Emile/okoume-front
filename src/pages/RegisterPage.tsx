@@ -15,9 +15,13 @@ export default function RegisterPage() {
     <div className="container-page py-8 lg:py-12">
       <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2">
         <div className="card p-6 sm:p-10">
-          <h1 className="text-2xl sm:text-3xl">Créer un compte</h1>
+          <h1 className="text-2xl sm:text-3xl">
+            {back === '/vendeur' ? 'Créer mon compte vendeur' : 'Créer un compte'}
+          </h1>
           <p className="mt-1.5 mb-6 text-ink-soft">
-            Quelques informations suffisent. Vous pourrez ajouter vos adresses plus tard.
+            {back === '/vendeur'
+              ? 'Après confirmation de votre adresse e-mail, vous pourrez créer votre boutique OKOUMÉ.'
+              : 'Quelques informations suffisent. Vous pourrez ajouter vos adresses plus tard.'}
           </p>
           <RegisterForm
             onSuccess={() => {

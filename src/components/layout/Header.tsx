@@ -63,7 +63,7 @@ export function Header() {
       <div className="container-page flex h-[76px] items-center gap-3 lg:gap-8">
         <button
           type="button"
-          className="-ml-2 rounded-md p-2 hover:bg-sage lg:hidden"
+          className="-ml-2 rounded-md p-2 hover:bg-sage xl:hidden"
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Ouvrir le menu"
         >

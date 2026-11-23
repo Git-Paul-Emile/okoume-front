@@ -35,6 +35,12 @@ export default function LoginPage() {
               Créer un compte
             </Link>
           </p>
+          <p className="mt-4 text-center text-sm text-ink-soft">
+            Vous êtes vendeur ?{' '}
+            <Link to="/connexion?retour=%2Fvendeur" className="font-semibold text-forest hover:underline">
+              Accéder à mon espace vendeur
+            </Link>
+          </p>
         </div>
         <AuthAside />
       </div>

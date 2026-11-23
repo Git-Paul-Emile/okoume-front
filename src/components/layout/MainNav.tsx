@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Link, useLocation } from 'react-router';
 import { CategoryMenu } from '@/features/categories/components/CategoryMenu';
 import { cn } from '@/utils/text';
+import { SellerEntryLink } from './SellerEntryLink';
 import { mainLinks } from './navigation';
 
 export function MainNav() {
@@ -16,8 +17,8 @@ export function MainNav() {
         : location.pathname.startsWith(to) && !location.search.includes('tri=newest');
 
   return (
-    <nav className="hidden border-t border-sage bg-white lg:block" aria-label="Navigation principale">
-      <div className="container-page flex h-14 items-center gap-6">
+    <nav className="hidden border-t border-sage bg-white xl:block" aria-label="Navigation principale">
+      <div className="container-page flex h-14 items-center gap-4">
         <CategoryMenu />
         <ul className="flex items-center gap-1">
           {mainLinks.map((l) => (
@@ -37,9 +38,10 @@ export function MainNav() {
             </li>
           ))}
         </ul>
+        <SellerEntryLink className="ml-auto" />
         <Link
           to="/promotions"
-          className="ml-auto inline-flex h-10 items-center gap-2 rounded-md bg-mure px-4 text-sm font-bold text-white transition hover:bg-mure-dark"
+          className="inline-flex h-10 items-center gap-2 rounded-md bg-mure px-4 text-sm font-bold text-white transition hover:bg-mure-dark"
         >
           <Percent className="size-4" /> Promotions en cours
         </Link>

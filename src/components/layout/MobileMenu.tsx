@@ -6,6 +6,7 @@ import { useCategories } from '@/features/categories/categories.queries';
 import { CategoryIcon } from '@/features/categories/components/CategoryIcon';
 import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/utils/text';
+import { SellerEntryLink } from './SellerEntryLink';
 import { mainLinks } from './navigation';
 
 export function MobileMenu() {
@@ -83,6 +84,9 @@ export function MobileMenu() {
               </Link>
             </li>
           ))}
+          <li className="mt-2 border-t border-sage pt-2">
+            <SellerEntryLink mobile />
+          </li>
         </ul>
       </nav>
     </Drawer>

@@ -7,6 +7,7 @@ import { PaymentLogo } from '@/features/checkout/components/PaymentLogo';
 import { whatsappLink } from '@/utils/whatsapp';
 import { useInstallPrompt } from '@/lib/pwa';
 import { useConsentStore } from '@/stores/consentStore';
+import { useSellerShop } from '@/features/seller/seller.queries';
 import { footerLinks, legalLinks } from './navigation';
 
 const social: Record<string, { label: string; path: string }> = {
@@ -28,6 +29,7 @@ export function Footer() {
   const { data: settings } = useSettings();
   const support = settings?.support;
   const openCookies = useConsentStore((s) => s.openPreferences);
+  const { data: sellerShop } = useSellerShop();
   const { canInstall, install } = useInstallPrompt();
 
   return (
@@ -72,6 +74,13 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              {title === 'Mon compte' && (
+                <li>
+                  <Link to={sellerShop ? '/vendeur' : '/devenir-vendeur'} className="transition hover:text-white">
+                    {sellerShop ? 'Gérer ma boutique' : 'Vendre sur OKOUMÉ'}
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         ))}

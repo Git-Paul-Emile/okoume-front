@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { sellerProductsBackend, type SellerProductModeration } from './sellerProducts.backend';
 import { sellerOrdersBackend } from './sellerOrders.backend';
+import { useAuthStore } from '@/stores/authStore';
 import type { OrderStatus } from '@/features/orders/orders.types';
 import type { Id } from '@/api/types';
 import { sellerBackend } from './seller.backend';
@@ -9,9 +10,11 @@ import { sellerBackend } from './seller.backend';
 const SELLER = 'seller';
 
 export function useSellerShop() {
+  const userId = useAuthStore((s) => s.userId);
   return useQuery({
-    queryKey: [SELLER, 'shop'],
+    queryKey: [SELLER, userId, 'shop'],
     queryFn: ({ signal }) => sellerBackend.shop(signal),
+    enabled: !!userId,
   });
 }
 
