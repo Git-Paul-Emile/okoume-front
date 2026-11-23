@@ -30,11 +30,13 @@ export function CodeStep({
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<'verify' | 'resend' | null>(null);
+  const acceptsAnyCode = import.meta.env.DEV || import.meta.env.VITE_SIMULATE_CONFIRMATIONS === 'true';
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!/^\d{6}$/.test(code)) return setError('Le code contient 6 chiffres.');
+    if (!code.trim()) return setError('Saisissez le code reçu.');
+    if (!acceptsAnyCode && !/^\d{6}$/.test(code)) return setError('Le code contient 6 chiffres.');
     setBusy('verify');
     try {
       await server.verify(code);
@@ -64,16 +66,16 @@ export function CodeStep({
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
       <p className="text-sm text-ink-soft">
-        Saisissez le code à 6 chiffres envoyé {target.includes('@') ? 'à' : 'par SMS au'} {maskTarget(target)}. Il
-        expire dans 10 minutes.
+        Saisissez le code envoyé {target.includes('@') ? 'à' : 'par SMS au'} {maskTarget(target)}. Il expire dans 10
+        minutes.
       </p>
       <TextField
         label="Code de vérification"
-        inputMode="numeric"
+        inputMode={acceptsAnyCode ? undefined : 'numeric'}
         autoComplete="one-time-code"
-        maxLength={6}
+        maxLength={acceptsAnyCode ? 100 : 6}
         value={code}
-        onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+        onChange={(e) => setCode(acceptsAnyCode ? e.target.value : e.target.value.replace(/\D/g, ''))}
         error={error || undefined}
       />
       <div className="flex flex-wrap gap-2">

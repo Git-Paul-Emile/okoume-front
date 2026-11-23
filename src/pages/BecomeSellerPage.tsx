@@ -122,7 +122,7 @@ export default function BecomeSellerPage() {
           <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Un compte OKOUMÉ avec une adresse e-mail confirmée.</li>
           <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Un numéro de téléphone valide et les coordonnées de votre boutique.</li>
           <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Des informations et des produits exacts, conformes aux règles de la marketplace.</li>
-          <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Une offre d’accès choisie lors de l’ouverture. La vérification du téléphone est actuellement simulée, sans SMS.</li>
+          <li className="flex gap-2"><BadgeCheck className="size-5 shrink-0 text-forest" />Une offre d’accès choisie lors de l’ouverture de votre boutique.</li>
         </ul>
       </section>
 

@@ -24,6 +24,7 @@ export function ServerAdminLogin({ back }: { back: string }) {
   const [code, setCode] = useState('');
   const [backup, setBackup] = useState(false);
   const [busy, setBusy] = useState(false);
+  const acceptsAnyCode = import.meta.env.DEV || import.meta.env.VITE_SIMULATE_CONFIRMATIONS === 'true';
 
   async function run(action: () => Promise<void>, onError: (message: string) => void) {
     setBusy(true);
@@ -94,11 +95,11 @@ export function ServerAdminLogin({ back }: { back: string }) {
           ) : (
             <TextField
               label="Code de vérification"
-              inputMode="numeric"
+              inputMode={acceptsAnyCode ? undefined : 'numeric'}
               autoComplete="one-time-code"
-              maxLength={6}
+              maxLength={acceptsAnyCode ? 100 : 6}
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              onChange={(e) => setCode(acceptsAnyCode ? e.target.value : e.target.value.replace(/\D/g, ''))}
               error={errors.code}
               autoFocus
             />
@@ -108,7 +109,13 @@ export function ServerAdminLogin({ back }: { back: string }) {
             size="lg"
             className="w-full"
             loading={busy}
-            disabled={backup ? code.replace(/[^A-Z0-9]/g, '').length !== 8 : code.length !== 6}
+            disabled={
+              backup
+                ? code.replace(/[^A-Z0-9]/g, '').length !== 8
+                : acceptsAnyCode
+                  ? !code.trim()
+                  : code.length !== 6
+            }
           >
             Valider
           </Button>

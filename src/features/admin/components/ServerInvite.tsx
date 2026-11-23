@@ -19,6 +19,7 @@ export function ServerInvite({ token }: { token: string }) {
   const [pw, setPw] = useState({ password: '', confirm: '' });
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const acceptsAnyCode = import.meta.env.DEV || import.meta.env.VITE_SIMULATE_CONFIRMATIONS === 'true';
   const start = useMutation({
     mutationFn: () => adminTeamBackend.startInvitation(token),
     onSuccess: () => setStep('code'),
@@ -40,7 +41,8 @@ export function ServerInvite({ token }: { token: string }) {
 
   const submitCode = (e: FormEvent) => {
     e.preventDefault();
-    if (!/^\d{6}$/.test(code.trim())) return setError('Saisissez les 6 chiffres reçus par e-mail.');
+    if (!code.trim()) return setError('Saisissez le code reçu par e-mail.');
+    if (!acceptsAnyCode && !/^\d{6}$/.test(code.trim())) return setError('Saisissez les 6 chiffres reçus par e-mail.');
     setError('');
     accept.mutate();
   };
@@ -82,10 +84,11 @@ export function ServerInvite({ token }: { token: string }) {
             </p>
             <TextField
               label="Code reçu"
-              inputMode="numeric"
+              inputMode={acceptsAnyCode ? undefined : 'numeric'}
               autoComplete="one-time-code"
+              maxLength={acceptsAnyCode ? 100 : 6}
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => setCode(acceptsAnyCode ? e.target.value : e.target.value.replace(/\D/g, ''))}
               error={error || undefined}
             />
             <Button type="submit" size="lg" className="w-full" loading={accept.isPending}>

@@ -23,6 +23,7 @@ export default function AdminForgotPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const acceptsAnyCode = import.meta.env.DEV || import.meta.env.VITE_SIMULATE_CONFIRMATIONS === 'true';
 
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -47,7 +48,8 @@ export default function AdminForgotPasswordPage() {
 
   const reset = (e: FormEvent) => {
     e.preventDefault();
-    if (!/^\d{6}$/.test(code.trim())) return setError('Le code reçu par e-mail contient 6 chiffres.');
+    if (!code.trim()) return setError('Saisissez le code reçu par e-mail.');
+    if (!acceptsAnyCode && !/^\d{6}$/.test(code.trim())) return setError('Le code reçu par e-mail contient 6 chiffres.');
     if (backupCode.trim().length < 8) return setError('Saisissez un de vos codes de secours.');
     const invalid = passwordError(password, confirm);
     if (invalid) return setError(invalid);
@@ -91,10 +93,11 @@ export default function AdminForgotPasswordPage() {
             </p>
             <TextField
               label="Code reçu par e-mail"
-              inputMode="numeric"
+              inputMode={acceptsAnyCode ? undefined : 'numeric'}
               autoComplete="one-time-code"
+              maxLength={acceptsAnyCode ? 100 : 6}
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              onChange={(e) => setCode(acceptsAnyCode ? e.target.value : e.target.value.replace(/\D/g, ''))}
             />
             <TextField label="Code de secours" value={backupCode} onChange={(e) => setBackupCode(e.target.value)} />
             <TextField

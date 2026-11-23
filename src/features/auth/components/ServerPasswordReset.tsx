@@ -20,6 +20,7 @@ export function ServerPasswordReset() {
   const [v, setV] = useState({ code: '', password: '', confirm: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const acceptsAnyCode = import.meta.env.DEV || import.meta.env.VITE_SIMULATE_CONFIRMATIONS === 'true';
 
   const request = async (e?: FormEvent) => {
     e?.preventDefault();
@@ -41,7 +42,8 @@ export function ServerPasswordReset() {
   const confirm = async (e: FormEvent) => {
     e.preventDefault();
     const next: Record<string, string> = {};
-    if (!/^\d{6}$/.test(v.code)) next.code = 'Le code contient 6 chiffres.';
+    if (!v.code.trim()) next.code = 'Saisissez le code reçu.';
+    if (!acceptsAnyCode && !/^\d{6}$/.test(v.code)) next.code = 'Le code contient 6 chiffres.';
     const password = registerSchema.shape.password.safeParse(v.password);
     if (!password.success) next.password = password.error.issues[0].message;
     else if (v.password !== v.confirm) next.confirm = 'Les deux mots de passe sont différents.';
@@ -79,16 +81,18 @@ export function ServerPasswordReset() {
   return (
     <form onSubmit={confirm} noValidate className="mt-6 space-y-4">
       <p className="text-sm text-ink-soft">
-        Si un compte correspond à {identifier.includes('@') ? maskTarget(identifier.trim()) : 'ce numéro'}, un code à 6
-        chiffres a été envoyé à son adresse e-mail. Il expire dans 10 minutes.
+        Si un compte correspond à {identifier.includes('@') ? maskTarget(identifier.trim()) : 'ce numéro'}, un code a été
+        envoyé à son adresse e-mail. Il expire dans 10 minutes.
       </p>
       <TextField
         label="Code de vérification"
-        inputMode="numeric"
+        inputMode={acceptsAnyCode ? undefined : 'numeric'}
         autoComplete="one-time-code"
-        maxLength={6}
+        maxLength={acceptsAnyCode ? 100 : 6}
         value={v.code}
-        onChange={(e) => setV((x) => ({ ...x, code: e.target.value.replace(/\D/g, '') }))}
+        onChange={(e) =>
+          setV((x) => ({ ...x, code: acceptsAnyCode ? e.target.value : e.target.value.replace(/\D/g, '') }))
+        }
         error={errors.code}
       />
       <TextField
