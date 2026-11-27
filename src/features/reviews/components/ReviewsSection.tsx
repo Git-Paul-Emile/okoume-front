@@ -1,4 +1,4 @@
-import { Camera, Flag, Star } from 'lucide-react';
+import { Camera, Star } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Rating } from '@/components/ui/Rating';
 import { useCurrentUser } from '@/features/auth/auth.queries';
@@ -8,15 +8,12 @@ import { Link } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { useMyOrders } from '@/features/orders/orders.queries';
 import { useMyReview, useProductReviews } from '../reviews.queries';
-import { ReportReviewDialog } from './ReportReviewDialog';
 import { ReviewForm } from './ReviewForm';
 
 export function ReviewsSection({ productId, productName }: { productId: string; productName: string }) {
   const { data: reviews = [], isLoading } = useProductReviews(productId);
-  const [reporting, setReporting] = useState<string | null>(null);
   const [stars, setStars] = useState<number | null>(null);
   const [withPhoto, setWithPhoto] = useState(false);
-  const { user } = useCurrentUser();
 
   const stats = useMemo(() => {
     const dist = [5, 4, 3, 2, 1].map((n) => ({ n, count: reviews.filter((r) => r.rating === n).length }));
@@ -117,19 +114,9 @@ export function ReviewsSection({ productId, productName }: { productId: string; 
                 ))}
               </div>
             )}
-            {user && user.id !== r.userId && (
-              <button
-                type="button"
-                onClick={() => setReporting(r.id)}
-                className="mt-3 inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-mure"
-              >
-                <Flag className="size-3.5" /> Signaler
-              </button>
-            )}
           </li>
         ))}
       </ul>
-      {reporting && user && <ReportReviewDialog reviewId={reporting} onClose={() => setReporting(null)} />}
     </div>
   );
 }

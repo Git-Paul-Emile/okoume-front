@@ -3,7 +3,7 @@ import { AdminAuthShell } from '@/features/admin/components/AdminAuthShell';
 import { ServerAdminLogin } from '@/features/admin/components/ServerAdminLogin';
 import { useAdminAuthStore } from '@/stores/adminAuthStore';
 
-/** Connexion en deux étapes (19.2) : mot de passe, code et blocage sont vérifiés par le serveur. */
+/** Connexion administrateur par adresse e-mail et mot de passe. */
 export default function AdminLoginPage() {
   const admin = useAdminAuthStore((s) => s.admin);
   const [params] = useSearchParams();

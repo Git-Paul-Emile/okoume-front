@@ -8,12 +8,10 @@ export interface FlyingItem {
 
 interface UiState {
   cartOpen: boolean;
-  assistantOpen: boolean;
   mobileMenuOpen: boolean;
   flying: FlyingItem | null;
   cartPulse: number;
   setCartOpen: (open: boolean) => void;
-  setAssistantOpen: (open: boolean) => void;
   setMobileMenuOpen: (open: boolean) => void;
   /** Lance l'animation « vers le panier » depuis l'élément source. */
   flyToCart: (image: string, source: Element | null) => void;
@@ -24,12 +22,10 @@ let flightId = 0;
 
 export const useUiStore = create<UiState>((set) => ({
   cartOpen: false,
-  assistantOpen: false,
   mobileMenuOpen: false,
   flying: null,
   cartPulse: 0,
   setCartOpen: (cartOpen) => set({ cartOpen }),
-  setAssistantOpen: (assistantOpen) => set({ assistantOpen }),
   setMobileMenuOpen: (mobileMenuOpen) => set({ mobileMenuOpen }),
   flyToCart: (image, source) => {
     if (!source) return set((s) => ({ cartPulse: s.cartPulse + 1 }));

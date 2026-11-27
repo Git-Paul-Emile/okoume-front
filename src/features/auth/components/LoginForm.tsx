@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
 import { getErrorMessage } from '@/api/ApiError';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
@@ -42,11 +41,6 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         onChange={(e) => setValues((v) => ({ ...v, password: e.target.value }))}
         error={errors.password}
       />
-      <p className="-mt-2 text-right text-sm">
-        <Link to="/mot-de-passe-oublie" className="font-semibold text-forest hover:underline">
-          Mot de passe oublié ?
-        </Link>
-      </p>
       {login.isError && (
         <p className="text-sm font-medium text-danger" role="alert">
           {getErrorMessage(login.error)}

@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/Badge';
 import { ButtonLink } from '@/components/ui/Button';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { orderStatusLabel, paymentStatusLabel } from '@/features/orders/orders.constants';
-import { ClaimOrderForm } from '@/features/orders/components/ClaimOrderForm';
 import { useMyOrders } from '@/features/orders/orders.queries';
 import { formatDate } from '@/utils/formatDate';
 import { formatPrice } from '@/utils/formatPrice';
@@ -63,7 +62,7 @@ export default function AccountOrdersPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone={o.status === 'cancelled' ? 'danger' : 'forest'}>{orderStatusLabel[o.status]}</Badge>
+                  <Badge tone="forest">{orderStatusLabel[o.status]}</Badge>
                   <Badge tone={o.paymentStatus === 'paid' ? 'neutral' : 'warning'}>
                     {paymentStatusLabel[o.paymentStatus]}
                   </Badge>
@@ -74,7 +73,6 @@ export default function AccountOrdersPage() {
           ))}
         </RevealGroup>
       )}
-      <ClaimOrderForm />
     </div>
   );
 }

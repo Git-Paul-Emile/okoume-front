@@ -16,7 +16,7 @@ export default function LoginPage() {
       <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2">
         <div className="card p-6 sm:p-10">
           <h1 className="text-2xl sm:text-3xl">Connexion</h1>
-          <p className="mt-1.5 mb-6 text-ink-soft">Accédez à vos commandes et à vos favoris.</p>
+          <p className="mt-1.5 mb-6 text-ink-soft">Accédez à vos commandes et à votre compte.</p>
           <LoginForm
             onSuccess={() => {
               toast.success('Vous êtes connecté');

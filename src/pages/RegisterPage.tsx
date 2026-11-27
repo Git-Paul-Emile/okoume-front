@@ -20,7 +20,7 @@ export default function RegisterPage() {
           </h1>
           <p className="mt-1.5 mb-6 text-ink-soft">
             {back === '/vendeur'
-              ? 'Après confirmation de votre adresse e-mail, vous pourrez créer votre boutique OKOZA.'
+              ? 'Créez votre compte pour ouvrir votre boutique OKOZA.'
               : 'Quelques informations suffisent. Vous pourrez ajouter vos adresses plus tard.'}
           </p>
           <RegisterForm

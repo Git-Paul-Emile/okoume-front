@@ -10,7 +10,6 @@ export const footerLinks = {
   'Service client': [
     { to: '/contact', label: 'Nous contacter' },
     { to: '/suivi', label: 'Suivre une commande' },
-    { to: '/legal/retours', label: 'Retours et remboursements' },
   ],
   Boutique: [
     { to: '/catalogue', label: 'Tout le catalogue' },
@@ -19,7 +18,6 @@ export const footerLinks = {
   ],
   'Mon compte': [
     { to: '/compte/commandes', label: 'Mes commandes' },
-    { to: '/compte/favoris', label: 'Mes favoris' },
     { to: '/compte/adresses', label: 'Mes adresses' },
   ],
 };

@@ -15,14 +15,11 @@ import { ancestors } from '@/features/categories/categories.utils';
 import { ProductBuyBox } from '@/features/products/components/ProductBuyBox';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { ProductGallery } from '@/features/products/components/ProductGallery';
-import { RecentlyViewed } from '@/features/products/components/RecentlyViewed';
 import { useProduct, useProductsByIds } from '@/features/products/products.queries';
 import type { Variant } from '@/features/products/products.types';
 import { defaultVariant } from '@/features/products/products.utils';
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
 import { useRatingStats } from '@/features/reviews/reviews.queries';
-import { useRecentlyViewedStore } from '@/stores/recentlyViewedStore';
-import { recordProductView } from '@/features/products/productViews.api';
 
 type Tab = 'description' | 'specs' | 'tips';
 
@@ -32,17 +29,14 @@ export default function ProductPage() {
   const { data: categories } = useCategories();
   const { data: ratings } = useRatingStats();
   const { data: related } = useProductsByIds(product?.relatedIds ?? []);
-  const pushRecent = useRecentlyViewedStore((s) => s.push);
   // Variante choisie, rattachée au produit : changer de produit revient à sa variante par défaut
   const [choice, setChoice] = useState<{ productId: string; variantId: string } | null>(null);
   const [tab, setTab] = useState<Tab>('description');
 
   useEffect(() => {
     if (!product) return;
-    pushRecent(product.id);
-    recordProductView(product.id, 'view');
     document.title = `${brand.name} : ${product.name}`;
-  }, [product, pushRecent]);
+  }, [product]);
 
   if (isLoading) return <PageLoader />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -156,7 +150,6 @@ export default function ProductPage() {
       )}
 
       <div className="mt-12">
-        <RecentlyViewed excludeId={product.id} />
       </div>
     </div>
   );

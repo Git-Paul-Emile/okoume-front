@@ -18,19 +18,12 @@ export interface AdminUser {
 /** Membre de l'équipe vu depuis l'écran « Équipe ». */
 export interface TeamMember extends AdminUser {
   status: 'active' | 'invited' | 'suspended';
-  /**
-   * Délégation des remboursements (14.5) : montant maximal par remboursement, en FCFA.
-   * null ou absent = pas de délégation. L'administrateur principal n'a pas de plafond.
-   */
-  refundLimit?: number | null;
-  backupCodesLeft?: number;
   sessionsRevokedAt?: string | null;
   inviteToken?: string | null;
   inviteExpiresAt?: string | null;
 }
 
-export type StockMovementType =
-  'reception' | 'ajustement' | 'commande' | 'annulation' | 'retour' | 'non_vendable' | 'mise_au_rebut';
+export type StockMovementType = 'reception' | 'ajustement' | 'commande';
 
 /** Mouvement de stock (7.4) : quantité avant et après, variation, type, motif, date et auteur. */
 export interface StockMovement {
@@ -72,24 +65,6 @@ export interface Courier {
   notes: string;
 }
 
-/** Proposition de l'assistant appliquée après validation, avec de quoi revenir en arrière (17.8). */
-export interface AssistantAction {
-  id: Id;
-  proposalId: string;
-  title: string;
-  changes: Array<{ productId: Id; label: string; before: Partial<AdminProduct>; after: Partial<AdminProduct> }>;
-  appliedAt: string;
-  appliedBy: string;
-  revertedAt: string | null;
-  revertedBy?: string;
-}
-
-export interface ReviewReport {
-  id: Id;
-  reviewId: Id;
-  reason: string;
-  createdAt: string;
-}
 
 /** Données réservées au back-office : coût d'achat et coût réel de livraison. */
 export interface AdminVariant extends Variant {
@@ -126,16 +101,15 @@ export interface PriceChange {
 export interface AdminOrderItem extends OrderItem {
   unitCost?: number;
 }
-/** Encaissement ou remboursement enregistré par une personne autorisée (8.4, 14.4). */
+/** Encaissement enregistré par une personne autorisée. */
 export interface PaymentRecord {
   id: string;
-  kind: 'payment' | 'refund';
+  kind: 'payment';
   amount: number;
   method: PaymentMethod;
-  /** Date de réception des fonds ou de l'opération de remboursement. */
+  /** Date de réception des fonds. */
   at: string;
   reference: string;
-  note: string;
   by: string;
   recordedAt: string;
 }
@@ -146,17 +120,6 @@ export interface AdminOrder extends Omit<Order, 'items'> {
   /** Livreur chargé de la course (nom affiché et fiche du répertoire). */
   courier?: string;
   courierId?: Id;
-  /** Livraisons échouées : motif et décision consignés (9.6). */
-  deliveryFailures?: Array<{ at: string; reason: string; decision: 'retry' | 'cancel'; by: string }>;
-  /** Vérification humaine d'une commande signalée comme suspecte (19.3). */
-  /** Vérification anti-fraude (19.3) tenue par l'API : motifs à la création, puis note de la personne qui a vérifié */
-  review?: {
-    status: 'pending' | 'cleared';
-    reasons: string[];
-    note: string | null;
-    by: string | null;
-    at: string | null;
-  } | null;
   payments?: PaymentRecord[];
 }
 

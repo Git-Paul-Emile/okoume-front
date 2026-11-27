@@ -25,10 +25,6 @@ const movementLabel: Record<StockMovementType, string> = {
   reception: 'Réception',
   ajustement: 'Correction de stock',
   commande: 'Sortie commande',
-  annulation: 'Retour annulation',
-  retour: 'Retour client',
-  non_vendable: 'Mouvement ancien',
-  mise_au_rebut: 'Mouvement ancien',
 };
 
 export default function AdminStockPage() {

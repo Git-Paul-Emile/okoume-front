@@ -24,11 +24,6 @@ export function useProductReviews(productId: Id | undefined) {
   });
 }
 
-export function useReportReview() {
-  return useMutation({
-    mutationFn: ({ reviewId, reason }: { reviewId: Id; reason: string }) => reviewsApi.report(reviewId, reason),
-  });
-}
 
 export function useMyReview(userId: Id | undefined, productId: Id) {
   return useQuery({

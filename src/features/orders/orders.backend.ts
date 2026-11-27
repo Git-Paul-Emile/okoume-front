@@ -1,12 +1,9 @@
 import { z } from 'zod';
-import { ApiError } from '@/api/ApiError';
 import { backend, getAll } from '@/api/backend';
-import { signedUploadDto, type SignedUpload } from '@/api/mediaUpload';
 import type { Id } from '@/api/types';
 import type { CartLine, CartTotals } from '@/features/cart/cart.types';
 import type { DeliveryInput } from '@/features/checkout/checkout.schemas';
-import type { InvoiceDocument } from '@/features/invoices/invoice.rules';
-import type { Order, PaymentMethod, ReturnRequest } from './orders.types';
+import type { Order, PaymentMethod } from './orders.types';
 
 /**
  * Commandes sur l'API (api/src/features/orders). L'API recalcule tout : le navigateur n'envoie que les
@@ -20,17 +17,8 @@ const status = z.enum([
   'courier_assigned',
   'shipping',
   'delivered',
-  'cancelled',
-  'claim',
 ]);
-const paymentStatus = z.enum([
-  'awaiting_payment',
-  'awaiting_verification',
-  'partially_paid',
-  'paid',
-  'refund_due',
-  'refunded',
-]);
+const paymentStatus = z.enum(['awaiting_payment', 'paid']);
 const paymentMethod = z.enum(['cash', 'airtel', 'moov']);
 
 const totals = z.object({
@@ -75,23 +63,6 @@ const orderDto = z.object({
   paymentStatus,
   status,
   history,
-  cancellationRequest: z
-    .object({
-      reason: z.string(),
-      comment: z.string(),
-      status: z.enum(['pending', 'accepted', 'refused']),
-      createdAt: z.string(),
-      decisionReason: z.string().optional(),
-    })
-    .nullable(),
-  deliveryDispute: z
-    .object({
-      reason: z.string(),
-      status: z.enum(['open', 'resolved']),
-      resolution: z.string().nullable(),
-      createdAt: z.string(),
-    })
-    .nullable(),
   shop: z.object({ slug: z.string(), name: z.string() }).nullable().default(null),
   checkoutNumber: z.string().nullable().default(null),
   fulfilledBy: z.enum(['okoza', 'seller']).default('okoza'),
@@ -173,18 +144,11 @@ export function toOrder(raw: unknown, ownerId: Id | null): Order {
     paymentStatus: o.paymentStatus,
     status: o.status,
     history: o.history,
-    cancellationRequest: o.cancellationRequest,
-    returnRequest: null,
     shop: o.shop,
     checkoutNumber: o.checkoutNumber,
     fulfilledBy: o.fulfilledBy,
     collectionConfirmedAt: o.collectionConfirmedAt,
     collectionConfirmedBy: o.collectionConfirmedBy,
-    deliveryDispute: o.deliveryDispute && {
-      createdAt: o.deliveryDispute.createdAt,
-      status: o.deliveryDispute.status,
-      resolution: o.deliveryDispute.resolution,
-    },
     createdAt: o.createdAt,
   };
 }
@@ -205,8 +169,6 @@ export function toTrackedOrder(raw: unknown): Order {
     paymentStatus: o.paymentStatus,
     status: o.status,
     history: o.history,
-    cancellationRequest: null,
-    returnRequest: null,
     shop: null,
     checkoutNumber: o.checkoutNumber,
     fulfilledBy: 'okoza',
@@ -247,93 +209,6 @@ export interface PlaceOrderRequest {
   promoCode: string | null;
 }
 
-/** Dossier de retour vu par le client (api/src/features/returns/returns.dto.ts). */
-const returnDto = z.object({
-  status: z.enum(['pending', 'refused', 'expected', 'received', 'refund_due', 'refunded', 'closed']),
-  reason: z.string(),
-  comment: z.string(),
-  items: z.array(z.object({ variantId: z.string(), quantity: z.number() })),
-  decisionReason: z.string().nullable(),
-  createdAt: z.string(),
-});
-
-export function toReturnRequest(raw: unknown): ReturnRequest {
-  const r = returnDto.parse(raw);
-  return {
-    items: r.items,
-    reason: r.reason,
-    comment: r.comment,
-    status: r.status,
-    createdAt: r.createdAt,
-    ...(r.decisionReason ? { decisionReason: r.decisionReason } : {}),
-  };
-}
-
-const invoiceLine = z.object({
-  label: z.string(),
-  detail: z.string().optional(),
-  quantity: z.number(),
-  unit: z.number(),
-  vatRate: z.number(),
-  ttc: z.number(),
-});
-
-const invoiceDto = z.object({
-  id: z.string(),
-  number: z.string(),
-  type: z.enum(['invoice', 'credit_note']),
-  orderId: z.string(),
-  orderNumber: z.string(),
-  issuedAt: z.string(),
-  relatedNumber: z.string().nullable(),
-  reason: z.string().nullable(),
-  customerName: z.string(),
-  customerPhone: z.string(),
-  customerEmail: z.string(),
-  address: z.string(),
-  paymentMethod,
-  lines: z.array(invoiceLine),
-  vatBreakdown: z.array(z.object({ rate: z.number(), ht: z.number(), vat: z.number(), ttc: z.number() })),
-  totals: z.object({ ht: z.number(), vat: z.number(), ttc: z.number() }),
-});
-
-/** Facture ou avoir émis par l'API, dans la forme du front. */
-export function toInvoiceDocument(raw: unknown, ownerId: Id): InvoiceDocument {
-  const d = invoiceDto.parse(raw);
-  return {
-    id: d.id,
-    number: d.number,
-    type: d.type,
-    orderId: d.orderId,
-    orderNumber: d.orderNumber,
-    userId: ownerId,
-    issuedAt: d.issuedAt,
-    customer: { name: d.customerName, phone: d.customerPhone, email: d.customerEmail, address: d.address },
-    paymentMethod: d.paymentMethod,
-    lines: d.lines,
-    vatBreakdown: d.vatBreakdown,
-    totals: d.totals,
-    ...(d.relatedNumber ? { relatedNumber: d.relatedNumber } : {}),
-    ...(d.reason ? { reason: d.reason } : {}),
-  };
-}
-
-/** Dossier de retour d'une commande du compte ; null s'il n'y en a pas (404). */
-async function returnOf(orderId: Id, signal?: AbortSignal): Promise<ReturnRequest | null> {
-  try {
-    return toReturnRequest(await backend.get(`/orders/${orderId}/return`, undefined, signal));
-  } catch (error) {
-    if (error instanceof ApiError && error.isNotFound) return null;
-    throw error;
-  }
-}
-
-/** Commande relue après une démarche : le dossier de retour, ressource à part sur l'API, est conservé. */
-const refreshed = (order: Order, raw: unknown): Order => ({
-  ...toOrder(raw, order.userId),
-  returnRequest: order.returnRequest,
-});
-
 export const ordersBackend = {
   /** Passage de commande : la même clé renvoie la même commande, jamais un doublon. */
   async place(request: PlaceOrderRequest, ownerId: Id | null): Promise<Order> {
@@ -357,10 +232,6 @@ export const ordersBackend = {
   },
 
   /** Commandes du compte sur les 3 dernières années, de la plus récente à la plus ancienne. */
-  /** Rattache au compte une commande passée sans compte (même adresse e-mail, numéro et code de suivi). */
-  claim: async (number: string, code: string, ownerId: Id) =>
-    toOrder(await backend.post('/orders/claims', { number, code }), ownerId),
-
   mine: (ownerId: Id, signal?: AbortSignal) => getAll('/orders', {}, (raw) => toOrder(raw, ownerId), signal),
 
   /** Commande du compte par son numéro ; null si elle n'existe pas ou appartient à un autre client. */
@@ -370,7 +241,7 @@ export const ordersBackend = {
       .parse(await backend.get('/orders', { number, page: 1, limit: 1 }, signal));
     if (!page.items[0]) return null;
     const order = toOrder(page.items[0], ownerId);
-    return { ...order, returnRequest: await returnOf(order.id, signal) };
+    return order;
   },
 
   track: async (number: string, code: string) =>
@@ -378,33 +249,5 @@ export const ordersBackend = {
       await backend.get('/order-tracking', { number: number.trim().toUpperCase(), code: code.trim().toUpperCase() }),
     ),
 
-  /** Annulation immédiate tant que la commande est confirmée, sinon demande soumise à la boutique. */
-  cancel: async (order: Order, reason: string, comment: string) =>
-    refreshed(order, await backend.post(`/orders/${order.id}/cancellation-requests`, { reason, comment })),
 
-  disputeDelivery: async (order: Order, reason: string) =>
-    refreshed(order, await backend.post(`/orders/${order.id}/delivery-disputes`, { reason })),
-
-  /** Autorisation d'envoyer une photo justificative pour le retour de cette commande. */
-  signEvidenceUpload: async (order: Order): Promise<SignedUpload> =>
-    signedUploadDto.parse(await backend.post(`/orders/${order.id}/return/evidence-uploads`)),
-
-  async requestReturn(
-    order: Order,
-    request: { items: ReturnRequest['items']; reason: string; comment: string; evidenceUrls: string[] },
-  ): Promise<Order> {
-    return { ...order, returnRequest: toReturnRequest(await backend.post(`/orders/${order.id}/return`, request)) };
-  },
-
-  async reopenReturn(order: Order, comment: string): Promise<Order> {
-    const raw = await backend.post(`/orders/${order.id}/return/reopenings`, { comment });
-    return { ...order, returnRequest: toReturnRequest(raw) };
-  },
-
-  /** Factures et avoirs d'une commande du compte, émis par l'API au paiement et au remboursement. */
-  invoices: async (order: Order, ownerId: Id, signal?: AbortSignal) =>
-    z
-      .array(z.unknown())
-      .parse(await backend.get(`/orders/${order.id}/invoices`, undefined, signal))
-      .map((raw) => toInvoiceDocument(raw, ownerId)),
 };

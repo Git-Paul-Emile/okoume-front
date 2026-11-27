@@ -46,12 +46,18 @@ export default function SellerDashboardPage() {
           <h2 className="mt-1 text-xl">Gérez votre boutique sur OKOZA</h2>
         </div>
         <div
-          className={data.shop.verified
-            ? 'flex items-start gap-2 rounded-lg bg-forest-50 p-3 text-sm text-forest'
-            : 'flex items-start gap-2 rounded-lg bg-ivory p-3 text-sm text-ink-soft'}
+          className={
+            data.shop.verified
+              ? 'flex items-start gap-2 rounded-lg bg-forest-50 p-3 text-sm text-forest'
+              : 'flex items-start gap-2 rounded-lg bg-ivory p-3 text-sm text-ink-soft'
+          }
           role="status"
         >
-          {data.shop.verified ? <BadgeCheck className="mt-0.5 size-5 shrink-0" /> : <Clock3 className="mt-0.5 size-5 shrink-0" />}
+          {data.shop.verified ? (
+            <BadgeCheck className="mt-0.5 size-5 shrink-0" />
+          ) : (
+            <Clock3 className="mt-0.5 size-5 shrink-0" />
+          )}
           <span>
             {data.shop.verified
               ? 'Votre boutique est vérifiée par OKOZA.'
@@ -70,15 +76,24 @@ export default function SellerDashboardPage() {
         <div className="grid gap-3 sm:grid-cols-3">
           <Link to="/vendeur/produits/nouveau" className="card flex items-center gap-3 p-4 hover:border-forest">
             <PackagePlus className="size-5 text-forest" />
-            <span><strong className="block">Ajouter un produit</strong><span className="text-xs text-ink-soft">Publier un nouvel article</span></span>
+            <span>
+              <strong className="block">Ajouter un produit</strong>
+              <span className="text-xs text-ink-soft">Publier un nouvel article</span>
+            </span>
           </Link>
           <Link to="/vendeur/commandes" className="card flex items-center gap-3 p-4 hover:border-forest">
             <ClipboardList className="size-5 text-forest" />
-            <span><strong className="block">Mes commandes</strong><span className="text-xs text-ink-soft">Traiter les commandes reçues</span></span>
+            <span>
+              <strong className="block">Mes commandes</strong>
+              <span className="text-xs text-ink-soft">Traiter les commandes reçues</span>
+            </span>
           </Link>
           <Link to="/vendeur/boutique" className="card flex items-center gap-3 p-4 hover:border-forest">
             <Store className="size-5 text-forest" />
-            <span><strong className="block">Ma boutique</strong><span className="text-xs text-ink-soft">Modifier ma vitrine et mon offre</span></span>
+            <span>
+              <strong className="block">Ma boutique</strong>
+              <span className="text-xs text-ink-soft">Modifier ma vitrine et mon offre</span>
+            </span>
           </Link>
         </div>
       </section>
@@ -86,7 +101,7 @@ export default function SellerDashboardPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Tile label="Commandes à préparer" value={orders.toPrepare} to="/vendeur/commandes?etat=confirmed" />
         <Tile label="Commandes à livrer" value={orders.toDeliver} to="/vendeur/commandes?etat=ready" />
-        <Tile label="Encaissements à déclarer" value={orders.toCollect} to="/vendeur/commandes?etat=delivered" />
+        <Tile label="Paiements à consulter" value={orders.toCollect} to="/vendeur/paiements" />
       </div>
 
       <section className="card p-5">

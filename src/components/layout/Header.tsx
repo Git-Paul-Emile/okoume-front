@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
-import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react';
+import { Menu, Search, ShoppingBag, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Logo } from '@/components/ui/Logo';
@@ -98,13 +98,6 @@ export function Header() {
               <span className="font-bold">{isAuthenticated ? (user?.firstName ?? '…') : 'Se connecter'}</span>
             </span>
             <span className="sr-only lg:hidden">{isAuthenticated ? 'Mon compte' : 'Se connecter'}</span>
-          </Link>
-          <Link
-            to="/compte/favoris"
-            className="hidden rounded-md p-2 transition hover:bg-sage sm:block"
-            aria-label="Mes favoris"
-          >
-            <Heart className="size-6" />
           </Link>
           <CartButton />
         </div>

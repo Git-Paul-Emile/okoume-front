@@ -5,10 +5,8 @@ import { apiFieldErrors } from '@/api/backend';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, TextField } from '@/components/ui/TextField';
 import { fieldErrors } from '@/utils/zodErrors';
-import { useVerifyRegistration } from '../auth.queries';
-import { authBackend } from '../auth.backend';
-import { registerSchema, type RegisterInput } from '../auth.schemas';
-import { CodeStep } from './CodeStep';
+import { useRegister } from '../auth.queries';
+import { registerSchema } from '../auth.schemas';
 
 type Values = {
   firstName: string;
@@ -21,7 +19,7 @@ type Values = {
 };
 
 export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
-  const [v, setV] = useState<Values>({
+  const [values, setValues] = useState<Values>({
     firstName: '',
     lastName: '',
     email: '',
@@ -31,60 +29,39 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     acceptTerms: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [checking, setChecking] = useState(false);
-  // Inscription validée : l'adresse e-mail est confirmée par code avant la création du compte (19.1)
-  const [pending, setPending] = useState<RegisterInput | null>(null);
-  const verifyRegistration = useVerifyRegistration();
+  const register = useRegister();
 
   const field = (key: keyof Values) => ({
-    value: v[key] as string,
-    onChange: (e: { target: { value: string } }) => setV((x) => ({ ...x, [key]: e.target.value })),
+    value: values[key] as string,
+    onChange: (event: { target: { value: string } }) => setValues((current) => ({ ...current, [key]: event.target.value })),
     error: errors[key],
   });
 
-  const blur = (key: 'email' | 'phone' | 'firstName' | 'lastName') => () => {
-    const r = registerSchema.shape[key].safeParse(v[key]);
-    setErrors((x) => ({ ...x, [key]: r.success ? '' : r.error.issues[0].message }));
+  const validateOnBlur = (key: 'email' | 'phone' | 'firstName' | 'lastName') => () => {
+    const result = registerSchema.shape[key].safeParse(values[key]);
+    setErrors((current) => ({ ...current, [key]: result.success ? '' : result.error.issues[0].message }));
   };
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    const r = registerSchema.safeParse(v);
-    if (!r.success) return setErrors(fieldErrors(r.error));
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    const result = registerSchema.safeParse(values);
+    if (!result.success) return setErrors(fieldErrors(result.error));
     setErrors({});
-    setChecking(true);
-    // L'API envoie le code ; elle répond de la même façon que l'adresse soit libre ou non
-    authBackend
-      .register(r.data)
-      .then(() => setPending(r.data))
-      .catch((error: unknown) => setErrors({ form: getErrorMessage(error), ...apiFieldErrors(error) }))
-      .finally(() => setChecking(false));
+    try {
+      await register.mutateAsync(result.data);
+      onSuccess();
+    } catch (error) {
+      setErrors({ form: getErrorMessage(error), ...apiFieldErrors(error) });
+    }
   };
-
-  if (pending)
-    return (
-      <div className="space-y-4">
-        <h2 className="text-lg">Confirmez votre adresse e-mail</h2>
-        <CodeStep
-          target={pending.email}
-          confirmLabel="Créer mon compte"
-          onBack={() => setPending(null)}
-          onVerified={onSuccess}
-          server={{
-            verify: (code) => verifyRegistration.mutateAsync({ email: pending.email, code }),
-            resend: () => authBackend.resendVerification(pending.email),
-          }}
-        />
-      </div>
-    );
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="Prénom" autoComplete="given-name" {...field('firstName')} onBlur={blur('firstName')} />
-        <TextField label="Nom" autoComplete="family-name" {...field('lastName')} onBlur={blur('lastName')} />
+        <TextField label="Prénom" autoComplete="given-name" {...field('firstName')} onBlur={validateOnBlur('firstName')} />
+        <TextField label="Nom" autoComplete="family-name" {...field('lastName')} onBlur={validateOnBlur('lastName')} />
       </div>
-      <TextField label="Adresse e-mail" type="email" autoComplete="email" {...field('email')} onBlur={blur('email')} />
+      <TextField label="Adresse e-mail" type="email" autoComplete="email" {...field('email')} onBlur={validateOnBlur('email')} />
       <TextField
         label="Téléphone"
         type="tel"
@@ -92,7 +69,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         autoComplete="tel"
         placeholder="077 12 34 56"
         {...field('phone')}
-        onBlur={blur('phone')}
+        onBlur={validateOnBlur('phone')}
       />
       <TextField
         label="Mot de passe"
@@ -108,30 +85,22 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         {...field('confirmPassword')}
       />
       <Checkbox
-        checked={v.acceptTerms}
-        onChange={(e) => setV((x) => ({ ...x, acceptTerms: e.target.checked }))}
+        checked={values.acceptTerms}
+        onChange={(event) => setValues((current) => ({ ...current, acceptTerms: event.target.checked }))}
         error={errors.acceptTerms}
         label={
           <>
             J’accepte les{' '}
-            <Link to="/legal/cgv" className="font-semibold text-forest underline">
-              CGV
-            </Link>{' '}
-            et la{' '}
+            <Link to="/legal/cgv" className="font-semibold text-forest underline">CGV</Link> et la{' '}
             <Link to="/legal/confidentialite" className="font-semibold text-forest underline">
               politique de confidentialité
-            </Link>
-            .
+            </Link>.
           </>
         }
       />
-      {errors.form && (
-        <p className="text-sm font-medium text-danger" role="alert">
-          {errors.form}
-        </p>
-      )}
-      <Button type="submit" size="lg" className="w-full" loading={checking} loadingText="Vérification…">
-        Continuer
+      {errors.form && <p className="text-sm font-medium text-danger" role="alert">{errors.form}</p>}
+      <Button type="submit" size="lg" className="w-full" loading={register.isPending} loadingText="Création…">
+        Créer mon compte
       </Button>
     </form>
   );

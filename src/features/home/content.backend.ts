@@ -2,21 +2,11 @@ import { z } from 'zod';
 import { backend } from '@/api/backend';
 import type { Id } from '@/api/types';
 import type { LegalPageRecord } from '@/features/legal/legal.api';
-import type { Ad, AdInput, Banner, ExclusiveOffer } from './home.types';
+import type { Ad, AdInput, ExclusiveOffer } from './home.types';
 
 /**
- * Contenus sur l'API (api/src/features/content) : bannières, espaces publicitaires, offres exclusives et pages légales.
+ * Contenus sur l'API : espaces publicitaires, offres exclusives et pages légales.
  */
-
-const bannerDto = z.object({
-  id: z.string(),
-  title: z.string(),
-  subtitle: z.string(),
-  cta: z.string(),
-  href: z.string(),
-  image: z.string(),
-  accent: z.enum(['forest', 'mure']),
-});
 
 const adDto = z.object({
   id: z.string(),
@@ -46,7 +36,6 @@ const legalDto = z.object({
   updatedAt: z.string(),
 });
 
-const toBanner = (raw: unknown): Banner => bannerDto.parse(raw);
 const toAd = (raw: unknown): Ad => adDto.parse(raw);
 const toOffer = (raw: unknown): ExclusiveOffer => {
   const o = offerDto.parse(raw);
@@ -69,26 +58,11 @@ const toLegalPage = (raw: unknown): LegalPageRecord => {
 const list = <T>(raw: unknown, map: (item: unknown) => T) => z.array(z.unknown()).parse(raw).map(map);
 
 export const contentBackend = {
-  banners: async (signal?: AbortSignal) => list(await backend.get('/content/banners', undefined, signal), toBanner),
   ads: async (placement: string, signal?: AbortSignal) =>
     list(await backend.get('/content/ads', { placement }, signal), toAd),
   offers: async (signal?: AbortSignal) => list(await backend.get('/content/offers', undefined, signal), toOffer),
   legalPages: async (signal?: AbortSignal) =>
     list(await backend.get('/content/legal-pages', undefined, signal), toLegalPage),
-
-  staffBanners: async (signal?: AbortSignal) =>
-    list(await backend.get('/staff/content/banners', undefined, signal), toBanner),
-  updateBanner: async (id: Id, patch: Partial<Banner>) =>
-    toBanner(
-      await backend.patch(`/staff/content/banners/${id}`, {
-        ...(patch.title !== undefined ? { title: patch.title } : {}),
-        ...(patch.subtitle !== undefined ? { subtitle: patch.subtitle } : {}),
-        ...(patch.cta !== undefined ? { cta: patch.cta } : {}),
-        ...(patch.href !== undefined ? { href: patch.href } : {}),
-        ...(patch.image !== undefined ? { image: patch.image } : {}),
-        ...(patch.accent !== undefined ? { accent: patch.accent } : {}),
-      }),
-    ),
 
   staffAds: async (signal?: AbortSignal) => list(await backend.get('/staff/content/ads', undefined, signal), toAd),
   createAd: async (ad: AdInput) => toAd(await backend.post('/staff/content/ads', ad)),

@@ -14,16 +14,11 @@ import { formatDateTime } from '@/utils/formatDate';
 import { formatPrice } from '@/utils/formatPrice';
 
 /** Tous les paiements se font à la livraison : « À encaisser » regroupe les commandes livrées non encore réglées. */
-type Filter =
-  'to_collect' | 'awaiting_verification' | 'partially_paid' | 'refund_due' | 'awaiting_payment' | 'paid' | 'refunded';
+type Filter = 'to_collect' | 'awaiting_payment' | 'paid';
 const LABELS: Record<Filter, string> = {
-  to_collect: 'À encaisser',
-  awaiting_verification: 'À vérifier',
-  partially_paid: 'Partiels',
-  refund_due: 'À rembourser',
-  awaiting_payment: 'Avant livraison',
+  to_collect: 'Attendus (livrées)',
+  awaiting_payment: 'Attendus (avant livraison)',
   paid: 'Payés',
-  refunded: 'Remboursés',
 };
 
 const columns: Column<AdminOrder>[] = [
@@ -60,8 +55,7 @@ export default function AdminPaymentsPage() {
   if (isLoading || !orders) return <PageLoader />;
 
   const by = (s: PaymentStatus) => orders.filter((o) => o.paymentStatus === s);
-  // Une commande annulée sans paiement n'attend plus rien
-  const pending = by('awaiting_payment').filter((o) => o.status !== 'cancelled');
+  const pending = by('awaiting_payment');
   const toCollect = pending.filter((o) => o.status === 'delivered');
   const beforeDelivery = pending.filter((o) => o.status !== 'delivered');
   const listOf = (f: Filter) => (f === 'to_collect' ? toCollect : f === 'awaiting_payment' ? beforeDelivery : by(f));
@@ -71,15 +65,13 @@ export default function AdminPaymentsPage() {
   return (
     <>
       <PageIntro>
-        Tous les paiements se font à la livraison, en espèces ou par Mobile Money. Une fois la commande livrée,
-        confirmez l’encaissement (avec la référence de la transaction pour Airtel Money et Moov Money).
+        Consultez le statut et le montant des paiements par commande. Les paiements se font à la livraison.
       </PageIntro>
       <StatRow
         items={[
-          { label: 'À encaisser (livrées)', value: formatPrice(sum(toCollect)) },
-          { label: 'À rembourser', value: formatPrice(sum(by('refund_due'))) },
-          { label: 'À encaisser à la livraison', value: formatPrice(sum(beforeDelivery)) },
-          { label: 'Encaissé au total', value: formatPrice(sum(by('paid'))) },
+          { label: 'Attendus sur commandes livrées', value: formatPrice(sum(toCollect)) },
+          { label: 'Attendus après livraison', value: formatPrice(sum(beforeDelivery)) },
+          { label: 'Paiements enregistrés', value: formatPrice(sum(by('paid'))) },
         ]}
       />
       <Toolbar>
@@ -87,10 +79,11 @@ export default function AdminPaymentsPage() {
           label="Statut du paiement"
           value={filter}
           onChange={setFilter}
-          options={(Object.keys(LABELS) as Filter[])
-            // Ancien statut, conservé pour les commandes passées avant le paiement à la livraison
-            .filter((f) => f !== 'awaiting_verification' || by(f).length > 0)
-            .map((f) => ({ value: f, label: LABELS[f], count: listOf(f).length }))}
+          options={(Object.keys(LABELS) as Filter[]).map((f) => ({
+            value: f,
+            label: LABELS[f],
+            count: listOf(f).length,
+          }))}
         />
         <SearchInput value={query} onChange={setQuery} placeholder="Numéro, client, téléphone" />
       </Toolbar>

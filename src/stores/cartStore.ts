@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { recordEvent } from '@/features/analytics/analytics.api';
 import { persist } from 'zustand/middleware';
 import type { CartLine } from '@/features/cart/cart.types';
 import { expired } from '@/features/privacy/retention';
@@ -28,7 +27,6 @@ export const useCartStore = create<CartState>()(
       promoCode: null,
       updatedAt: null,
       add: (line, quantity = 1) => {
-        recordEvent({ kind: 'add_to_cart', productId: line.productId });
         set((s) => {
           const key = lineKey(line.productId, line.variantId);
           const existing = s.lines.find((l) => l.key === key);

@@ -1,10 +1,8 @@
 import { z } from 'zod';
 import { backend, getAll } from '@/api/backend';
-import type { Id } from '@/api/types';
 
 /**
- * Reversements aux vendeurs (cahier des charges 1.2, 32.6), lus et enregistrés sur l'API : ce qu'un livreur
- * OKOZA a encaissé pour une boutique, moins la livraison et la commission.
+ * Reversements vendeurs, en consultation dans le back-office.
  */
 const payoutDto = z.object({
   id: z.string(),
@@ -38,6 +36,4 @@ export const adminPayoutsBackend = {
     ]);
     return { items, due: dueDto.parse(first).due };
   },
-  markPaid: async (id: Id, method: 'cash' | 'airtel' | 'moov', reference: string | null) =>
-    payoutDto.parse(await backend.post(`/staff/payouts/${encodeURIComponent(id)}/payment`, { method, reference })),
 };

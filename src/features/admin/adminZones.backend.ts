@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { backend } from '@/api/backend';
 import type { Id } from '@/api/types';
-import type { DeliveryZone, ZoneRequest } from '@/features/delivery/delivery.types';
+import type { DeliveryZone } from '@/features/delivery/delivery.types';
 
 /** Quartiers livrés vus par l'équipe (api/src/features/staff-delivery-zones), avec le coût habituel d'une course. */
 const staffZoneDto = z.object({
@@ -31,18 +31,6 @@ function zoneBody(patch: Partial<DeliveryZone>) {
   return body;
 }
 
-const zoneRequestDto = z
-  .object({
-    id: z.string(),
-    neighbourhood: z.string(),
-    city: z.string(),
-    contact: z.string(),
-    status: z.enum(['new', 'added', 'declined']),
-    note: z.string().nullable(),
-    createdAt: z.string(),
-  })
-  .transform(({ note, ...r }): ZoneRequest => ({ ...r, ...(note !== null ? { note } : {}) }));
-
 export const adminZonesBackend = {
   list: async (signal?: AbortSignal) =>
     z
@@ -57,10 +45,4 @@ export const adminZonesBackend = {
   update: async (id: Id, patch: Partial<DeliveryZone>) =>
     toStaffZone(await backend.patch(`/staff/delivery-zones/${id}`, zoneBody(patch))),
 
-  /** Demandes de nouveau quartier (9.1). */
-  requests: async (signal?: AbortSignal): Promise<ZoneRequest[]> =>
-    z.array(zoneRequestDto).parse(await backend.get('/staff/zone-requests', undefined, signal)),
-
-  decideRequest: async (id: Id, status: 'added' | 'declined', note: string): Promise<ZoneRequest> =>
-    zoneRequestDto.parse(await backend.patch(`/staff/zone-requests/${id}`, { status, note })),
 };

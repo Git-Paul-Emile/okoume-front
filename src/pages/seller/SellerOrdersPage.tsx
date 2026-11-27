@@ -62,7 +62,7 @@ export default function SellerOrdersPage() {
                     </span>
                   </span>
                   {todo && <Badge tone="warning">À faire : {todo.toLowerCase()}</Badge>}
-                  <Badge tone={o.status === 'cancelled' ? 'danger' : o.status === 'delivered' ? 'forest' : 'neutral'}>
+                  <Badge tone={o.status === 'delivered' ? 'forest' : 'neutral'}>
                     {orderStatusLabel[o.status]}
                   </Badge>
                 </Link>

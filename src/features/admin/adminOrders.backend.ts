@@ -6,7 +6,7 @@ import type { AdminOrder, Courier, PaymentRecord } from './admin.types';
 
 /**
  * Commandes, livreurs et paiements de l'équipe sur l'API (api/src/features/staff-*). L'API applique chaque
- * changement comme une action (transition, décision, encaissement) dans une transaction, avec son auteur :
+ * changement comme une action (transition, décision) dans une transaction, avec son auteur :
  * le front n'écrit jamais l'état d'une commande lui-même.
  */
 
@@ -15,15 +15,6 @@ const staffExtras = z.object({
   courierId: z.string().nullable(),
   deliveryCost: z.number().nullable(),
   history: z.array(z.object({ by: z.string().optional() })),
-  review: z
-    .object({
-      status: z.enum(['pending', 'cleared']),
-      reasons: z.array(z.string()),
-      note: z.string().nullable(),
-      by: z.string().nullable(),
-      at: z.string().nullable(),
-    })
-    .nullable(),
 });
 
 /** Commande de l'équipe dans la forme du back-office ; le nom du livreur vient du répertoire. */
@@ -41,7 +32,6 @@ export function toAdminOrder(raw: unknown, couriers: readonly Courier[] = []): A
     ...(extras.courierId ? { courierId: extras.courierId } : {}),
     ...(courier ? { courier: `${courier.firstName} ${courier.lastName}` } : {}),
     ...(extras.deliveryCost !== null ? { deliveryCost: extras.deliveryCost } : {}),
-    review: extras.review,
   };
 }
 
@@ -67,12 +57,11 @@ export function toCourier(raw: unknown): Courier {
 
 const paymentDto = z.object({
   id: z.string(),
-  kind: z.enum(['payment', 'refund']),
+  kind: z.literal('payment'),
   amount: z.number(),
   method: z.enum(['cash', 'airtel', 'moov']),
   occurredAt: z.string(),
   reference: z.string().nullable(),
-  noReferenceReason: z.string().nullable(),
   by: z.string(),
   createdAt: z.string(),
 });
@@ -96,7 +85,6 @@ export function toPaymentsSummary(raw: unknown) {
       method: p.method,
       at: p.occurredAt,
       reference: p.reference ?? '',
-      note: p.noReferenceReason ? `Sans référence : ${p.noReferenceReason}` : '',
       by: p.by,
       recordedAt: p.createdAt,
     })),
@@ -104,7 +92,7 @@ export function toPaymentsSummary(raw: unknown) {
   };
 }
 
-/** Encaissements et remboursements d'une commande, dans la forme du back-office. */
+/** Encaissements d'une commande, dans la forme du back-office. */
 export function toPaymentRecords(raw: unknown): PaymentRecord[] {
   return toPaymentsSummary(raw).payments;
 }
@@ -113,25 +101,7 @@ export function toPaymentRecords(raw: unknown): PaymentRecord[] {
 export type Transition =
   | { action: 'advance'; note?: string }
   | { action: 'confirm_collection' }
-  | { action: 'assign_courier'; courierId: Id; deliveryCost?: number }
-  | { action: 'cancel'; reason: string }
-  | { action: 'reopen'; reason: string }
-  | { action: 'delivery_failed'; reason: string; decision: 'retry' | 'cancel' };
-
-export interface PaymentEntry {
-  amount: number;
-  /** Date de réception des fonds (ISO) */
-  at: string;
-  reference: string;
-}
-
-export interface RefundEntry {
-  amount: number;
-  method: AdminOrder['paymentMethod'];
-  reference: string;
-  noReferenceReason: string;
-  clientAgreed: boolean;
-}
+  | { action: 'assign_courier'; courierId: Id; deliveryCost?: number };
 
 const one = (couriers: readonly Courier[]) => (raw: unknown) => toAdminOrder(raw, couriers);
 
@@ -146,51 +116,8 @@ export const adminOrdersBackend = {
   transition: async (order: AdminOrder, transition: Transition, couriers: readonly Courier[]) =>
     toAdminOrder(await backend.post(`/staff/orders/${order.id}/transitions`, transition), couriers),
 
-  /** Commande signalée vérifiée : la note dit ce qui a été contrôlé ; la préparation devient possible. */
-  clearReview: async (order: AdminOrder, note: string, couriers: readonly Courier[]) =>
-    toAdminOrder(await backend.post(`/staff/orders/${order.id}/review-clearances`, { note }), couriers),
-
-  setDeliveryCost: async (order: AdminOrder, amount: number, couriers: readonly Courier[]) =>
-    toAdminOrder(await backend.put(`/staff/orders/${order.id}/delivery-cost`, { amount }), couriers),
-
-  resolveDispute: async (order: AdminOrder, resolution: string, couriers: readonly Courier[]) =>
-    toAdminOrder(await backend.patch(`/staff/orders/${order.id}/delivery-dispute`, { resolution }), couriers),
-
-  decideCancellation: async (
-    order: AdminOrder,
-    accept: boolean,
-    decisionReason: string,
-    couriers: readonly Courier[],
-  ) =>
-    toAdminOrder(
-      await backend.patch(`/staff/orders/${order.id}/cancellation-request`, {
-        status: accept ? 'accepted' : 'refused',
-        decisionReason,
-      }),
-      couriers,
-    ),
-
   payments: async (order: AdminOrder, signal?: AbortSignal) =>
     toPaymentsSummary(await backend.get(`/staff/orders/${order.id}/payments`, undefined, signal)),
-
-  /** Encaissement vérifié ; l'API émet la facture quand la commande est payée. */
-  recordPayment: (order: AdminOrder, entry: PaymentEntry) =>
-    backend.post(`/staff/orders/${order.id}/payments`, {
-      amount: entry.amount,
-      receivedAt: entry.at,
-      reference: entry.reference.trim() || null,
-    }),
-
-  /** Remboursement ; l'API émet l'avoir. */
-  refund: (order: AdminOrder, entry: RefundEntry) =>
-    backend.post(`/staff/orders/${order.id}/refunds`, {
-      amount: entry.amount,
-      method: entry.method,
-      refundedAt: new Date().toISOString(),
-      reference: entry.reference.trim() || null,
-      noReferenceReason: entry.noReferenceReason.trim() || null,
-      clientAgreed: entry.clientAgreed,
-    }),
 
   couriers: (signal?: AbortSignal) =>
     backend.get('/staff/couriers', undefined, signal).then((raw) => z.array(z.unknown()).parse(raw).map(toCourier)),

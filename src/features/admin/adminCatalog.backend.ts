@@ -18,7 +18,7 @@ const stockMovementDto = z.object({
   productId: z.string(),
   productName: z.string(),
   variantLabel: z.string(),
-  type: z.enum(['reception', 'ajustement', 'commande', 'annulation', 'retour', 'non_vendable', 'mise_au_rebut']),
+  type: z.enum(['reception', 'ajustement', 'commande']),
   before: z.number(),
   after: z.number(),
   delta: z.number(),

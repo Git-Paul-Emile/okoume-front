@@ -1,15 +1,5 @@
 import type { Id } from '@/api/types';
 
-export interface Banner {
-  id: Id;
-  title: string;
-  subtitle: string;
-  cta: string;
-  href: string;
-  image: string;
-  accent: 'forest' | 'mure';
-}
-
 /** Bannière publicitaire administrable, affichée à un emplacement donné de la page. */
 export interface Ad {
   id: Id;

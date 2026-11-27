@@ -1,5 +1,4 @@
 import { expect, type Page } from '@playwright/test';
-import { sixDigitCode, waitForEmail } from './mailbox';
 import { DEMO_PASSWORD } from './stack';
 
 /** Comptes de l'équipe des données de départ (api/prisma/seeders/data/staff.json) */
@@ -9,17 +8,12 @@ export const STAFF = {
   stock: 'stock@boutique.ga',
 } as const;
 
-/** Connexion au back-office : mot de passe, puis code reçu par e-mail. */
+/** Connexion directe au back-office avec adresse e-mail et mot de passe. */
 export async function loginAsStaff(page: Page, email: string) {
-  const since = Date.now();
   await page.goto('/admin/connexion');
   await page.getByLabel('Adresse e-mail professionnelle').fill(email);
   await page.getByLabel('Mot de passe').fill(DEMO_PASSWORD);
-  await page.getByRole('button', { name: 'Continuer' }).click();
-  await expect(page.getByRole('heading', { name: 'Vérification en deux étapes' })).toBeVisible();
-  const mail = await waitForEmail(email, /code de connexion/i, since);
-  await page.getByLabel('Code de vérification').fill(sixDigitCode(mail));
-  await page.getByRole('button', { name: 'Valider' }).click();
+  await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page).toHaveURL(/\/admin(\/|$)(?!connexion)/);
 }
 

@@ -1,16 +1,13 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { Lock, Menu, PanelLeftClose, PanelLeftOpen, Store, X } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen, Store, X } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { Toaster } from '@/components/feedback/Toaster';
-import { EmptyState } from '@/components/feedback/EmptyState';
-import { ButtonLink } from '@/components/ui/Button';
-import { adminPageTitle, availableWithSource, canAccess } from '@/features/admin/admin.navigation';
+import { adminPageTitle } from '@/features/admin/admin.navigation';
 import { AdminSidebar } from '@/features/admin/components/AdminSidebar';
 import { useSessionGuard } from '@/features/admin/useSessionGuard';
 import { useSessionTimeout } from '@/features/admin/useSessionTimeout';
-import { ChartsTheme } from '@/features/admin/components/ChartsTheme';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useAdminAuthStore } from '@/stores/adminAuthStore';
 import { cn } from '@/utils/text';
@@ -139,39 +136,9 @@ export default function AdminLayout() {
         </header>
 
         <main id="contenu" tabIndex={-1} className="px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8">
-          <ChartsTheme>
-            <Suspense fallback={<PageLoader />}>
-              {!availableWithSource(pathname) ? (
-                <div className="card">
-                  <EmptyState
-                    icon={<Lock />}
-                    title="Écran pas encore branché sur l’API"
-                    description="Cet écran sera disponible quand son module sera relié au serveur. En attendant, ventes, catalogue, stock, retours et codes promo sont gérés depuis le menu."
-                    action={
-                      <ButtonLink to="/admin/commandes" variant="outline">
-                        Aller aux commandes
-                      </ButtonLink>
-                    }
-                  />
-                </div>
-              ) : admin && !canAccess(admin, pathname) ? (
-                <div className="card">
-                  <EmptyState
-                    icon={<Lock />}
-                    title="Accès réservé"
-                    description="Cet écran n’est pas disponible dans la version actuelle de la plateforme."
-                    action={
-                      <ButtonLink to="/admin" variant="outline">
-                        Revenir au tableau de bord
-                      </ButtonLink>
-                    }
-                  />
-                </div>
-              ) : (
-                <Outlet />
-              )}
-            </Suspense>
-          </ChartsTheme>
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
       <Toaster />

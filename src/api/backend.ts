@@ -98,7 +98,7 @@ function refreshSession(audience: Audience) {
 
 /** Public de la session à renouveler pour cette route ; null pour les routes d'authentification. */
 function audienceOf(path: string): Audience | null {
-  if (path.startsWith('/auth/') || path.startsWith('/staff/auth/sessions') || path.startsWith('/staff/auth/challenges'))
+  if (path.startsWith('/auth/') || path.startsWith('/staff/auth/sessions'))
     return null;
   return path.startsWith('/staff/') ? 'staff' : 'customer';
 }

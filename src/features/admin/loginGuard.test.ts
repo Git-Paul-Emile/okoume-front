@@ -1,10 +1,4 @@
-import { maskEmail, sessionExpired } from './loginGuard';
-
-describe('code de vérification', () => {
-  it('masque l’adresse e-mail', () => {
-    expect(maskEmail('admin@boutique.ga')).toBe('a••••@boutique.ga');
-  });
-});
+import { sessionExpired } from './loginGuard';
 
 describe('expiration de session', () => {
   it('expire après 60 minutes sans activité', () => {

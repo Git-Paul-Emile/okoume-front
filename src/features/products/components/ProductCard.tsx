@@ -5,7 +5,6 @@ import { Link } from 'react-router';
 import { Badge } from '@/components/ui/Badge';
 import { Rating } from '@/components/ui/Rating';
 import { useAddToCart } from '@/features/cart/useAddToCart';
-import { FavoriteButton } from '@/features/favorites/components/FavoriteButton';
 import type { RatingStats } from '@/features/reviews/reviews.types';
 import { cn } from '@/utils/text';
 import type { Product } from '../products.types';
@@ -21,7 +20,6 @@ import { chooseVariant, findVariant, productOptions, type OptionSelection } from
 import { ProductCardOptions } from './ProductCardOptions';
 import { PriceTag } from './PriceTag';
 import { responsiveImage } from '@/utils/responsiveImage';
-import { recordProductView } from '../productViews.api';
 
 interface Props {
   product: Product;
@@ -81,7 +79,6 @@ export function ProductCard({ product, rating, compact }: Props) {
           {product.isNew && <Badge tone="forest">Nouveau</Badge>}
           {!inStock && <Badge tone="ink">Indisponible</Badge>}
         </div>
-        <FavoriteButton productId={product.id} className="absolute top-3 right-3 z-10" />
         {inStock && (
           <div className="absolute inset-x-3 bottom-3 z-10 flex translate-y-[120%] justify-center opacity-0 transition-all duration-300 ease-out group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 max-md:hidden">
             {ready ? (
@@ -107,7 +104,6 @@ export function ProductCard({ product, rating, compact }: Props) {
         <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-ink">
           <Link
             to={`/produit/${product.slug}`}
-            onClick={() => recordProductView(product.id, 'click')}
             className="after:absolute after:inset-0 after:content-[''] hover:text-forest focus-visible:outline-none"
           >
             {product.name}

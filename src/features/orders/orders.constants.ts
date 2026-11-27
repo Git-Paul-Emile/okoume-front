@@ -17,17 +17,11 @@ export const orderStatusLabel: Record<OrderStatus, string> = {
   courier_assigned: 'Livreur trouvé',
   shipping: 'En cours de livraison',
   delivered: 'Livrée',
-  cancelled: 'Annulée',
-  claim: 'Réclamation en cours',
 };
 
 export const paymentStatusLabel: Record<PaymentStatus, string> = {
   awaiting_payment: 'En attente de paiement',
-  awaiting_verification: 'En attente de vérification',
-  partially_paid: 'Partiellement payé',
   paid: 'Payé',
-  refund_due: 'Remboursement à effectuer',
-  refunded: 'Remboursé',
 };
 
 export const paymentMethodLabel: Record<PaymentMethod, string> = {

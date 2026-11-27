@@ -8,7 +8,6 @@ const publicShopDto = z.object({
   city: z.string(),
   district: z.string().nullable(),
   acceptedPaymentMethods: z.array(z.enum(['cash', 'airtel', 'moov'])),
-  handoverModes: z.array(z.enum(['pickup', 'seller_delivery'])),
   verified: z.boolean(),
   createdAt: z.string(),
 });

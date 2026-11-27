@@ -23,7 +23,7 @@ export default function AccountOrderDetailPage() {
       >
         Mes commandes
       </Link>
-      <OrderDetailPanel order={order} inAccount />
+      <OrderDetailPanel order={order} />
       <p className="mt-6 text-sm text-ink-soft">
         Un problème avec cette commande ?{' '}
         <Link to="/contact" className="font-semibold text-forest hover:underline">

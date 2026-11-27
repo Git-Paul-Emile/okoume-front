@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { SearchX, SlidersHorizontal, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -13,7 +13,6 @@ import { ProductCard, ProductCardSkeleton } from '@/features/products/components
 import { ProductFilters } from '@/features/products/components/ProductFilters';
 import type { SortKey } from '@/features/products/products.types';
 import { useCatalog } from '@/features/products/useCatalog';
-import { recordSearch } from '@/features/search/search.api';
 import { useCatalogFilters } from '@/features/products/useCatalogFilters';
 import { formatPrice } from '@/utils/formatPrice';
 import { pluralize } from '@/utils/text';
@@ -30,10 +29,6 @@ const sortOptions: Array<{ value: SortKey; label: string }> = [
 export default function CatalogPage() {
   const { filters, update, reset } = useCatalogFilters();
   const catalog = useCatalog(filters);
-  // Terme recherché et nombre de résultats, mesurés seulement avec le consentement (18.1, 18.2)
-  useEffect(() => {
-    if (filters.q && !catalog.isLoading) recordSearch(filters.q, catalog.total);
-  }, [filters.q, catalog.isLoading, catalog.total]);
   const { data: categories } = useCategories();
   const [filtersOpen, setFiltersOpen] = useState(false);
 

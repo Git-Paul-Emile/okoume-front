@@ -15,10 +15,8 @@ const memberDto = z.object({
   lastName: z.string(),
   role: z.string(),
   status: z.enum(['invited', 'active', 'suspended']),
-  refundLimit: z.number().nullable(),
   inviteExpiresAt: z.string().nullable(),
   lastLoginAt: z.string().nullable(),
-  backupCodesLeft: z.number(),
   createdAt: z.string(),
 });
 
@@ -31,9 +29,7 @@ const toMember = (raw: unknown): TeamMember => {
     lastName: m.lastName,
     role: 'super_admin',
     status: m.status,
-    refundLimit: m.refundLimit,
     inviteExpiresAt: m.inviteExpiresAt,
-    backupCodesLeft: m.backupCodesLeft,
   };
 };
 
@@ -94,23 +90,11 @@ export const adminTeamBackend = {
     toMember(
       await backend.patch(`/staff/team/${id}`, {
         ...(patch.status === 'active' || patch.status === 'suspended' ? { status: patch.status } : {}),
-        ...(patch.refundLimit !== undefined ? { refundLimit: patch.refundLimit } : {}),
       }),
     ),
 
   revokeSessions: (id: Id) => backend.post(`/staff/team/${id}/session-revocations`),
 
-  resetBackupCodes: (id: Id, reason: string) => backend.post(`/staff/team/${id}/backup-code-resets`, { reason }),
-
-  /** Invitation, étape 1 : le lien est valide, un code part à l'adresse invitée. */
-  startInvitation: async (token: string) =>
-    z
-      .object({ firstName: z.string(), email: z.string() })
-      .parse(await backend.post(`/staff/auth/invitations/${encodeURIComponent(token)}/codes`)),
-
-  /** Étape 2 : mot de passe et code ; les codes de secours ne sont remis qu'une fois. */
-  acceptInvitation: async (token: string, code: string, password: string) =>
-    z
-      .object({ backupCodes: z.array(z.string()) })
-      .parse(await backend.post(`/staff/auth/invitations/${encodeURIComponent(token)}/acceptance`, { code, password })),
+  acceptInvitation: (token: string, password: string) =>
+    backend.post(`/staff/auth/invitations/${encodeURIComponent(token)}/acceptance`, { password }),
 };

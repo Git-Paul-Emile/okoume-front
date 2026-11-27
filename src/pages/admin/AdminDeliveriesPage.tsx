@@ -4,10 +4,9 @@ import { PageLoader } from '@/components/feedback/PageLoader';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { TextField } from '@/components/ui/TextField';
-import type { DeliveryZone, ZoneRequest } from '@/features/delivery/delivery.types';
+import type { DeliveryZone } from '@/features/delivery/delivery.types';
 import { adminApi } from '@/features/admin/admin.api';
-import { useAdminMutation, useAdminOrders, useAdminZones, useZoneRequests } from '@/features/admin/admin.queries';
-import { ReasonDialog } from '@/features/admin/components/ReasonDialog';
+import { useAdminMutation, useAdminOrders, useAdminZones } from '@/features/admin/admin.queries';
 import type { AdminOrder } from '@/features/admin/admin.types';
 import { AdminTable, type Column } from '@/features/admin/components/AdminTable';
 import { OrderDrawer } from '@/features/admin/components/OrderDrawer';
@@ -25,15 +24,6 @@ export default function AdminDeliveriesPage() {
   const { data: zones } = useAdminZones();
   const { selected, open, close } = useSelection(orders);
   const [editing, setEditing] = useState<DeliveryZone | 'new' | null>(null);
-  const [fromRequest, setFromRequest] = useState<ZoneRequest[]>([]);
-  const [declining, setDeclining] = useState<ZoneRequest[] | null>(null);
-  const { data: requests = [] } = useZoneRequests();
-  const decline = useAdminMutation(
-    async ({ list, note }: { list: ZoneRequest[]; note: string }) => {
-      for (const r of list) await adminApi.decideZoneRequest(r.id, 'declined', note);
-    },
-    (v) => `Demande de ${v.list[0].neighbourhood} refusée (${v.note})`,
-  );
   const toggle = useAdminMutation(
     (z: DeliveryZone) => adminApi.updateDeliveryZone(z.id, { available: !z.available }),
     (z) => (z.available ? `${z.name} : livraison suspendue` : `${z.name} : livraison rouverte`),
@@ -156,111 +146,30 @@ export default function AdminDeliveriesPage() {
         pageSize={20}
       />
 
-      <ZoneRequests
-        requests={requests}
-        onAdd={(list) => {
-          setFromRequest(list);
-          setEditing('new');
-        }}
-        onDecline={setDeclining}
-      />
-
       <OrderDrawer order={selected} onClose={close} />
       {editing && (
         <ZoneDialog
           zone={editing === 'new' ? null : editing}
           zones={zones}
-          requests={editing === 'new' ? fromRequest : []}
-          onClose={() => {
-            setEditing(null);
-            setFromRequest([]);
-          }}
+          onClose={() => setEditing(null)}
         />
       )}
-      <ReasonDialog
-        open={!!declining}
-        onClose={() => setDeclining(null)}
-        title={`Refuser la livraison à ${declining?.[0]?.neighbourhood ?? ''}`}
-        description="Le motif est conservé ; prévenez les clients concernés avec leurs coordonnées."
-        confirmLabel="Refuser"
-        danger
-        loading={decline.isPending}
-        onConfirm={(note) =>
-          declining && decline.mutate({ list: declining, note }, { onSuccess: () => setDeclining(null) })
-        }
-      />
     </>
-  );
-}
-
-/** Demandes de quartiers non desservis, regroupées par quartier (9.1). */
-function ZoneRequests({
-  requests,
-  onAdd,
-  onDecline,
-}: {
-  requests: ZoneRequest[];
-  onAdd: (list: ZoneRequest[]) => void;
-  onDecline: (list: ZoneRequest[]) => void;
-}) {
-  const open = requests.filter((r) => r.status === 'new');
-  const groups = new Map<string, ZoneRequest[]>();
-  open.forEach((r) => {
-    const key = `${r.neighbourhood.trim().toLowerCase()}|${r.city.trim().toLowerCase()}`;
-    groups.set(key, [...(groups.get(key) ?? []), r]);
-  });
-  const sorted = [...groups.values()].sort((a, b) => b.length - a.length);
-
-  return (
-    <section className="mt-8">
-      <h2 className="mb-1 text-lg">Quartiers demandés par les clients</h2>
-      <p className="mb-3 text-sm text-ink-soft">
-        Clients dont le quartier n’est pas dans la liste. Ajoutez la zone ou refusez avec un motif.
-      </p>
-      {sorted.length === 0 ? (
-        <p className="text-sm text-ink-muted">Aucune demande en attente.</p>
-      ) : (
-        <ul className="divide-y divide-sage rounded-xl border border-sage bg-white text-sm">
-          {sorted.map((list) => (
-            <li key={list[0].id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-              <span className="min-w-0">
-                <span className="block font-semibold">
-                  {list[0].neighbourhood} ({list[0].city}) · {list.length} demande{list.length > 1 ? 's' : ''}
-                </span>
-                <span className="block text-xs text-ink-muted">
-                  {list.map((r) => `${r.contact}, le ${formatDateTime(r.createdAt)}`).join(' · ')}
-                </span>
-              </span>
-              <span className="flex gap-2">
-                <Button size="sm" onClick={() => onAdd(list)}>
-                  Ajouter la zone
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => onDecline(list)}>
-                  Refuser
-                </Button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 
 function ZoneDialog({
   zone,
   zones,
-  requests,
   onClose,
 }: {
   zone: DeliveryZone | null;
   zones: DeliveryZone[];
-  requests: ZoneRequest[];
   onClose: () => void;
 }) {
   const [values, setValues] = useState({
-    name: zone?.name ?? requests[0]?.neighbourhood ?? '',
-    city: zone?.city ?? requests[0]?.city ?? 'Libreville',
+    name: zone?.name ?? '',
+    city: zone?.city ?? 'Libreville',
     fee: String(zone?.fee ?? ''),
     courierCost: String(zone?.courierCost ?? ''),
     eta: zone?.eta ?? '24 à 48 h',
@@ -272,9 +181,7 @@ function ZoneDialog({
   const save = useAdminMutation(
     async (patch: Partial<DeliveryZone>) => {
       if (zone) return adminApi.updateDeliveryZone(zone.id, patch);
-      const created = await adminApi.createDeliveryZone({ available: true, ...patch } as Omit<DeliveryZone, 'id'>);
-      for (const r of requests) await adminApi.decideZoneRequest(r.id, 'added', `Zone ${created.name} ouverte`);
-      return created;
+      return adminApi.createDeliveryZone({ available: true, ...patch } as Omit<DeliveryZone, 'id'>);
     },
     zone ? `Tarif de ${zone.name} enregistré` : `Quartier ${values.name.trim()} ajouté`,
   );
@@ -301,12 +208,6 @@ function ZoneDialog({
   return (
     <Modal open onClose={onClose} title={zone ? `Livraison : ${zone.name}` : 'Ajouter un quartier'}>
       <form onSubmit={submit} noValidate className="space-y-4">
-        {requests.length > 0 && (
-          <p className="text-sm text-ink-soft">
-            {requests.length} client{requests.length > 1 ? 's ont' : ' a'} demandé ce quartier : leurs demandes seront
-            marquées traitées.
-          </p>
-        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField label="Quartier" value={values.name} onChange={set('name')} disabled={!!zone} />
           <TextField label="Ville" value={values.city} onChange={set('city')} disabled={!!zone} />

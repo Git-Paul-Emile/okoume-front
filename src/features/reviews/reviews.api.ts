@@ -17,5 +17,4 @@ export const reviewsApi = {
   /** Tout avis, nouveau ou modifié, repasse en modération ; la version précédente est conservée par le serveur. */
   save: (review: Pick<Review, 'productId' | 'rating' | 'comment' | 'photos'>) =>
     reviewsBackend.save(review.productId, { rating: review.rating, comment: review.comment, photos: review.photos }),
-  report: (reviewId: Id, reason: string) => reviewsBackend.report(reviewId, reason),
 };

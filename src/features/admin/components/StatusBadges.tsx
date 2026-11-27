@@ -22,17 +22,11 @@ const orderTone: Record<OrderStatus, Tone> = {
   courier_assigned: 'neutral',
   shipping: 'neutral',
   delivered: 'forest',
-  cancelled: 'danger',
-  claim: 'danger',
 };
 
 const paymentTone: Record<PaymentStatus, Tone> = {
   awaiting_payment: 'neutral',
-  awaiting_verification: 'warning',
-  partially_paid: 'warning',
   paid: 'forest',
-  refund_due: 'danger',
-  refunded: 'neutral',
 };
 
 /** Statut générique : actif, inactif, en attente… */

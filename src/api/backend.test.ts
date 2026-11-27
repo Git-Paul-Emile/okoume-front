@@ -80,7 +80,7 @@ describe('client de l’API OKOZA', () => {
 
   it('signale une coupure réseau comme erreur de connexion', async () => {
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
-    await expect(backend.post('/listing-requests', {})).rejects.toMatchObject({ status: 0 });
+    await expect(backend.post('/products', {})).rejects.toMatchObject({ status: 0 });
   });
 
   it('renouvelle la session une fois sur un refus 401, puis rejoue la requête', async () => {
@@ -88,11 +88,11 @@ describe('client de l’API OKOZA', () => {
       .mockResolvedValueOnce(json({ success: false, message: 'Connectez-vous.', code: 'UNAUTHORIZED' }, 401))
       .mockResolvedValueOnce(json({ success: true, data: { id: 'c1' } }))
       .mockResolvedValueOnce(json({ success: true, data: ['p1'] }));
-    expect(await backend.get('/me/favorites')).toEqual(['p1']);
+    expect(await backend.get('/me/addresses')).toEqual(['p1']);
     expect(fetchMock.mock.calls.map(([url, init]) => `${init.method} ${url}`)).toEqual([
-      'GET http://api.test/api/v1/me/favorites',
+      'GET http://api.test/api/v1/me/addresses',
       'POST http://api.test/api/v1/auth/sessions/refresh',
-      'GET http://api.test/api/v1/me/favorites',
+      'GET http://api.test/api/v1/me/addresses',
     ]);
   });
 
@@ -123,7 +123,7 @@ describe('client de l’API OKOZA', () => {
             : json({ success: true, data: url }),
       ),
     );
-    await Promise.all([backend.get('/me/addresses'), backend.get('/me/favorites')]);
+    await Promise.all([backend.get('/me/addresses'), backend.get('/me')]);
     const refreshes = fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/sessions/refresh'));
     expect(refreshes).toHaveLength(1);
   });

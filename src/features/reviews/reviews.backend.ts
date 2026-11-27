@@ -1,10 +1,8 @@
 import { z } from 'zod';
-import { ApiError } from '@/api/ApiError';
 import { backend, getAll } from '@/api/backend';
 import { signedUploadDto, uploadPhoto } from '@/api/mediaUpload';
 import type { Id } from '@/api/types';
 import type { ImageUploader } from '@/utils/upload';
-import type { ReviewReport } from '@/features/admin/admin.types';
 import type { Review } from './reviews.types';
 
 /**
@@ -28,7 +26,6 @@ const reviewDto = z.object({
       z.object({ at: z.string(), event: z.string(), rating: z.number().optional(), comment: z.string().optional() }),
     )
     .optional(),
-  reports: z.array(z.string()).optional(),
 });
 
 /** Un avis public n'a ni statut ni auteur : il est publié, et son compte n'est pas montré. */
@@ -64,33 +61,8 @@ export const reviewsBackend = {
   save: async (productId: Id, content: { rating: number; comment: string; photos: string[] }) =>
     toReview(await backend.put(`/reviews/mine/${productId}`, content)),
 
-  async report(reviewId: Id, reason: string) {
-    try {
-      await backend.post(`/reviews/${reviewId}/reports`, { reason });
-    } catch (error) {
-      // Déjà signalé par ce client : pour lui, le signalement est bien enregistré
-      if (error instanceof ApiError && error.status === 409) return;
-      throw error;
-    }
-  },
+  staffList: async (signal?: AbortSignal) => getAll('/staff/reviews', {}, toReview, signal),
 
-  /** File de modération : chaque avis porte ses signalements en attente. */
-  async staffList(signal?: AbortSignal) {
-    const raws = await getAll('/staff/reviews', {}, (raw) => raw, signal);
-    const reviews = raws.map(toReview);
-    const reports: ReviewReport[] = raws.flatMap((raw) => {
-      const r = reviewDto.parse(raw);
-      return (r.reports ?? []).map((reason, i) => ({
-        id: `${r.id}-${i}`,
-        reviewId: r.id,
-        reason,
-        createdAt: r.createdAt,
-      }));
-    });
-    return { reviews, reports };
-  },
-
-  /** La décision clôt les signalements de l'avis côté serveur. */
   decide: async (
     id: Id,
     decision: { status: 'approved' } | { status: 'rejected'; rejectionReason: string; detail: string },

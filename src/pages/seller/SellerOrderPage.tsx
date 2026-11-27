@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { useParams } from 'react-router';
 import { getErrorMessage } from '@/api/ApiError';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { TextField } from '@/components/ui/TextField';
 import { orderStatusLabel, paymentStatusLabel } from '@/features/orders/orders.constants';
 import type { Order } from '@/features/orders/orders.types';
 import { useSellerAction, useSellerOrder } from '@/features/seller/seller.queries';
@@ -16,7 +14,7 @@ import { formatPrice } from '@/utils/formatPrice';
 
 const PAYMENT = { cash: 'Espèces', airtel: 'Airtel Money', moov: 'Moov Money' } as const;
 
-/** Une commande reçue par la boutique : préparation, livraison si le vendeur livre, encaissement (32.4 à 32.6). */
+/** Une commande reçue par la boutique : préparation et livraison selon l'organisation choisie. */
 export default function SellerOrderPage() {
   const { id } = useParams();
   const order = useSellerOrder(id);
@@ -27,8 +25,6 @@ export default function SellerOrderPage() {
 }
 
 function OrderPanel({ order }: { order: Order }) {
-  const [reference, setReference] = useState('');
-  const [reason, setReason] = useState('');
   const act = useSellerAction((fn: () => Promise<Order>) => fn());
   const run = (fn: () => Promise<Order>, done: string) =>
     act.mutate(fn, {
@@ -37,16 +33,12 @@ function OrderPanel({ order }: { order: Order }) {
     });
 
   const todo = nextSellerAction(order);
-  const canCancel = ['confirmed', 'preparing', 'ready'].includes(order.status);
-  const toCollect =
-    order.fulfilledBy === 'seller' && order.status === 'delivered' && order.paymentStatus === 'awaiting_payment';
-
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <section className="card space-y-4 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-mono text-lg">{order.number}</h2>
-          <Badge tone={order.status === 'cancelled' ? 'danger' : 'neutral'}>{orderStatusLabel[order.status]}</Badge>
+          <Badge tone="neutral">{orderStatusLabel[order.status]}</Badge>
         </div>
         <p className="text-sm text-ink-soft">
           Passée le {formatDateTime(order.createdAt)} ·{' '}
@@ -70,7 +62,7 @@ function OrderPanel({ order }: { order: Order }) {
           <dd className="text-right tabular-nums">{formatPrice(order.totals.subtotal)}</dd>
           <dt className="text-ink-muted">Livraison</dt>
           <dd className="text-right tabular-nums">{formatPrice(order.totals.deliveryFee)}</dd>
-          <dt className="font-semibold">Total à encaisser</dt>
+          <dt className="font-semibold">Total de la commande</dt>
           <dd className="text-right font-semibold tabular-nums">{formatPrice(order.totals.total)}</dd>
           <dt className="text-ink-muted">Paiement</dt>
           <dd className="text-right">
@@ -121,57 +113,19 @@ function OrderPanel({ order }: { order: Order }) {
         )}
         {!todo && order.fulfilledBy === 'okoza' && order.status === 'ready' && (
           <p className="card p-4 text-sm text-ink-soft">
-            Commande prête. Le livreur OKOZA sera affecté quand toutes les boutiques de la tournée auront terminé leur préparation.
-            Gardez-la emballée avec son numéro.
+            Commande prête. Le livreur OKOZA sera affecté quand toutes les boutiques de la tournée auront terminé leur
+            préparation. Gardez-la emballée avec son numéro.
           </p>
         )}
-        {!todo && order.fulfilledBy === 'okoza' && order.status === 'courier_assigned' && order.collectionConfirmedAt && (
-          <p className="card p-4 text-sm text-ink-soft">
-            Remise confirmée par {order.collectionConfirmedBy ?? 'votre boutique'} le{' '}
-            {formatDateTime(order.collectionConfirmedAt)}. Le livreur partira après les autres collectes.
-          </p>
-        )}
-
-        {toCollect && (
-          <section className="card space-y-3 p-5">
-            <h2 className="text-base">Encaissement</h2>
-            <p className="text-sm text-ink-soft">
-              Déclarez le paiement reçu du client : {formatPrice(order.totals.total)}.
+        {!todo &&
+          order.fulfilledBy === 'okoza' &&
+          order.status === 'courier_assigned' &&
+          order.collectionConfirmedAt && (
+            <p className="card p-4 text-sm text-ink-soft">
+              Remise confirmée par {order.collectionConfirmedBy ?? 'votre boutique'} le{' '}
+              {formatDateTime(order.collectionConfirmedAt)}. Le livreur partira après les autres collectes.
             </p>
-            {order.paymentMethod !== 'cash' && (
-              <TextField
-                label="Référence de la transaction"
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-              />
-            )}
-            <Button
-              variant="outline"
-              loading={act.isPending}
-              disabled={order.paymentMethod !== 'cash' && reference.trim().length < 3}
-              onClick={() =>
-                run(() => sellerOrdersBackend.collect(order.id, reference.trim() || null), 'Encaissement enregistré')
-              }
-            >
-              Paiement reçu
-            </Button>
-          </section>
-        )}
-
-        {canCancel && (
-          <section className="card space-y-3 p-5">
-            <h2 className="text-base">Annuler la commande</h2>
-            <TextField label="Motif" value={reason} onChange={(e) => setReason(e.target.value)} />
-            <Button
-              variant="ghost"
-              loading={act.isPending}
-              disabled={reason.trim().length < 5}
-              onClick={() => run(() => sellerOrdersBackend.cancel(order.id, reason.trim()), 'Commande annulée')}
-            >
-              Annuler la commande
-            </Button>
-          </section>
-        )}
+          )}
       </aside>
     </div>
   );

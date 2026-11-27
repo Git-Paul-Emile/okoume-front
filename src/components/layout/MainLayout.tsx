@@ -3,7 +3,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { ScrollRestoration, useLocation, useOutlet } from 'react-router';
 import { PageLoader } from '@/components/feedback/PageLoader';
 import { Toaster } from '@/components/feedback/Toaster';
-import { AssistantWidget } from '@/features/assistant/components/AssistantWidget';
 import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import { CookieBanner } from '@/features/consent/CookieBanner';
 import { FlyToCart } from '@/features/cart/components/FlyToCart';
@@ -56,7 +55,6 @@ export function MainLayout() {
       <CartDrawer />
       <MobileMenu />
       <FlyToCart />
-      <AssistantWidget />
       <CookieBanner />
       {/* Dans le routeur : les notifications peuvent contenir des liens */}
       <Toaster />

@@ -15,11 +15,8 @@ const publicSettingsDto = z.object({
     }),
   ),
   mobileMoneyExpiryHours: z.number(),
-  returnWindowDays: z.number(),
-  reopenWindowDays: z.number(),
   deliveryVatRate: z.number(),
   maxAddresses: z.number(),
-  supportSla: z.object({ high: z.number(), normal: z.number() }),
   legal: z.object({ companyName: z.string(), nif: z.string(), rccm: z.string(), vatNote: z.string() }),
   support: z.object({
     whatsapp: z.string(),

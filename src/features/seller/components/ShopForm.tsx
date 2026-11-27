@@ -1,11 +1,10 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent } from 'react';
 import { getErrorMessage } from '@/api/ApiError';
 import { apiFieldErrors } from '@/api/backend';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, TextAreaField, TextField } from '@/components/ui/TextField';
 import { gabonPhone } from '@/features/auth/auth.schemas';
-import { HANDOVER_MODES, PAYMENT_METHODS, handoverLabel, paymentLabel } from '@/features/seller/seller.backend';
-import type { ShopFields } from '../seller.backend';
+import { PAYMENT_METHODS, paymentLabel, type ShopFields } from '@/features/seller/seller.backend';
 
 const toggle = <T,>(list: T[], value: T, on: boolean) => (on ? [...list, value] : list.filter((v) => v !== value));
 
@@ -13,13 +12,10 @@ const toggle = <T,>(list: T[], value: T, on: boolean) => (on ? [...list, value] 
 export function ShopForm({
   initial,
   submitLabel,
-  extra,
   onSubmit,
 }: {
   initial: ShopFields;
   submitLabel: string;
-  /** Contenu ajouté avant le bouton (choix de l'offre à l'ouverture) */
-  extra?: ReactNode;
   onSubmit: (fields: ShopFields) => Promise<unknown>;
 }) {
   const [v, setV] = useState<ShopFields>(initial);
@@ -36,7 +32,6 @@ export function ShopForm({
     const phone = gabonPhone.safeParse(v.phone);
     if (!phone.success) next.phone = phone.error.issues[0]?.message ?? 'Numéro invalide.';
     if (!v.acceptedPaymentMethods.length) next.acceptedPaymentMethods = 'Indiquez au moins un moyen de paiement.';
-    if (!v.handoverModes.length) next.handoverModes = 'Indiquez au moins un mode de remise.';
     setErrors(next);
     if (Object.keys(next).length) return;
     setBusy(true);
@@ -105,21 +100,6 @@ export function ShopForm({
           <p className="mt-1.5 text-sm font-medium text-danger">{errors.acceptedPaymentMethods}</p>
         )}
       </fieldset>
-      <fieldset>
-        <legend className="label">Remise de l’article</legend>
-        <div className="flex flex-wrap gap-4">
-          {HANDOVER_MODES.map((m) => (
-            <Checkbox
-              key={m}
-              label={handoverLabel[m]}
-              checked={v.handoverModes.includes(m)}
-              onChange={(e) => set({ handoverModes: toggle(v.handoverModes, m, e.target.checked) })}
-            />
-          ))}
-        </div>
-        {errors.handoverModes && <p className="mt-1.5 text-sm font-medium text-danger">{errors.handoverModes}</p>}
-      </fieldset>
-      {extra}
       {errors.form && (
         <p className="text-sm font-medium text-danger" role="alert">
           {errors.form}

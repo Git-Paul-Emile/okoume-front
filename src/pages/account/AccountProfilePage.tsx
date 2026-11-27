@@ -4,7 +4,6 @@ import { TextField } from '@/components/ui/TextField';
 import { useCurrentUser, useUpdateUser } from '@/features/auth/auth.queries';
 import { profileSchema } from '@/features/auth/auth.schemas';
 import { ContactSettings } from '@/features/auth/components/ContactSettings';
-import { NotificationPreferences } from '@/features/auth/components/NotificationPreferences';
 import { toast } from '@/stores/toastStore';
 import { fieldErrors } from '@/utils/zodErrors';
 
@@ -53,8 +52,6 @@ export default function AccountProfilePage() {
       </form>
 
       <ContactSettings user={user} />
-
-      <NotificationPreferences user={user} />
 
     </div>
   );

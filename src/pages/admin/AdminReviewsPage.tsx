@@ -1,4 +1,3 @@
-import { Flag } from 'lucide-react';
 import { useState } from 'react';
 import { reviewsBackend } from '@/features/reviews/reviews.backend';
 import { PageLoader } from '@/components/feedback/PageLoader';
@@ -10,7 +9,6 @@ import { SelectField, TextField } from '@/components/ui/TextField';
 import {
   useAdminMutation,
   useAdminProducts,
-  useAdminReviewReports,
   useAdminReviews,
 } from '@/features/admin/admin.queries';
 import { AdminTable, type Column } from '@/features/admin/components/AdminTable';
@@ -19,11 +17,10 @@ import { PageIntro, SearchInput, Segmented, StatRow, Toolbar } from '@/features/
 import { matches } from '@/features/admin/admin.utils';
 import { formatDate } from '@/utils/formatDate';
 
-type Filter = 'pending' | 'reported' | 'approved' | 'rejected';
+type Filter = 'pending' | 'approved' | 'rejected';
 
 export default function AdminReviewsPage() {
   const { data: reviews, isLoading } = useAdminReviews();
-  const { data: reports = [] } = useAdminReviewReports();
   const { data: products = [] } = useAdminProducts();
   const [filter, setFilter] = useState<Filter>('pending');
   const [query, setQuery] = useState('');
@@ -40,7 +37,6 @@ export default function AdminReviewsPage() {
       reason?: string;
       detail?: string;
     }) => {
-      // Historique, motif et clôture des signalements sont tenus par le serveur
       return reviewsBackend.decide(
         review.id,
         status === 'approved' ? { status } : { status, rejectionReason: reason ?? '', detail },
@@ -52,9 +48,7 @@ export default function AdminReviewsPage() {
   if (isLoading || !reviews) return <PageLoader />;
 
   const productName = new Map(products.map((p) => [p.id, p.name]));
-  const reported = new Map<string, string[]>();
-  reports.forEach((r) => reported.set(r.reviewId, [...(reported.get(r.reviewId) ?? []), r.reason]));
-  const inFilter = (r: Review, f: Filter) => (f === 'reported' ? reported.has(r.id) : r.status === f);
+  const inFilter = (r: Review, f: Filter) => r.status === f;
   const rows = reviews.filter(
     (r) => inFilter(r, filter) && matches(query, r.authorName, r.comment, productName.get(r.productId)),
   );
@@ -84,12 +78,6 @@ export default function AdminReviewsPage() {
                 ))}
               </ul>
             </details>
-          )}
-          {reported.has(r.id) && (
-            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-danger">
-              <Flag className="size-3.5" aria-hidden="true" />
-              Signalé : {reported.get(r.id)!.join(', ')}
-            </p>
           )}
         </div>
       ),
@@ -144,7 +132,6 @@ export default function AdminReviewsPage() {
 
   const labels: Record<Filter, string> = {
     pending: 'À modérer',
-    reported: 'Signalés',
     approved: 'Publiés',
     rejected: 'Masqués',
   };
@@ -158,7 +145,6 @@ export default function AdminReviewsPage() {
       <StatRow
         items={[
           { label: 'À modérer', value: reviews.filter((r) => r.status === 'pending').length },
-          { label: 'Signalés', value: reported.size },
           { label: 'Avis publiés', value: approved.length },
           { label: 'Note moyenne', value: `${average.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} / 5` },
         ]}

@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Check, Package, PackageCheck, ShoppingCart, Truck, UserCheck, XCircle, Home } from 'lucide-react';
+import { Check, Package, PackageCheck, ShoppingCart, Truck, UserCheck, Home } from 'lucide-react';
 import { formatDateTime } from '@/utils/formatDate';
 import { cn } from '@/utils/text';
 import { ORDER_FLOW, orderStatusLabel } from '../orders.constants';
@@ -15,24 +15,6 @@ const icons = {
 };
 
 export function OrderTimeline({ order }: { order: Order }) {
-  if (order.status === 'cancelled') {
-    const at = order.history.find((h) => h.status === 'cancelled');
-    return (
-      <div className="flex items-center gap-3 rounded-lg bg-danger/5 p-4 text-danger">
-        <XCircle className="size-6" />
-        <div>
-          <p className="font-bold">Commande annulée</p>
-          {at && (
-            <p className="text-sm">
-              {formatDateTime(at.at)}
-              {at.note ? ` : ${at.note}` : ''}
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   const currentIndex = Math.max(0, ORDER_FLOW.indexOf(order.status));
   const progress = currentIndex / (ORDER_FLOW.length - 1);
 

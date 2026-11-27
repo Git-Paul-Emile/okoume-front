@@ -1,5 +1,4 @@
 import { newCustomer, register } from './support/customer';
-import { sixDigitCode, waitForEmail } from './support/mailbox';
 import { addToCart, fillDelivery, payAndConfirm } from './support/shop';
 import { expect, test } from './support/test';
 
@@ -19,17 +18,11 @@ test('un client rattache une commande passée sans compte puis change son adress
   await page.getByRole('button', { name: 'Ajouter à mon compte' }).click();
   await expect(page.getByRole('link', { name: new RegExp(number) })).toBeVisible();
 
-  // Nouvelle adresse : code envoyé à cette adresse, ancienne adresse prévenue
+  // L'adresse de contact se modifie directement depuis le compte connecté.
   const next = customer.email.replace('@', '.nouveau@');
   await page.goto('/compte/profil');
   await page.getByRole('button', { name: 'Modifier mes coordonnées' }).click();
-  await page.getByLabel('Nouvelle adresse e-mail').fill(next);
-  await page.getByLabel('Mot de passe actuel').fill(customer.password);
-  const since = Date.now();
-  await page.getByRole('button', { name: 'Recevoir un code' }).click();
-  const mail = await waitForEmail(next, /code de modification/i, since);
-  await page.getByLabel('Code de vérification').fill(sixDigitCode(mail));
-  await page.getByRole('button', { name: 'Confirmer le changement' }).click();
+  await page.getByLabel('Adresse e-mail').fill(next);
+  await page.getByRole('button', { name: 'Enregistrer' }).click();
   await expect(page.locator('main section').getByText(next)).toBeVisible();
-  await waitForEmail(customer.email, /coordonnées.*ont changé/i, since);
 });

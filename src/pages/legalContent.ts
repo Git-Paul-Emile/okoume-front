@@ -6,224 +6,185 @@ export interface LegalDoc {
   sections: Array<{ heading: string; body: string[] }>;
 }
 
-/** Paramètres de la boutique repris dans les textes : un seul endroit à modifier, le site reste cohérent. */
-export type LegalSettings = Pick<ShopSettings, 'returnWindowDays'> &
-  Partial<Pick<ShopSettings, 'legal' | 'support'>>;
+/** ParamÃ¨tres de la boutique repris dans les textes : un seul endroit Ã  modifier, le site reste cohÃ©rent. */
+export type LegalSettings = Partial<Pick<ShopSettings, 'legal' | 'support'>>;
 
-/** Valeurs par défaut de l'API (RETURN_WINDOW_DAYS, données de départ), en attendant les paramètres réels. */
-export const DEFAULT_LEGAL_SETTINGS: LegalSettings = {
-  returnWindowDays: 14,
-};
+/** Valeurs de configuration utilisées par les pages légales. */
+export const DEFAULT_LEGAL_SETTINGS: LegalSettings = {};
 
-/** Valeur obligatoire pas encore fournie : signalée clairement plutôt qu'inventée. */
-const TO_FILL = '[à renseigner dans les Paramètres avant la mise en ligne]';
+/** Valeur obligatoire pas encore fournie : signalÃ©e clairement plutÃ´t qu'inventÃ©e. */
+const TO_FILL = '[Ã  renseigner dans les ParamÃ¨tres avant la mise en ligne]';
 const filled = (value: string | undefined) => (value && value.trim() ? value.trim() : TO_FILL);
 
 /**
- * Textes légaux établis au regard du droit gabonais : loi n° 001/2011 du 25 septembre 2011 relative à la protection
- * des données à caractère personnel (contrôle : CNPDCP), droit OHADA (RCCM, conservation comptable), TVA gabonaise.
- * Faute de texte gabonais précis connu (retours, garanties), le modèle français sert de référence, sans citer
- * d'article non vérifié. À faire valider par un professionnel du droit avant la mise en ligne.
+ * Textes lÃ©gaux Ã©tablis au regard du droit gabonais : loi nÂ° 001/2011 du 25 septembre 2011 relative Ã  la protection
+ * des donnÃ©es Ã  caractÃ¨re personnel (contrÃ´le : CNPDCP), droit OHADA (RCCM, conservation comptable), TVA gabonaise.
+ * Faute de texte gabonais prÃ©cis connu (retours, garanties), le modÃ¨le franÃ§ais sert de rÃ©fÃ©rence, sans citer
+ * d'article non vÃ©rifiÃ©. Ã€ faire valider par un professionnel du droit avant la mise en ligne.
  */
 export function buildLegalDocs(settings: LegalSettings = DEFAULT_LEGAL_SETTINGS): Record<string, LegalDoc> {
   const company = filled(settings.legal?.companyName || brand.legalName);
   const contactEmail = filled(settings.support?.email);
   const contactPhone = filled(settings.support?.phone);
   const address = filled(settings.support?.address || `${brand.city}, ${brand.country}`);
-  const days = settings.returnWindowDays;
 
   return {
     cgv: {
-      title: 'Conditions générales de vente',
+      title: 'Conditions gÃ©nÃ©rales de vente',
       sections: [
         {
-          heading: 'Objet et champ d’application',
+          heading: 'Objet et champ dâ€™application',
           body: [
-            `Les présentes conditions régissent les ventes conclues sur le site ${brand.name} entre ${company} (« la boutique ») et toute personne qui achète, avec ou sans compte client. Elles sont acceptées à chaque commande ; la version applicable est celle en vigueur au jour de la commande.`,
-            `Des vendeurs indépendants, inscrits sur ${brand.name}, y publient aussi leurs produits. Chaque fiche indique la boutique qui vend. Un panier qui réunit plusieurs boutiques donne une commande par boutique : chacune est préparée par sa boutique, livrée par les livreurs de ${brand.name} ou par le vendeur, et payée à la livraison. Pour les produits d’un vendeur, le vendeur est responsable du produit. ${brand.name} vérifie les produits avant publication et encaisse pour le vendeur lorsque la livraison est assurée par ses livreurs. Les différends concernant une vente ou une livraison organisée par un vendeur sont à régler directement entre l’acheteur et la boutique ; ${brand.name} ne les instruit ni ne les arbitre.`,
+            `Les prÃ©sentes conditions rÃ©gissent les ventes conclues sur le site ${brand.name} entre ${company} (Â« la boutique Â») et toute personne qui achÃ¨te, avec ou sans compte client. Elles sont acceptÃ©es Ã  chaque commande ; la version applicable est celle en vigueur au jour de la commande.`,
+            `Des vendeurs indÃ©pendants, inscrits sur ${brand.name}, y publient aussi leurs produits. Chaque fiche indique la boutique qui vend. Un panier qui rÃ©unit plusieurs boutiques donne une commande par boutique : chacune est prÃ©parÃ©e par sa boutique, livrÃ©e par les livreurs de ${brand.name} ou par le vendeur, et payÃ©e Ã  la livraison. Pour les produits dâ€™un vendeur, le vendeur est responsable du produit. ${brand.name} vÃ©rifie les produits avant publication et encaisse pour le vendeur lorsque la livraison est assurÃ©e par ses livreurs. Les diffÃ©rends concernant une vente ou une livraison organisÃ©e par un vendeur sont Ã  rÃ©gler directement entre lâ€™acheteur et la boutique ; ${brand.name} ne les instruit ni ne les arbitre.`,
           ],
         },
         {
           heading: 'Produits',
           body: [
-            'Les caractéristiques essentielles des produits figurent sur leur fiche. Les photos sont aussi fidèles que possible mais n’ont pas de valeur contractuelle. Les produits sont proposés dans la limite des stocks disponibles.',
+            'Les caractÃ©ristiques essentielles des produits figurent sur leur fiche. Les photos sont aussi fidÃ¨les que possible mais nâ€™ont pas de valeur contractuelle. Les produits sont proposÃ©s dans la limite des stocks disponibles.',
           ],
         },
         {
           heading: 'Prix',
           body: [
-            'Les prix sont indiqués en francs CFA (XAF), toutes taxes comprises : la taxe sur la valeur ajoutée applicable au Gabon (18 % au taux normal) est incluse. Les frais de livraison s’ajoutent et sont affichés avant la confirmation.',
-            'Le prix applicable est celui affiché au moment de la confirmation de la commande ; il est conservé dans la commande. Si un prix change alors qu’un produit est dans votre panier, le nouveau montant vous est présenté avant la commande.',
+            'Les prix sont indiquÃ©s en francs CFA (XAF), toutes taxes comprises : la taxe sur la valeur ajoutÃ©e applicable au Gabon (18 % au taux normal) est incluse. Les frais de livraison sâ€™ajoutent et sont affichÃ©s avant la confirmation.',
+            'Le prix applicable est celui affichÃ© au moment de la confirmation de la commande ; il est conservÃ© dans la commande. Si un prix change alors quâ€™un produit est dans votre panier, le nouveau montant vous est prÃ©sentÃ© avant la commande.',
           ],
         },
         {
           heading: 'Commande',
           body: [
-            'La commande est conclue après le récapitulatif, l’acceptation des présentes conditions et la confirmation. Pour un panier multi-boutiques, un numéro global relie les sous-commandes de chaque boutique ; un code de suivi commun et un e-mail récapitulatif vous sont communiqués. Le récapitulatif n’est pas une facture : la facture est émise au paiement.',
-            'La boutique peut demander une vérification avant de préparer une commande inhabituelle (montant, quantités, commandes répétées). Elle peut annuler une commande en cas de fraude avérée ou de produit indisponible ; toute somme versée est alors remboursée.',
+            'La commande est conclue aprÃ¨s le rÃ©capitulatif, lâ€™acceptation des prÃ©sentes conditions et la confirmation. Pour un panier multi-boutiques, un numÃ©ro global relie les sous-commandes de chaque boutique ; un code de suivi commun et un e-mail rÃ©capitulatif vous sont communiquÃ©s. Le rÃ©capitulatif nâ€™est pas une facture : la facture est Ã©mise au paiement.',
+            'La boutique peut demander une vÃ©rification avant de prÃ©parer une commande inhabituelle (montant, quantitÃ©s, commandes rÃ©pÃ©tÃ©es). Elle peut annuler une commande en cas de fraude avÃ©rÃ©e ou de produit indisponible ; toute somme versÃ©e est alors remboursÃ©e.',
           ],
         },
         {
           heading: 'Paiement',
           body: [
-            'Tous les paiements se font à la livraison : en espèces, par Airtel Money ou par Moov Money. Aucun paiement n’est demandé avant la livraison. Pour les sous-commandes confiées au livreur OKOZA, le paiement est regroupé et réglé une fois à la réception. Les boutiques qui livrent elles-mêmes encaissent leur sous-commande séparément. Pour le Mobile Money, utilisez la référence de panier ou de commande indiquée au récapitulatif.',
-            'Seul le montant exact dû pour la livraison concernée est accepté. La facture est émise une fois le paiement enregistré par la boutique.',
+            'Tous les paiements se font Ã  la livraison : en espÃ¨ces, par Airtel Money ou par Moov Money. Aucun paiement nâ€™est demandÃ© avant la livraison. Pour les sous-commandes confiÃ©es au livreur OKOZA, le paiement est regroupÃ© et rÃ©glÃ© une fois Ã  la rÃ©ception. Les boutiques qui livrent elles-mÃªmes encaissent leur sous-commande sÃ©parÃ©ment. Pour le Mobile Money, utilisez la rÃ©fÃ©rence de panier ou de commande indiquÃ©e au rÃ©capitulatif.',
+            'Seul le montant exact dÃ» pour la livraison concernÃ©e est acceptÃ©. La facture est Ã©mise une fois le paiement enregistrÃ© par la boutique.',
           ],
         },
         {
           heading: 'Livraison',
           body: [
-            'Pour les commandes centralisées, un livreur OKOZA collecte les produits dans les boutiques concernées et les remet en une seule livraison à l’adresse indiquée. Une boutique peut aussi organiser indépendamment la livraison de sa sous-commande. Les frais sont affichés avant la confirmation ; les délais sont indicatifs. En cas d’absence, une nouvelle tentative ou l’annulation vous est proposée.',
-            'Les risques sont transférés à la remise du colis. Vérifiez le colis en présence du livreur et signalez tout dommage depuis votre compte ou la page Contact dans les meilleurs délais.',
-          ],
-        },
-        {
-          heading: 'Annulation, retours et remboursements',
-          body: [
-            'Avant le début de la préparation, vous pouvez annuler votre commande depuis votre compte. Ensuite, une demande d’annulation est examinée par la boutique, qui vous informe de sa décision et de son motif.',
-            `Un retour peut être demandé dans les ${days} jours suivant la livraison, selon les modalités de la page Retours et remboursements. Le remboursement intervient après confirmation de réception, par le moyen de paiement initial lorsque c’est possible.`,
+            'Pour les commandes centralisÃ©es, un livreur OKOZA collecte les produits dans les boutiques concernÃ©es et les remet en une seule livraison Ã  lâ€™adresse indiquÃ©e. Une boutique peut aussi organiser indÃ©pendamment la livraison de sa sous-commande. Les frais sont affichÃ©s avant la confirmation ; les dÃ©lais sont indicatifs. En cas dâ€™absence, une nouvelle tentative ou lâ€™annulation vous est proposÃ©e.',
+            'Les risques sont transfÃ©rÃ©s Ã  la remise du colis. VÃ©rifiez le colis en prÃ©sence du livreur et signalez tout dommage depuis votre compte ou la page Contact dans les meilleurs dÃ©lais.',
           ],
         },
         {
           heading: 'Garanties',
           body: [
-            'Les produits bénéficient de la garantie légale contre les vices cachés et de la garantie de conformité au contrat, dans les conditions prévues par la loi. Un produit défectueux ou non conforme est réparé, remplacé ou remboursé, retour à la charge de la boutique.',
+            'Les produits bÃ©nÃ©ficient de la garantie lÃ©gale contre les vices cachÃ©s et de la garantie de conformitÃ© au contrat, dans les conditions prÃ©vues par la loi. Un produit dÃ©fectueux ou non conforme est rÃ©parÃ©, remplacÃ© ou remboursÃ©, retour Ã  la charge de la boutique.',
           ],
         },
         {
           heading: 'Contact et recours',
           body: [
-            `Pour toute question ou réclamation : ${contactEmail}, ${contactPhone}, ou la page Contact. Une solution amiable est recherchée en priorité.`,
-            'Les présentes conditions sont soumises au droit gabonais. À défaut d’accord amiable, le litige est porté devant les juridictions compétentes de Libreville, sous réserve des règles protectrices dont bénéficie le consommateur.',
+            `Pour toute question ou rÃ©clamation : ${contactEmail}, ${contactPhone}, ou la page Contact. Une solution amiable est recherchÃ©e en prioritÃ©.`,
+            'Les prÃ©sentes conditions sont soumises au droit gabonais. Ã€ dÃ©faut dâ€™accord amiable, le litige est portÃ© devant les juridictions compÃ©tentes de Libreville, sous rÃ©serve des rÃ¨gles protectrices dont bÃ©nÃ©ficie le consommateur.',
           ],
         },
       ],
     },
     confidentialite: {
-      title: 'Politique de confidentialité',
+      title: 'Politique de confidentialitÃ©',
       sections: [
         {
           heading: 'Responsable du traitement',
           body: [
-            `${company}, ${address}. Contact pour vos données : ${contactEmail}. Les traitements respectent la loi n° 001/2011 du 25 septembre 2011 relative à la protection des données à caractère personnel ; ils sont déclarés auprès de la Commission Nationale pour la Protection des Données à Caractère Personnel (CNPDCP).`,
+            `${company}, ${address}. Contact pour vos donnÃ©es : ${contactEmail}. Les traitements respectent la loi nÂ° 001/2011 du 25 septembre 2011 relative Ã  la protection des donnÃ©es Ã  caractÃ¨re personnel ; ils sont dÃ©clarÃ©s auprÃ¨s de la Commission Nationale pour la Protection des DonnÃ©es Ã  CaractÃ¨re Personnel (CNPDCP).`,
           ],
         },
         {
-          heading: 'Données collectées',
+          heading: 'DonnÃ©es collectÃ©es',
           body: [
-            'Commande : nom, téléphone, adresse e-mail, quartier, repère et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes et préférences d’e-mail. Assistance : vos messages et les photos jointes. Commande auprès d’une boutique de vendeur : les informations nécessaires à la préparation et à la livraison (nom, téléphone, quartier, repère, consignes) sont transmises à ce vendeur.',
-            'Le mot de passe n’est jamais conservé en clair. Aucune donnée de carte bancaire n’est collectée : les paiements Mobile Money se font hors du site.',
+            'Commande : nom, tÃ©lÃ©phone, adresse e-mail, quartier, repÃ¨re et consignes de livraison. Avec un compte : identifiants, adresses, favoris, historique de commandes et prÃ©fÃ©rences dâ€™e-mail. Assistance : vos messages et les photos jointes. Commande auprÃ¨s dâ€™une boutique de vendeur : les informations nÃ©cessaires Ã  la prÃ©paration et Ã  la livraison (nom, tÃ©lÃ©phone, quartier, repÃ¨re, consignes) sont transmises Ã  ce vendeur.',
+            'Le mot de passe nâ€™est jamais conservÃ© en clair. Aucune donnÃ©e de carte bancaire nâ€™est collectÃ©e : les paiements Mobile Money se font hors du site.',
           ],
         },
         {
-          heading: 'Finalités et bases légales',
+          heading: 'FinalitÃ©s et bases lÃ©gales',
           body: [
-            'Exécution du contrat : préparer, livrer et facturer vos commandes, gérer retours et remboursements et votre compte. Obligation légale : conservation des factures. Intérêt légitime : sécurité du site et prévention de la fraude (vérification de commandes inhabituelles). Consentement : mesure d’audience et offres promotionnelles par e-mail.',
+            'ExÃ©cution du contrat : prÃ©parer, livrer et facturer vos commandes, gÃ©rer retours et remboursements et votre compte. Obligation lÃ©gale : conservation des factures. IntÃ©rÃªt lÃ©gitime : sÃ©curitÃ© du site et prÃ©vention de la fraude (vÃ©rification de commandes inhabituelles). Consentement : mesure dâ€™audience et offres promotionnelles par e-mail.',
           ],
         },
         {
           heading: 'Destinataires et sous-traitants',
           body: [
-            'Vos données sont traitées par l’équipe habilitée de la boutique, chacun selon son rôle. Le livreur reçoit uniquement ce qui est nécessaire à la livraison. Vos données ne sont jamais vendues.',
-            'Prestataires techniques, liés par contrat : hébergement du site (Vercel) et de l’API (Render), base de données (Neon), envoi des e-mails (Resend), images (Cloudinary), suivi des erreurs (Sentry), et intelligence artificielle pour l’assistant d’achat et la vérification des produits des vendeurs (Google Gemini ou Anthropic). Ces prestataires peuvent héberger les données hors du Gabon, notamment aux États-Unis ou dans l’Union européenne ; la boutique encadre ces transferts par des engagements contractuels de protection.',
+            'Vos donnÃ©es sont traitÃ©es par lâ€™Ã©quipe habilitÃ©e de la boutique, chacun selon son rÃ´le. Le livreur reÃ§oit uniquement ce qui est nÃ©cessaire Ã  la livraison. Vos donnÃ©es ne sont jamais vendues.',
+            'Prestataires techniques, liÃ©s par contrat : hÃ©bergement du site (Vercel) et de lâ€™API (Render), base de donnÃ©es (Neon), envoi des e-mails (Resend), images (Cloudinary), suivi des erreurs (Sentry), et intelligence artificielle pour lâ€™assistant dâ€™achat et la vÃ©rification des produits des vendeurs (Google Gemini ou Anthropic). Ces prestataires peuvent hÃ©berger les donnÃ©es hors du Gabon, notamment aux Ã‰tats-Unis ou dans lâ€™Union europÃ©enne ; la boutique encadre ces transferts par des engagements contractuels de protection.',
           ],
         },
         {
-          heading: 'Assistants automatisés',
+          heading: 'Assistants automatisÃ©s',
           body: [
-            'L’assistant d’achat n’accède qu’aux informations publiques du catalogue. Les produits proposés par les vendeurs peuvent être analysés par un service d’intelligence artificielle pour vérifier leur conformité avant publication ; un refus est toujours décidé par une personne de l’équipe. Ne communiquez jamais de mot de passe ni de code reçu.',
+            'Lâ€™assistant dâ€™achat nâ€™accÃ¨de quâ€™aux informations publiques du catalogue. Les produits proposÃ©s par les vendeurs peuvent Ãªtre analysÃ©s par un service dâ€™intelligence artificielle pour vÃ©rifier leur conformitÃ© avant publication ; un refus est toujours dÃ©cidÃ© par une personne de lâ€™Ã©quipe. Ne communiquez jamais de mot de passe ni de code reÃ§u.',
           ],
         },
         {
-          heading: 'Durées de conservation',
+          heading: 'DurÃ©es de conservation',
           body: [
-            'Comptes clients inactifs : 3 ans, puis anonymisation. Factures et pièces comptables : 10 ans (droit comptable OHADA), archivées hors de votre compte. Paniers : 30 jours. Mesure d’audience : 13 mois. Journaux de connexion : 12 mois. Assistance et prospection : 3 ans après le dernier contact.',
+            'Comptes clients inactifs : 3 ans, puis anonymisation. Factures et piÃ¨ces comptables : 10 ans (droit comptable OHADA), archivÃ©es hors de votre compte. Paniers : 30 jours. Mesure dâ€™audience : 13 mois. Journaux de connexion : 12 mois. Assistance et prospection : 3 ans aprÃ¨s le dernier contact.',
           ],
         },
         {
           heading: 'Vos droits',
           body: [
-            'Vous disposez d’un droit d’accès, de rectification, d’opposition et de suppression de vos données, ainsi que d’un droit d’obtenir une copie de vos données. Ces demandes se font depuis votre compte (Profil et préférences) ou via la page Contact ; une réponse vous est apportée dans un délai d’un mois.',
-            'La suppression du compte efface ou anonymise vos données, sauf celles que la loi impose de conserver (factures). Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la CNPDCP.',
+            'Vous disposez dâ€™un droit dâ€™accÃ¨s, de rectification, dâ€™opposition et de suppression de vos donnÃ©es, ainsi que dâ€™un droit dâ€™obtenir une copie de vos donnÃ©es. Ces demandes se font depuis votre compte (Profil et prÃ©fÃ©rences) ou via la page Contact ; une rÃ©ponse vous est apportÃ©e dans un dÃ©lai dâ€™un mois.',
+            'La suppression du compte efface ou anonymise vos donnÃ©es, sauf celles que la loi impose de conserver (factures). Si vous estimez que vos droits ne sont pas respectÃ©s, vous pouvez saisir la CNPDCP.',
           ],
         },
         {
-          heading: 'Sécurité',
+          heading: 'SÃ©curitÃ©',
           body: [
-            'Connexions chiffrées (HTTPS), mots de passe protégés par un hachage robuste, accès de l’équipe en deux étapes et journalisés, sauvegardes de la base. En cas de violation de données présentant un risque, vous en serez informé.',
+            'Connexions chiffrÃ©es (HTTPS), mots de passe protÃ©gÃ©s par un hachage robuste, accÃ¨s de lâ€™Ã©quipe en deux Ã©tapes et journalisÃ©s, sauvegardes de la base. En cas de violation de donnÃ©es prÃ©sentant un risque, vous en serez informÃ©.',
           ],
         },
         {
           heading: 'Cookies et stockage local',
           body: [
-            'Des cookies techniques, indispensables, conservent votre session et protègent les formulaires. Le stockage de votre navigateur garde votre panier et les produits récemment consultés.',
-            'La mesure d’audience n’est activée qu’avec votre accord, donné ou retiré à tout moment depuis « Gérer les cookies » en bas de page ; votre choix est redemandé après 6 mois. Aucun traceur publicitaire n’est utilisé.',
+            'Des cookies techniques, indispensables, conservent votre session et protÃ¨gent les formulaires. Le stockage de votre navigateur garde votre panier et les produits rÃ©cemment consultÃ©s.',
+            'La mesure dâ€™audience nâ€™est activÃ©e quâ€™avec votre accord, donnÃ© ou retirÃ© Ã  tout moment depuis Â« GÃ©rer les cookies Â» en bas de page ; votre choix est redemandÃ© aprÃ¨s 6 mois. Aucun traceur publicitaire nâ€™est utilisÃ©.',
           ],
         },
       ],
     },
     mentions: {
-      title: 'Mentions légales',
+      title: 'Mentions lÃ©gales',
       sections: [
         {
-          heading: 'Éditeur du site',
+          heading: 'Ã‰diteur du site',
           body: [
-            `${company}. Siège social : ${address}.`,
-            `Immatriculation au Registre du Commerce et du Crédit Mobilier (RCCM) : ${filled(settings.legal?.rccm)}. Numéro d’identification fiscale (NIF) : ${filled(settings.legal?.nif)}.`,
-            `Contact : ${contactEmail}, ${contactPhone}. Directeur de la publication : le représentant légal de la société.`,
+            `${company}. SiÃ¨ge social : ${address}.`,
+            `Immatriculation au Registre du Commerce et du CrÃ©dit Mobilier (RCCM) : ${filled(settings.legal?.rccm)}. NumÃ©ro dâ€™identification fiscale (NIF) : ${filled(settings.legal?.nif)}.`,
+            `Contact : ${contactEmail}, ${contactPhone}. Directeur de la publication : le reprÃ©sentant lÃ©gal de la sociÃ©tÃ©.`,
           ],
         },
         {
-          heading: 'Hébergement',
+          heading: 'HÃ©bergement',
           body: [
-            'Site : Vercel Inc. (vercel.com). API et traitements : Render Services, Inc. (render.com). Base de données : Neon, Inc. (neon.tech). Images : Cloudinary Ltd. (cloudinary.com).',
+            'Site : Vercel Inc. (vercel.com). API et traitements : Render Services, Inc. (render.com). Base de donnÃ©es : Neon, Inc. (neon.tech). Images : Cloudinary Ltd. (cloudinary.com).',
           ],
         },
         {
-          heading: 'Propriété intellectuelle',
+          heading: 'PropriÃ©tÃ© intellectuelle',
           body: [
-            `La structure du site, ses textes, logos et visuels sont la propriété de ${company} ou de ses partenaires. Toute reproduction sans autorisation est interdite. Les marques citées appartiennent à leurs titulaires ; les fiches des produits des vendeurs engagent leurs auteurs.`,
+            `La structure du site, ses textes, logos et visuels sont la propriÃ©tÃ© de ${company} ou de ses partenaires. Toute reproduction sans autorisation est interdite. Les marques citÃ©es appartiennent Ã  leurs titulaires ; les fiches des produits des vendeurs engagent leurs auteurs.`,
           ],
         },
         {
-          heading: 'Données personnelles',
+          heading: 'DonnÃ©es personnelles',
           body: [
-            'Le traitement de vos données est décrit dans la Politique de confidentialité, conformément à la loi n° 001/2011 relative à la protection des données à caractère personnel.',
+            'Le traitement de vos donnÃ©es est dÃ©crit dans la Politique de confidentialitÃ©, conformÃ©ment Ã  la loi nÂ° 001/2011 relative Ã  la protection des donnÃ©es Ã  caractÃ¨re personnel.',
           ],
         },
       ],
-    },
-    retours: {
-      title: 'Retours et remboursements',
-      sections: [
-        {
-          heading: 'Délai',
-          body: [
-            `Vous pouvez demander un retour dans les ${days} jours suivant la livraison, depuis votre compte ou la page Contact. Un retour refusé peut être réexaminé sur demande motivée.`,
-          ],
-        },
-        {
-          heading: 'Conditions',
-          body: [
-            'Le produit doit être complet, dans son emballage d’origine lorsque c’est possible, et ne pas avoir été utilisé au-delà de ce qui est nécessaire pour l’essayer. Pour un produit endommagé, défectueux ou non conforme, une description et au moins une photo sont demandées.',
-          ],
-        },
-        {
-          heading: 'Traitement',
-          body: [
-            'La boutique accepte ou refuse la demande et vous informe de sa décision et de son motif. Après réception, le produit est inspecté. Les frais de retour sont à la charge de la boutique pour un produit défectueux, endommagé ou non conforme ; dans les autres cas, ils sont précisés lors de l’acceptation.',
-          ],
-        },
-        {
-          heading: 'Remboursement',
-          body: [
-            'Le remboursement correspond au montant payé pour les articles retournés, remises comprises au prorata. Il est effectué après confirmation de réception du retour, par le moyen de paiement initial lorsque c’est possible ; un autre moyen nécessite votre accord.',
-          ],
-        },
-      ],
-    },
-  };
+    }  };
 }
 
-/** Textes avec les valeurs par défaut : base de l'éditeur des pages légales du back-office. */
+/** Textes avec les valeurs par dÃ©faut : base de l'Ã©diteur des pages lÃ©gales du back-office. */
 export const legalDocs = buildLegalDocs();
+
+

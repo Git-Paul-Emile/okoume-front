@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { sellerProductsBackend, type SellerProductModeration } from './sellerProducts.backend';
 import { sellerOrdersBackend } from './sellerOrders.backend';
+import { sellerPayoutsBackend } from './sellerPayouts.backend';
 import { useAuthStore } from '@/stores/authStore';
 import type { OrderStatus } from '@/features/orders/orders.types';
 import type { Id } from '@/api/types';
@@ -15,22 +16,6 @@ export function useSellerShop() {
     queryKey: [SELLER, userId, 'shop'],
     queryFn: ({ signal }) => sellerBackend.shop(signal),
     enabled: !!userId,
-  });
-}
-
-export function useAccessPlans() {
-  return useQuery({
-    queryKey: ['access-plans'],
-    queryFn: ({ signal }) => sellerBackend.plans(signal),
-    staleTime: 10 * 60_000,
-  });
-}
-
-export function useShopPayments(page: number) {
-  return useQuery({
-    queryKey: [SELLER, 'payments', page],
-    queryFn: ({ signal }) => sellerBackend.shopPayments(page, signal),
-    placeholderData: keepPreviousData,
   });
 }
 
@@ -72,6 +57,15 @@ export function useSellerOrders(status: OrderStatus | undefined, page: number) {
   return useQuery({
     queryKey: [SELLER, 'orders', status ?? 'all', page],
     queryFn: ({ signal }) => sellerOrdersBackend.list(status, page, signal),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** Reversements de la boutique courante, scopes côté API au vendeur connecté. */
+export function useSellerPayouts(page: number) {
+  return useQuery({
+    queryKey: [SELLER, 'payouts', page],
+    queryFn: ({ signal }) => sellerPayoutsBackend.list(page, signal),
     placeholderData: keepPreviousData,
   });
 }

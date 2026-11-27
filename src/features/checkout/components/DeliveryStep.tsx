@@ -3,7 +3,6 @@ import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/Button';
 import { SelectField, TextField } from '@/components/ui/TextField';
 import type { User } from '@/features/auth/auth.types';
-import { ZoneRequestForm } from '@/features/delivery/components/ZoneRequestForm';
 import type { DeliveryZone } from '@/features/delivery/delivery.types';
 import { formatPrice } from '@/utils/formatPrice';
 import { cn } from '@/utils/text';
@@ -130,7 +129,6 @@ export function DeliveryStep({ value, zones, user, onChange, onNext }: Props) {
           </option>
         ))}
       </SelectField>
-      {!zone && <ZoneRequestForm defaultContact={user?.phone ?? ''} />}
       {zone && (
         <p
           className={cn(

@@ -12,13 +12,3 @@ export interface DeliveryZone {
   courierCost?: number;
 }
 
-/** Demande d'un client dont le quartier n'est pas dans la liste (9.1). */
-export interface ZoneRequest {
-  id: Id;
-  neighbourhood: string;
-  city: string;
-  contact: string;
-  status: 'new' | 'added' | 'declined';
-  note?: string;
-  createdAt: string;
-}

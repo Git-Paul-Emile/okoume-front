@@ -12,7 +12,7 @@ let fetchMock: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   fetchMock = vi.fn(() =>
     Promise.resolve(
-      json({ alertEscalationHours: 4, reviewAmount: 500000, cashPreparationAlertHours: 24, assistantMonthlyBudget: 0 }),
+      json({ currency: 'XAF', mobileMoney: [], mobileMoneyExpiryHours: 24, deliveryVatRate: 18, maxAddresses: 5, legal: {}, support: {}, social: {} }),
     ),
   );
   vi.stubGlobal('fetch', fetchMock);
@@ -30,13 +30,12 @@ const patches = () =>
 describe('paramètres sur l’API', () => {
   it('enregistre les informations de boutique', async () => {
     await adminSettingsBackend.update({
-      reviewAmount: 750000,
       social: { facebook: 'https://facebook.com/okoza', tiktok: '' },
     });
     expect(patches()).toEqual([
       {
         path: '/staff/settings/shop',
-        body: { social: { facebook: 'https://facebook.com/okoza' }, reviewAmount: 750000 },
+        body: { social: { facebook: 'https://facebook.com/okoza' } },
       },
     ]);
   });

@@ -65,13 +65,13 @@ const staffOrder = {
     subtotal: 10_000,
     productDiscount: 0,
     codeDiscount: 0,
-    pointsDiscount: 0,
+    
     deliveryFee: 2_000,
     deliveryDiscount: 0,
     total: 12_000,
   },
   promoCode: null,
-  pointsUsed: 0,
+  
   paymentMethod: 'cash',
   paymentStatus: 'awaiting_payment',
   status: 'courier_assigned',
@@ -99,15 +99,14 @@ describe('connexion de l’équipe sur l’API', () => {
     });
   });
 
-  it('passe le mot de passe, puis le code ou le code de secours, sans les deux à la fois', async () => {
-    fetchMock
-      .mockResolvedValueOnce(json({ success: true, data: { challengeId: 'ch1' } }, 202))
-      .mockResolvedValueOnce(json({ success: true, data: { member, backupCodesLeft: 9 } }));
-    expect(await staffBackend.startLogin('Ines@Okoza.ga', 'motdepasse-long-1')).toBe('ch1');
-    const session = await staffBackend.completeLogin('ch1', { backupCode: 'ABCD-EFGH' });
-    expect(sent(0).body).toEqual({ email: 'ines@okoza.ga', password: 'motdepasse-long-1' });
-    expect(sent(1).body).toEqual({ challengeId: 'ch1', backupCode: 'ABCD-EFGH' });
-    expect(session.backupCodesLeft).toBe(9);
+  it('ouvre une session avec l’adresse et le mot de passe', async () => {
+    fetchMock.mockResolvedValueOnce(json({ success: true, data: { member } }));
+    await staffBackend.login('Ines@Okoza.ga', 'motdepasse-long-1');
+    expect(sent()).toMatchObject({
+      url: 'http://api.test/api/v1/staff/auth/sessions',
+      method: 'POST',
+      body: { email: 'ines@okoza.ga', password: 'motdepasse-long-1' },
+    });
   });
 
   it('renouvelle la session de l’équipe, et non celle du client, sur une route de l’équipe', async () => {
@@ -121,7 +120,7 @@ describe('connexion de l’équipe sur l’API', () => {
 
   it('ne renouvelle rien quand la connexion de l’équipe échoue', async () => {
     fetchMock.mockResolvedValue(json({ success: false, message: 'Identifiants incorrects.' }, 401));
-    await expect(staffBackend.startLogin('a@b.ga', 'x')).rejects.toMatchObject({ status: 401 });
+    await expect(staffBackend.login('a@b.ga', 'x')).rejects.toMatchObject({ status: 401 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
@@ -134,44 +133,17 @@ describe('commandes de l’équipe', () => {
     expect(order.history[0]).not.toHaveProperty('by');
   });
 
-  it('envoie une transition comme une action, jamais un nouvel état', async () => {
-    fetchMock.mockResolvedValue(json({ success: true, data: { ...staffOrder, status: 'shipping' } }));
-    const order = toAdminOrder(staffOrder);
-    await adminOrdersBackend.transition(
-      order,
-      { action: 'delivery_failed', reason: 'Client absent ou injoignable', decision: 'retry' },
-      [],
-    );
-    expect(sent()).toEqual({
-      url: 'http://api.test/api/v1/staff/orders/o1/transitions',
-      method: 'POST',
-      body: { action: 'delivery_failed', reason: 'Client absent ou injoignable', decision: 'retry' },
-    });
-  });
-
-  it('enregistre un encaissement sans référence vide ni observation', async () => {
-    fetchMock.mockResolvedValue(json({ success: true, data: { payments: [] } }, 201));
-    await adminOrdersBackend.recordPayment(toAdminOrder(staffOrder), {
-      amount: 12_000,
-      at: '2026-11-10T10:00:00.000Z',
-      reference: '  ',
-    });
-    expect(sent().body).toEqual({ amount: 12_000, receivedAt: '2026-11-10T10:00:00.000Z', reference: null });
-  });
-
-  it('traduit les paiements et les livreurs dans la forme du back-office', () => {
+  it('traduit les encaissements dans la forme du back-office', () => {
     expect(
       toPaymentRecords({
         payments: [
           {
             id: 'p1',
-            kind: 'refund',
+            kind: 'payment',
             amount: 5_000,
             method: 'airtel',
             occurredAt: 'x',
-            reference: null,
-            noReferenceReason: 'Remboursé en boutique',
-            clientAgreed: true,
+            reference: 'TX-123',
             by: 'Inès Moussavou',
             createdAt: 'y',
           },
@@ -180,19 +152,17 @@ describe('commandes de l’équipe', () => {
     ).toEqual([
       {
         id: 'p1',
-        kind: 'refund',
+        kind: 'payment',
         amount: 5_000,
         method: 'airtel',
         at: 'x',
-        reference: '',
-        note: 'Sans référence : Remboursé en boutique',
+        reference: 'TX-123',
         by: 'Inès Moussavou',
         recordedAt: 'y',
       },
     ]);
     expect(toCourier(courier)).toMatchObject({ vehicle: 'Vélo', email: '' });
   });
-
   it('crée un livreur avec les valeurs attendues par l’API', async () => {
     fetchMock.mockResolvedValue(json({ success: true, data: courier }, 201));
     await adminOrdersBackend.saveCourier({ ...toCourier(courier), id: '', vehicle: 'À pied' }, false);
@@ -226,9 +196,9 @@ describe('quartiers livrés et écrans disponibles', () => {
   it('ferme les écrans pas encore branchés quand l’API est active', () => {
     expect(availableWithSource('/admin/commandes')).toBe(true);
     expect(availableWithSource('/admin/livreurs')).toBe(true);
-    expect(availableWithSource('/admin/statistiques')).toBe(true);
-    expect(availableWithSource('/admin/emails')).toBe(true);
-    expect(availableWithSource('/admin/assistant')).toBe(true);
+    expect(availableWithSource('/admin/statistiques')).toBe(false);
+    expect(availableWithSource('/admin/emails')).toBe(false);
+    expect(availableWithSource('/admin/assistant')).toBe(false);
     expect(availableWithSource('/admin/securite')).toBe(true);
     expect(availableWithSource('/admin')).toBe(true);
     expect(availableWithSource('/admin/commandes-archives')).toBe(false);

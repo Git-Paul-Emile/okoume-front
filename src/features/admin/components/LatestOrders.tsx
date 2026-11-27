@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { formatDateTime } from '@/utils/formatDate';
 import { formatPrice } from '@/utils/formatPrice';
 import type { AdminOrder } from '../admin.types';
-import { OrderStatusBadge, PaymentStatusBadge } from './StatusBadges';
+import { OrderStatusBadge } from './StatusBadges';
 
 /** Dernières commandes reçues : client, numéro, statut et montant. */
 export function LatestOrders({ orders }: { orders: AdminOrder[] }) {
@@ -30,11 +30,7 @@ export function LatestOrders({ orders }: { orders: AdminOrder[] }) {
             </span>
             <span className="flex shrink-0 flex-col items-end gap-1">
               <span className="text-sm font-bold text-ink tabular-nums">{formatPrice(o.totals.total)}</span>
-              {o.paymentStatus === 'awaiting_verification' ? (
-                <PaymentStatusBadge status={o.paymentStatus} />
-              ) : (
-                <OrderStatusBadge status={o.status} />
-              )}
+              <OrderStatusBadge status={o.status} />
             </span>
           </motion.li>
         );

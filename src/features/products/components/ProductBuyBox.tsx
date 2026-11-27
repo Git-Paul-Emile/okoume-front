@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Bot, ShoppingBag, Store, Truck } from 'lucide-react';
+import { ShoppingBag, Store, Truck } from 'lucide-react';
 import { Link } from 'react-router';
 import { useRef, useState } from 'react';
 import { Badge } from '@/components/ui/Badge';
@@ -8,13 +8,10 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { Rating } from '@/components/ui/Rating';
 import { useAddToCart } from '@/features/cart/useAddToCart';
 import { useDeliveryZones } from '@/features/delivery/delivery.queries';
-import { FavoriteButton } from '@/features/favorites/components/FavoriteButton';
 import type { RatingStats } from '@/features/reviews/reviews.types';
-import { useUiStore } from '@/stores/uiStore';
 import { formatDate } from '@/utils/formatDate';
 import { formatPrice } from '@/utils/formatPrice';
 import { cn } from '@/utils/text';
-import { whatsappShareLink } from '@/utils/whatsapp';
 import type { Product, Variant } from '../products.types';
 import { conditionLabel } from '../products.utils';
 import {
@@ -41,7 +38,6 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
   const [qty, setQty] = useState(1);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const addToCart = useAddToCart();
-  const openAssistant = useUiStore((s) => s.setAssistantOpen);
   const { data: zones } = useDeliveryZones();
 
   const price = applyPromotion(variant.price, product.promotion);
@@ -145,7 +141,6 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
           >
             {availability === 'out_of_stock' ? 'Indisponible' : 'Ajouter au panier'}
           </Button>
-          <FavoriteButton productId={product.id} className="size-13 border border-sage-dark shadow-none" />
         </div>
       </div>
 
@@ -160,23 +155,6 @@ export function ProductBuyBox({ product, variant, onVariantChange, rating }: Pro
                 : ''}
             </p>
           </div>
-        </li>
-        <li className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <button
-            type="button"
-            onClick={() => openAssistant(true)}
-            className="inline-flex items-center gap-2 font-semibold text-forest hover:text-forest-dark"
-          >
-            <Bot className="size-5" /> Une question sur ce produit ?
-          </button>
-          <a
-            href={whatsappShareLink(`${product.name}, ${formatPrice(price)} : ${window.location.href}`)}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md bg-[#1f7a4a] px-3 py-2 font-semibold text-white hover:bg-[#186139]"
-          >
-            Partager sur WhatsApp
-          </a>
         </li>
       </ul>
     </div>
