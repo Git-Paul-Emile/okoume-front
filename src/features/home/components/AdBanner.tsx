@@ -7,6 +7,31 @@ import type { Ad } from '../home.types';
 import { useAds } from '../home.queries';
 import { pickAds } from '../home.utils';
 
+const FALLBACK_ADS: Record<string, Ad> = {
+  'home-promo': {
+    id: 'home-promo-default',
+    placement: 'home-promo',
+    advertiser: null,
+    priority: 0,
+    image: '/banniere-shopping-horizontal.jpg',
+    imageMobile: null,
+    alt: 'Découvrez les produits de la boutique OKOZA.',
+    href: '/catalogue',
+    active: true,
+  },
+  'home-promo-side': {
+    id: 'home-promo-side-default',
+    placement: 'home-promo-side',
+    advertiser: null,
+    priority: 0,
+    image: '/ads/publicite-1-cote.svg',
+    imageMobile: null,
+    alt: 'Votre entreprise pourrait être ici. Réservez cet espace publicitaire.',
+    href: '/contact?sujet=publicite',
+    active: true,
+  },
+};
+
 type Variant = 'wide' | 'side';
 
 /** Visuel d'une diapositive : lien interne ou externe (annonceur), avec la mention « Publicité » si tiers. */
@@ -66,7 +91,8 @@ export function AdBanner({
   className?: string;
 }) {
   const { data, isLoading } = useAds(placement);
-  const slides = pickAds(data ?? []);
+  const availableAds = data?.length ? data : FALLBACK_ADS[placement] ? [FALLBACK_ADS[placement]] : [];
+  const slides = pickAds(availableAds);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;

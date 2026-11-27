@@ -3,7 +3,38 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ButtonLink } from '@/components/ui/Button';
 import { ease } from '@/lib/motion';
+import type { Banner } from '../home.types';
 import { useBanners } from '../home.queries';
+
+const DEFAULT_BANNERS: Banner[] = [
+  {
+    id: 'home-banner-tech',
+    title: 'La tech qui suit votre rythme',
+    subtitle: 'Smartphones, ordinateurs et accessoires neufs, livrés à Libreville, Akanda et Owendo.',
+    cta: 'Voir l’électronique',
+    href: '/catalogue?categorie=electronique',
+    image: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/1.webp',
+    accent: 'forest',
+  },
+  {
+    id: 'home-banner-mode',
+    title: 'Votre style, du bureau au week-end',
+    subtitle: 'Chemises, robes, sacs et baskets. Payez à la livraison ou par Mobile Money.',
+    cta: 'Découvrir la mode',
+    href: '/catalogue?categorie=mode',
+    image: "https://cdn.dummyjson.com/product-images/womens-bags/heshe-women's-leather-bag/1.webp",
+    accent: 'mure',
+  },
+  {
+    id: 'home-banner-cuisine',
+    title: 'Équipez votre cuisine sans vous déplacer',
+    subtitle: 'Blenders, micro-ondes et ustensiles, avec un délai de livraison indiqué pour votre quartier.',
+    cta: 'Voir la cuisine',
+    href: '/catalogue?categorie=cuisine',
+    image: 'https://cdn.dummyjson.com/product-images/kitchen-accessories/boxed-blender/1.webp',
+    accent: 'forest',
+  },
+];
 
 /** Cercle pointillé qui se dessine autour du visuel produit. */
 function Halo() {
@@ -33,7 +64,9 @@ export function HeroSlider() {
   const { data: banners, isLoading } = useBanners();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const count = banners?.length ?? 0;
+  const slides = banners?.length ? banners : DEFAULT_BANNERS;
+  const count = slides.length;
+  const currentIndex = index % count;
 
   useEffect(() => {
     if (!count || paused) return;
@@ -42,8 +75,7 @@ export function HeroSlider() {
   }, [count, paused]);
 
   if (isLoading) return <div className="skeleton h-[420px] rounded-xl" />;
-  if (!banners?.length) return null;
-  const b = banners[index];
+  const b = slides[currentIndex];
 
   return (
     <section
@@ -122,26 +154,26 @@ export function HeroSlider() {
         >
           <ChevronLeft className="size-4" />
         </button>
-        {banners.map((x, i) => (
+        {slides.map((x, i) => (
           <button
             key={x.id}
             type="button"
             onClick={() => setIndex(i)}
             className="relative h-2 overflow-hidden rounded-full bg-forest/20 transition-all"
-            style={{ width: i === index ? 32 : 8 }}
+            style={{ width: i === currentIndex ? 32 : 8 }}
             aria-label={`Aller à la diapositive ${i + 1}`}
-            aria-current={i === index}
+            aria-current={i === currentIndex}
           >
-            {i === index && !paused && (
+            {i === currentIndex && !paused && (
               <motion.span
-                key={`${index}-p`}
+                key={`${currentIndex}-p`}
                 className="absolute inset-y-0 left-0 bg-forest"
                 initial={{ width: 0 }}
                 animate={{ width: '100%' }}
                 transition={{ duration: 6.5, ease: 'linear' }}
               />
             )}
-            {i === index && paused && <span className="absolute inset-0 bg-forest" />}
+            {i === currentIndex && paused && <span className="absolute inset-0 bg-forest" />}
           </button>
         ))}
         <button

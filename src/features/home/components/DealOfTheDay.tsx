@@ -33,15 +33,15 @@ function Unit({ value, label }: { value: number; label: string }) {
  * avec son propre compte à rebours calé sur la vraie date de fin de la promotion.
  */
 export function DealOfTheDay({ className }: { className?: string }) {
-  const { data: products } = useProducts();
+  const { data: products, isLoading } = useProducts();
   const { data: ratings } = useRatingStats();
-  const deals = useMemo(
-    () =>
-      (products ?? [])
-        .filter((p) => p.dealOfTheDay && isPromotionActive(p.promotion) && productInStock(p))
-        .sort((a, b) => a.promotion!.endsAt.localeCompare(b.promotion!.endsAt)),
-    [products],
-  );
+  const deals = useMemo(() => {
+    const activePromotions = (products ?? [])
+      .filter((p) => isPromotionActive(p.promotion) && productInStock(p))
+      .sort((a, b) => a.promotion!.endsAt.localeCompare(b.promotion!.endsAt));
+    const featuredDeals = activePromotions.filter((p) => p.dealOfTheDay);
+    return featuredDeals.length ? featuredDeals : activePromotions;
+  }, [products]);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = deals.length;
@@ -55,7 +55,18 @@ export function DealOfTheDay({ className }: { className?: string }) {
   const deal = deals[index % Math.max(count, 1)];
   const time = useCountdown(deal?.promotion?.endsAt ?? null);
 
-  if (!deal) return null;
+  if (isLoading) return <div className={cn('skeleton min-h-[340px] rounded-lg', className)} />;
+  if (!deal)
+    return (
+      <article className={cn('card flex min-h-[340px] flex-col items-center justify-center p-6 text-center', className)}>
+        <h2 className="text-lg">Offre limitée</h2>
+        <p className="mt-2 max-w-xs text-sm text-ink-soft">De nouvelles offres arrivent bientôt.</p>
+        <Link to="/promotions" className="mt-4 text-sm font-semibold text-forest hover:underline">
+          Voir les promotions
+        </Link>
+      </article>
+    );
+
   const { price, original } = productSalePrice(deal);
   const rating = ratings?.get(deal.id);
 
