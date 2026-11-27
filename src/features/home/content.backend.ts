@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { backend } from '@/api/backend';
 import type { Id } from '@/api/types';
 import type { LegalPageRecord } from '@/features/legal/legal.api';
-import type { Ad, AdInput, ExclusiveOffer } from './home.types';
+import type { Ad, AdInput, Banner, ExclusiveOffer } from './home.types';
 
 /**
  * Contenus sur l'API : espaces publicitaires, offres exclusives et pages légales.
@@ -18,6 +18,16 @@ const adDto = z.object({
   alt: z.string(),
   href: z.string(),
   active: z.boolean(),
+});
+
+const bannerDto = z.object({
+  id: z.string(),
+  title: z.string(),
+  subtitle: z.string(),
+  cta: z.string(),
+  href: z.string(),
+  image: z.string(),
+  accent: z.enum(['forest', 'mure']),
 });
 
 const offerDto = z.object({
@@ -37,6 +47,7 @@ const legalDto = z.object({
 });
 
 const toAd = (raw: unknown): Ad => adDto.parse(raw);
+const toBanner = (raw: unknown): Banner => bannerDto.parse(raw);
 const toOffer = (raw: unknown): ExclusiveOffer => {
   const o = offerDto.parse(raw);
   return {
@@ -58,6 +69,7 @@ const toLegalPage = (raw: unknown): LegalPageRecord => {
 const list = <T>(raw: unknown, map: (item: unknown) => T) => z.array(z.unknown()).parse(raw).map(map);
 
 export const contentBackend = {
+  banners: async (signal?: AbortSignal) => list(await backend.get('/content/banners', undefined, signal), toBanner),
   ads: async (placement: string, signal?: AbortSignal) =>
     list(await backend.get('/content/ads', { placement }, signal), toAd),
   offers: async (signal?: AbortSignal) => list(await backend.get('/content/offers', undefined, signal), toOffer),

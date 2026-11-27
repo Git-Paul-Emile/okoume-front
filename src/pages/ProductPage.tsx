@@ -20,6 +20,7 @@ import type { Variant } from '@/features/products/products.types';
 import { defaultVariant } from '@/features/products/products.utils';
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
 import { useRatingStats } from '@/features/reviews/reviews.queries';
+import { useRecentlyViewedStore } from '@/stores/recentlyViewedStore';
 
 type Tab = 'description' | 'specs' | 'tips';
 
@@ -29,6 +30,7 @@ export default function ProductPage() {
   const { data: categories } = useCategories();
   const { data: ratings } = useRatingStats();
   const { data: related } = useProductsByIds(product?.relatedIds ?? []);
+  const pushRecentlyViewed = useRecentlyViewedStore((state) => state.push);
   // Variante choisie, rattachée au produit : changer de produit revient à sa variante par défaut
   const [choice, setChoice] = useState<{ productId: string; variantId: string } | null>(null);
   const [tab, setTab] = useState<Tab>('description');
@@ -37,6 +39,10 @@ export default function ProductPage() {
     if (!product) return;
     document.title = `${brand.name} : ${product.name}`;
   }, [product]);
+
+  useEffect(() => {
+    if (product) pushRecentlyViewed(product.id);
+  }, [product, pushRecentlyViewed]);
 
   if (isLoading) return <PageLoader />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
