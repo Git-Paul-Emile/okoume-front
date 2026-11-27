@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import { AuthAside } from '@/features/auth/components/AuthAside';
 import { LoginForm } from '@/features/auth/components/LoginForm';
+import { demoLoginRoles } from '@/features/auth/demoAccounts';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from '@/stores/toastStore';
 
@@ -9,6 +11,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const userId = useAuthStore((s) => s.userId);
   const back = params.get('retour') ?? '/compte';
+  const [demoDestination, setDemoDestination] = useState<string | null>(null);
   if (userId) return <Navigate to={back} replace />;
 
   return (
@@ -18,14 +21,13 @@ export default function LoginPage() {
           <h1 className="text-2xl sm:text-3xl">Connexion</h1>
           <p className="mt-1.5 mb-6 text-ink-soft">Accédez à vos commandes et à votre compte.</p>
           <LoginForm
+            demoRoles={demoLoginRoles}
+            onDemoRoleSelect={(role) => setDemoDestination(params.has('retour') ? back : role.destination)}
             onSuccess={() => {
               toast.success('Vous êtes connecté');
-              navigate(back, { replace: true });
+              navigate(demoDestination ?? back, { replace: true });
             }}
           />
-          <p className="mt-4 rounded-md bg-ivory p-3 text-xs text-ink-muted">
-            Compte de démonstration : voir le fichier README du projet.
-          </p>
           <p className="mt-6 text-center text-sm text-ink-soft">
             Pas encore de compte ?{' '}
             <Link
@@ -33,12 +35,6 @@ export default function LoginPage() {
               className="font-semibold text-forest hover:underline"
             >
               Créer un compte
-            </Link>
-          </p>
-          <p className="mt-4 text-center text-sm text-ink-soft">
-            Vous êtes vendeur ?{' '}
-            <Link to="/connexion?retour=%2Fvendeur" className="font-semibold text-forest hover:underline">
-              Accéder à mon espace vendeur
             </Link>
           </p>
         </div>

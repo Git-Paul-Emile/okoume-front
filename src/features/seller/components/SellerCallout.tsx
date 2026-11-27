@@ -19,7 +19,7 @@ export function SellerCallout() {
             : 'Rejoignez notre marketplace, créez votre boutique en ligne et proposez vos produits à de nouveaux clients.'}
         </p>
         <ButtonLink
-          to={isSeller ? '/vendeur' : '/devenir-vendeur'}
+          to={isAuthenticated ? '/vendeur' : '/inscription?retour=%2Fvendeur'}
           className="mt-5"
           icon={<ArrowRight className="size-4" />}
         >

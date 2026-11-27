@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
 import { getErrorMessage } from '@/api/ApiError';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
+import { demoAdminCredentials } from '@/features/auth/demoAccounts';
 import { useAdminAuthStore } from '@/stores/adminAuthStore';
 import { fieldErrors } from '@/utils/zodErrors';
 import { writeActivity } from '../loginGuard';
@@ -17,8 +18,11 @@ const credentialsSchema = z.object({
 /** Connexion au back-office par adresse e-mail et mot de passe. */
 export function ServerAdminLogin({ back }: { back: string }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const setAdmin = useAdminAuthStore((state) => state.setAdmin);
-  const [values, setValues] = useState({ email: '', password: '' });
+  const [values, setValues] = useState(() =>
+    params.get('demo') === 'admin' && demoAdminCredentials ? demoAdminCredentials : { email: '', password: '' },
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
@@ -44,6 +48,19 @@ export function ServerAdminLogin({ back }: { back: string }) {
     <div>
       <h1 className="text-2xl">Connexion au back-office</h1>
       <p className="mt-1.5 text-ink-soft">Réservé à l’équipe de la boutique.</p>
+      {demoAdminCredentials && (
+        <button
+          type="button"
+          onClick={() => {
+            if (!demoAdminCredentials) return;
+            setValues({ email: demoAdminCredentials.email, password: demoAdminCredentials.password });
+            setErrors({});
+          }}
+          className="mt-4 rounded-md border border-sage bg-ivory px-3 py-2 text-sm font-semibold text-forest hover:border-forest"
+        >
+          Administrateur de démonstration
+        </button>
+      )}
       <form onSubmit={submit} noValidate className="mt-6 space-y-4">
         <TextField
           label="Adresse e-mail professionnelle"

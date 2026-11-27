@@ -33,7 +33,10 @@ export default function RegisterPage() {
           />
           <p className="mt-6 text-center text-sm text-ink-soft">
             Déjà inscrit ?{' '}
-            <Link to="/connexion" className="font-semibold text-forest hover:underline">
+            <Link
+              to={`/connexion${params.has('retour') ? `?retour=${encodeURIComponent(back)}` : ''}`}
+              className="font-semibold text-forest hover:underline"
+            >
               Se connecter
             </Link>
           </p>

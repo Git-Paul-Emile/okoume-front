@@ -11,7 +11,7 @@ export function SellerEntryLink({ className, mobile = false }: { className?: str
 
   return (
     <Link
-      to={isSeller ? '/vendeur' : '/devenir-vendeur'}
+      to={isAuthenticated ? '/vendeur' : '/inscription?retour=%2Fvendeur'}
       className={cn(
         mobile
           ? 'block rounded-md border border-forest/20 bg-forest-50 px-3 py-3 font-semibold text-forest hover:bg-forest-100'

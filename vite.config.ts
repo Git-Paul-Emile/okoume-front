@@ -5,8 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 import { contentSecurityPolicy } from './csp';
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), 'VITE_');
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [
       react(),
@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_RELEASE__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? ''),
       __VERCEL_API_PROXY__: JSON.stringify(process.env.VERCEL === '1'),
+      __OKOZA_DEMO_PASSWORD__: JSON.stringify(command === 'serve' ? (env.OKOZA_DEMO_PASSWORD ?? '') : ''),
     },
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },

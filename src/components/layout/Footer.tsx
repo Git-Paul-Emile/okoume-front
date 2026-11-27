@@ -4,6 +4,7 @@ import { Logo } from '@/components/ui/Logo';
 import { brand } from '@/config/brand';
 import { useSettings } from '@/features/settings/settings.queries';
 import { PaymentLogo } from '@/features/checkout/components/PaymentLogo';
+import { useCurrentUser } from '@/features/auth/auth.queries';
 import { whatsappLink } from '@/utils/whatsapp';
 import { useInstallPrompt } from '@/lib/pwa';
 import { useConsentStore } from '@/stores/consentStore';
@@ -30,6 +31,7 @@ export function Footer() {
   const support = settings?.support;
   const openCookies = useConsentStore((s) => s.openPreferences);
   const { data: sellerShop } = useSellerShop();
+  const { isAuthenticated } = useCurrentUser();
   const { canInstall, install } = useInstallPrompt();
 
   return (
@@ -76,7 +78,10 @@ export function Footer() {
               ))}
               {title === 'Mon compte' && (
                 <li>
-                  <Link to={sellerShop ? '/vendeur' : '/devenir-vendeur'} className="transition hover:text-white">
+                  <Link
+                    to={isAuthenticated ? '/vendeur' : '/inscription?retour=%2Fvendeur'}
+                    className="transition hover:text-white"
+                  >
                     {sellerShop ? 'Gérer ma boutique' : 'Vendre sur OKOZA'}
                   </Link>
                 </li>
