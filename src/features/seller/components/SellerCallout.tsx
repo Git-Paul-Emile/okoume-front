@@ -9,7 +9,7 @@ export function SellerCallout() {
   const isSeller = isAuthenticated && !!shop;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-forest/15 bg-forest-50">
+    <section className="overflow-hidden rounded-xl bg-white shadow-[0_14px_32px_rgba(37,53,47,0.14),0_4px_10px_rgba(37,53,47,0.08)] transition-shadow hover:shadow-[0_18px_38px_rgba(37,53,47,0.18),0_6px_14px_rgba(37,53,47,0.1)]">
       <div className="p-6 sm:p-8">
         <p className="text-sm font-semibold text-forest">Vous êtes commerçant ?</p>
         <h2 className="mt-1 text-2xl sm:text-3xl">{isSeller ? 'Gérez votre boutique OKOZA' : 'Développez votre activité avec OKOZA'}</h2>

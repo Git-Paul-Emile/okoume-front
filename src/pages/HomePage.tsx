@@ -3,7 +3,6 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { CategoryCircles } from '@/features/categories/components/CategoryCircles';
 import { CategorySidebar } from '@/features/categories/components/CategorySidebar';
 import { DealOfTheDay } from '@/features/home/components/DealOfTheDay';
-import { HelpBand } from '@/features/home/components/HelpBand';
 import { HeroSlider } from '@/features/home/components/HeroSlider';
 import { ProductTabsSection } from '@/features/home/components/ProductTabsSection';
 import { ExclusiveOfferCard } from '@/features/home/components/ExclusiveOfferCard';
@@ -56,8 +55,6 @@ export function HomePage() {
       <SellerCallout />
 
       <RecentlyViewed />
-
-      <HelpBand />
     </div>
   );
 }
