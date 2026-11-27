@@ -20,7 +20,6 @@ const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const ShopPage = lazy(() => import('@/pages/ShopPage'));
-const ShopsPage = lazy(() => import('@/pages/ShopsPage'));
 const BecomeSellerPage = lazy(() => import('@/pages/BecomeSellerPage'));
 const SellerLayout = lazy(() => import('@/pages/seller/SellerLayout'));
 const SellerDashboardPage = lazy(() => import('@/pages/seller/SellerDashboardPage'));
@@ -112,7 +111,6 @@ export const routes: RouteObject[] = [
       { path: 'catalogue', element: <CatalogPage /> },
       { path: 'produit/:slug', element: <ProductPage /> },
       { path: 'boutiques/:slug', element: <ShopPage /> },
-      { path: 'boutiques', element: <ShopsPage /> },
       { path: 'devenir-vendeur', element: <BecomeSellerPage /> },
       {
         path: 'vendeur',

@@ -1,8 +1,6 @@
 export const mainLinks = [
   { to: '/', label: 'Accueil' },
-  { to: '/boutiques', label: 'Boutiques' },
   { to: '/catalogue', label: 'Produits' },
-  { to: '/catalogue?tri=newest', label: 'Nouveautés' },
   { to: '/contact', label: 'Contact' },
 ];
 
@@ -11,10 +9,9 @@ export const footerLinks = {
     { to: '/contact', label: 'Nous contacter' },
     { to: '/suivi', label: 'Suivre une commande' },
   ],
-  Boutique: [
+  Catalogue: [
     { to: '/catalogue', label: 'Tout le catalogue' },
     { to: '/promotions', label: 'Promotions' },
-    { to: '/catalogue?tri=newest', label: 'Nouveautés' },
   ],
   'Mon compte': [
     { to: '/compte/commandes', label: 'Mes commandes' },

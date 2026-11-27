@@ -36,7 +36,9 @@ type Variant = 'wide' | 'side';
 
 /** Visuel d'une diapositive : lien interne ou externe (annonceur), avec la mention « Publicité » si tiers. */
 function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const external = /^https?:\/\//.test(ad.href);
+  const fallbackImage = variant === 'side' ? '/ads/publicite-1-cote.svg' : '/banniere-shopping-horizontal.jpg';
   const cropWideMatte = variant === 'wide' && !ad.imageMobile && ad.image.endsWith('banniere-tech-premium.jpg');
   const imageClass =
     variant === 'side'
@@ -54,8 +56,13 @@ function AdSlide({ ad, variant }: { ad: Ad; variant: Variant }) {
         )}
       >
         <picture className="block size-full">
-          {ad.imageMobile && <source media="(max-width: 639px)" srcSet={ad.imageMobile} />}
-          <img src={ad.image} alt={ad.alt} className={imageClass} />
+          {ad.imageMobile && !imageFailed && <source media="(max-width: 639px)" srcSet={ad.imageMobile} />}
+          <img
+            src={imageFailed ? fallbackImage : ad.image}
+            alt={ad.alt}
+            className={imageClass}
+            onError={() => setImageFailed(true)}
+          />
         </picture>
       </div>
       {/* Une publicité tierce doit être identifiable comme telle */}

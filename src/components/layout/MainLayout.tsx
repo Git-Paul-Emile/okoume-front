@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
+import { ArrowUp } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
 import { ScrollRestoration, useLocation, useOutlet } from 'react-router';
 import { PageLoader } from '@/components/feedback/PageLoader';
@@ -19,6 +20,30 @@ function FrozenOutlet() {
   const outlet = useOutlet();
   const [frozen] = useState(outlet);
   return frozen;
+}
+
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const updateVisibility = () => setVisible(window.scrollY > 360);
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    return () => window.removeEventListener('scroll', updateVisibility);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Remonter en haut de la page"
+      className="fixed right-4 bottom-24 z-50 grid size-11 place-items-center rounded-full bg-forest text-white transition hover:-translate-y-1 hover:bg-forest-dark sm:bottom-6"
+    >
+      <ArrowUp className="size-5" aria-hidden="true" />
+    </button>
+  );
 }
 
 export function MainLayout() {
@@ -54,6 +79,7 @@ export function MainLayout() {
       <Footer />
       <CartDrawer />
       <MobileMenu />
+      <ScrollToTopButton />
       <FlyToCart />
       <CookieBanner />
       {/* Dans le routeur : les notifications peuvent contenir des liens */}
